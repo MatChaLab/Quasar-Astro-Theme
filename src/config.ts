@@ -31,9 +31,10 @@ export const NAVBAR_CONFIG = {
     { label: "2", url: "/2" },
     { label: "3", url: "/3" },
     { label: "相册", url: "/albums" },
-    { label: "About", url: "/about" }
+    { label: "关于", url: "/about" }
   ]
 };
+
 
 export const EARTH_CONFIG = {
   // 地球初始对焦视角
@@ -58,10 +59,48 @@ searchData: [
     { type: 'Journal', title: '法语学习打卡第一天', url: '/journal/french-1' }
   ]
 
+
   export const ALBUMS_CONFIG = {
     nav: "Albums",
     title: "🖼️  Singyan Albums",
     subtitle: "我的数字相册，捕捉生活中的微光与余热。",
     // 你的 Google Photos 分享链接
-    googleSharedId: "Hj55uVT1gDPqYDu560",
+    googleSharedId: "Hj55uVT1gDPqYDu56",
 };
+
+
+// src/config.ts
+
+export const ABOUT_CONFIG = {
+  name: "Singyan",
+  subtitle: "Sophomore · Class Monitor · Explorer",
+  avatar: {
+    // 替换成你的 Instagram 头像链接，或者本地图片路径如 "/avatar.jpg"
+    src: "	https://scontent-hkg4-2.cdninstagram.com/v/t51.2885-19/426757531_369055709168003_3674533028650657133_n.jpg?stp=dst-jpg_s320x320_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=scontent-hkg4-2.cdninstagram.com&_nc_cat=111&_nc_oc=Q6cZ2gEjYRxlwP2wat3zsgP_fFzDA4zswV07--DSF2c2gOqOKqE50qibkfqWxrHqS3fM-RA&_nc_ohc=xUsT-vRmgN0Q7kNvwFbkHq4&_nc_gid=cYU2I9kbcp89oNrzcz0Ciw&edm=AOQ1c0wBAAAA&ccb=7-5&oh=00_AQBBmtau5MeGzZKbYnYF5FbBPH8Wlo8ZXwJnq-mM60O_Qg&oe=6A60252B&_nc_sid=8b3546", 
+    alt: "Singyan Profile"
+  },
+  bio: [
+    "你好，我是 Singyan。",
+    "目前在广东广州，作为一名二年级学生，我在数字营销与投资逻辑中寻找平衡。我习惯捕捉生活中的微光，无论是那一抹法文的优雅，还是深夜关于市场波动（比如黄金）的冷思考。",
+    "比起终点，我更在意在不同身份之间切换的节奏感。"
+  ],
+  interests: [
+    { title: "Tech & Data", desc: "Google Pixel 的忠实信徒，关注移动生态与开源架构。喜欢用数据说话。" },
+    { title: "Languages", desc: "Cantonese / Mandarin / English / French.<br>正在法语的语法森林里漫步。" },
+    { title: "Investment", desc: "关注全球市场，以 HSBC Paper Gold 为锚点，尝试理解长期主义的逻辑。" },
+    { title: "Life", desc: "Matcha & McFlurry.<br>生活不需要太多修饰，偶尔一点糖分就够了。" }
+  ],
+  socialLinks: [
+    { 
+      name: "Instagram", 
+      url: "https://instagram.com/chenenyeeeee", 
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>` 
+    },
+    { 
+      name: "Email", 
+      url: "mailto:", 
+      icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>` 
+    }
+  ]
+};
+
