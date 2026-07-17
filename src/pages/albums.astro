@@ -1,16 +1,15 @@
 ---
 // src/pages/albums.astro
-import { SITE_CONFIG } from '../config';
+import { SITE_CONFIG, ALBUMS_CONFIG  } from '../config';
 import Navbar from '../components/Navbar.astro';
 
 // ========================================================
 // 服务端数据同步引擎 (Astro Frontmatter)
 // ========================================================
-const GOOGLE_SHARE_ID = "Hj55uVT1gDPqYDu56"; 
-const shareUrl = `https://photos.app.goo.gl/${GOOGLE_SHARE_ID}`;
+const shareUrl = `https://photos.app.goo.gl/${ALBUMS_CONFIG.googleSharedId}`;
 
 let photosData: any[] = [];
-let albumTitle = "Sinyan Moments";
+let albumTitle = "{ALBUMS_CONFIG.title}";
 let errorMsg = null;
 
 try {
@@ -22,15 +21,18 @@ try {
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch album page: ${response.statusText}`);
+    throw new Error(` 或寻找 Google Photos 相册失败，请检查分享外链。: ${response.statusText}`);
   }
 
   const html = await response.text();
 
-  const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
-  if (titleMatch && titleMatch[1]) {
-    albumTitle = titleMatch[1];
-  }
+  // ========================================================
+// Google Photos 标题同步
+// ========================================================
+  // const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
+  // if (titleMatch && titleMatch[1]) {
+  //   albumTitle = titleMatch[1];
+  // }
 
   const matches = html.match(/AF_initDataCallback\(\s*\{\s*key:\s*'ds:\d+'[\s\S]*?data:\s*([\s\S]*?)\}\s*\);/g);
   
@@ -69,7 +71,7 @@ try {
 
 } catch (err: any) {
   errorMsg = err.message;
-  console.error("服务端抓取 Google 相册失败:", err);
+  console.error("服务端抓取 Google Photos 失败。", err);
 }
 
 function extractPhotosFromArray(arr: any[]): any[] {
@@ -115,7 +117,6 @@ function extractPhotosFromArray(arr: any[]): any[] {
 
           return {
             index, id, mediaType, width, height, takenAt,
-            // 强制使用等宽缩略图，保证视觉一致性
             thumbUrl: `${baseUrl}=w800`,
             fallbackThumbUrl: `${baseUrl}=w500`,
             displayUrl: `${baseUrl}=w1600`,
@@ -170,8 +171,8 @@ function fallbackRegexExtract(html: string): any[] {
 <head>
   <meta charset="utf-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gallery | {SITE_CONFIG.title}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>{ALBUMS_CONFIG .nav} | {SITE_CONFIG.title}</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -184,8 +185,8 @@ function fallbackRegexExtract(html: string): any[] {
   <main class="gallery-viewport" define:vars={{ themeColor: SITE_CONFIG.themeColor }}>
     
     <div class="header-section">
-      <h1 class="page-title">{albumTitle}</h1>
-      <p class="page-subtitle">我的数字相册，捕捉生活中的微光与温热。</p>
+      <h1 class="page-title">{ALBUMS_CONFIG .title}</h1>
+      <p class="page-subtitle">{ALBUMS_CONFIG .subtitle}</p>
     </div>
 
     <div 
@@ -197,14 +198,15 @@ function fallbackRegexExtract(html: string): any[] {
 
     {errorMsg && (
       <div class="error-banner">
-        <p class="error-title">画廊数据同步中断</p>
-        <p class="error-desc">{errorMsg}</p>
+        <p class="error-title">相册数据同步中断</p>
+        {/* <p class="error-desc">服务端抓取 Google Photos 失败，当前可能网络无法访问 Google Services。:{errorMsg}</p> */}
+        <p class="error-desc">服务端抓取 Google Photos 失败，当前可能网络无法访问 Google Services  :{errorMsg}</p> 
       </div>
     )}
 
-    <!-- 🔴 重构：绝对工整的 CSS Grid 网格容器，彻底告别狗啃边缘 -->
+    <!-- 🔴 真正的物理隔离多列瀑布流容器 -->
     <div class="masonry-wrapper">
-      <div id="photo-grid" class="photo-grid-layout"></div>
+      <div id="masonry-grid" class="masonry-grid-flex"></div>
       <div id="scroll-sentinel" class="scroll-sentinel"></div>
     </div>
 
@@ -223,7 +225,6 @@ function fallbackRegexExtract(html: string): any[] {
           </button>
         </div>
 
-        <!-- 🔴 绝对物理死锁防溢出舱 -->
         <div class="media-frame-container">
           <img id="lb-base-img" class="lightbox-layer opacity-hidden" />
           <img id="lb-high-img" class="lightbox-layer opacity-hidden" />
@@ -277,6 +278,16 @@ function fallbackRegexExtract(html: string): any[] {
   const REVEAL_BATCH = 15; 
   let activeIndex = null;  
 
+  // 🔴 DOM 缓存池，彻底防止每次计算多列时卡片 DOM 被销毁重造
+  const cardCache = [];
+
+  function getColumnCount() {
+    const w = window.innerWidth;
+    if (w >= 1024) return 5; 
+    if (w >= 640) return 2;  
+    return 1;                
+  }
+
   function initGallery() {
     if (cachePool.length === 0) return;
     window.dispatchEvent(new CustomEvent('sinyan-album-sync', { detail: { showing: 0, cached: cachePool.length, isBuffering: true } }));
@@ -286,34 +297,61 @@ function fallbackRegexExtract(html: string): any[] {
     }, 200); 
   }
 
-  // 🔴 全新网格追加渲染机制，每次下拉无缝追加新照片卡片，直到全部渲染完成
+  // 🔴 采用物理隔离的分列 Flex 组装机，绝对隔绝列交叉和溢出
+  function renderGrid() {
+    const gridContainer = document.getElementById('masonry-grid');
+    gridContainer.innerHTML = '';
+    
+    const colCount = getColumnCount();
+    const columns = [];
+
+    // 创建纯粹隔离的列盒子
+    for (let i = 0; i < colCount; i++) {
+      const col = document.createElement('div');
+      col.className = 'masonry-column-flex';
+      gridContainer.appendChild(col);
+      columns.push(col);
+    }
+
+    // 分发卡片到对应列中
+    const visiblePhotos = cachePool.slice(0, renderedCount);
+    visiblePhotos.forEach((photo, index) => {
+      const targetColumn = columns[index % colCount];
+      const cardEl = getOrCreateCard(photo, index);
+      targetColumn.appendChild(cardEl);
+    });
+  }
+
+  function getOrCreateCard(photo, index) {
+    if (cardCache[index]) return cardCache[index];
+    
+    const card = createPhotoCard(photo, index);
+    cardCache[index] = card;
+    return card;
+  }
+
   function revealNextBatch() {
     if (cachePool.length === 0 || renderedCount >= cachePool.length) return;
     
-    const end = Math.min(renderedCount + REVEAL_BATCH, cachePool.length);
-    const gridContainer = document.getElementById('photo-grid');
-    
-    for (let i = renderedCount; i < end; i++) {
-      const card = createPhotoCard(cachePool[i], i);
-      gridContainer.appendChild(card);
-    }
-    
-    renderedCount = end;
+    renderedCount = Math.min(renderedCount + REVEAL_BATCH, cachePool.length);
+    renderGrid();
     notifyNavbar();
   }
 
   function createPhotoCard(photo, index) {
     const card = document.createElement('div');
-    // 🔴 强制所有卡片绝对保持 4:3 比例的统一画框，绝不再允许出现参差不齐的尺寸
-    card.className = 'photo-grid-card group';
+    card.className = 'masonry-item-card group';
     card.onclick = () => openLightbox(index);
+
+    const aspect = photo.width && photo.height ? `${photo.width} / ${photo.height}` : 'auto';
 
     card.innerHTML = `
       <img 
         src="${photo.thumbUrl}" 
         alt="" 
-        class="photo-grid-img opacity-hidden"
-        onload="onImageLoaded(this, '${photo.id}')"
+        class="photo-img opacity-hidden"
+        style="aspect-ratio: ${aspect};max-width: 100%;"
+        onload="onImageLoaded(this)"
         onerror="onImageError(this, '${photo.fallbackThumbUrl}')"
       />
       ${photo.mediaType === 'video' ? `
@@ -325,16 +363,16 @@ function fallbackRegexExtract(html: string): any[] {
     return card;
   }
 
-  window.onImageLoaded = (imgEl, id) => {
+  window.onImageLoaded = (imgEl) => {
     imgEl.classList.remove('opacity-hidden');
-    const cardEl = imgEl.closest('.photo-grid-card');
+    const cardEl = imgEl.closest('.masonry-item-card');
     if (!cardEl || cardEl.dataset.animated === "true") return;
     cardEl.dataset.animated = "true";
 
     const randomRotate = (Math.random() - 0.5) * 4; 
     
     gsap.fromTo(cardEl, 
-      { y: 60, scale: 0.95, rotation: randomRotate, opacity: 0 }, 
+      { y: 50, scale: 0.96, rotation: randomRotate, opacity: 0 }, 
       { y: 0, scale: 1, rotation: 0, opacity: 1, duration: 1.0, ease: "power4.out", clearProps: "transform,rotation" }
     );
   };
@@ -350,6 +388,12 @@ function fallbackRegexExtract(html: string): any[] {
     window.dispatchEvent(new CustomEvent('sinyan-album-sync', { detail: { showing: renderedCount, cached: cachePool.length, isBuffering: false } }));
   }
 
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => { renderGrid(); }, 150);
+  });
+
   const sentinel = document.getElementById('scroll-sentinel');
   const scrollObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) revealNextBatch();
@@ -358,7 +402,7 @@ function fallbackRegexExtract(html: string): any[] {
 
 
   // ==========================================
-  // 大图预览：绝对无缝重叠、100% 完整显示防溢出引擎
+  // 大图预览：防溢出引擎
   // ==========================================
   const lightbox = document.getElementById('lightbox');
   const lbBaseImg = document.getElementById('lb-base-img');
@@ -377,7 +421,6 @@ function fallbackRegexExtract(html: string): any[] {
     const photo = cachePool[index];
     if (!photo) return;
 
-    // 清理可能遗留的动态视频节点
     frameContainer.querySelectorAll('video').forEach(v => v.remove());
 
     lightbox.classList.add('active');
@@ -412,13 +455,11 @@ function fallbackRegexExtract(html: string): any[] {
       };
       frameContainer.appendChild(video);
     } else {
-      // 核心：强制高低图加载链路分开，并在加载完毕时去除隐藏类，保证 100% 同比例替换
       lbBaseImg.src = photo.previewUrl || photo.displayUrl;
       
       lbBaseImg.onload = () => {
         lbLoader.style.display = 'none';
         lbBaseImg.classList.remove('opacity-hidden');
-        // 底图加载完毕后，静默触发高清原图请求
         lbHighImg.src = photo.originalLikeUrl || photo.displayUrl;
       };
 
@@ -467,7 +508,9 @@ function fallbackRegexExtract(html: string): any[] {
     padding: 0 !important;
     background-color: #030303;
     color: #ffffff;
-    overflow-x: hidden;
+    /* 🔴 物理死锁横向溢出 */
+    overflow-x: hidden !important; 
+    width: 100% !important;
     transition: background-color 0.4s ease, color 0.4s ease;
   }
 
@@ -475,56 +518,79 @@ function fallbackRegexExtract(html: string): any[] {
     min-height: 100vh;
     padding: 120px 6% 60px 6%;
     font-family: 'Noto Sans SC', sans-serif;
+    box-sizing: border-box; 
+    width: 100% !important;
+    overflow-x: hidden !important;
   }
 
   .header-section { max-width: 600px; margin-bottom: 50px; }
   .page-title {
     font-size: 3.2rem; font-weight: 900; letter-spacing: -0.04em;
     background: linear-gradient(180deg, #ffffff 60%, #999999 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
     margin-bottom: 12px;
   }
   .page-subtitle { font-size: 0.95rem; color: #888888; line-height: 1.6; font-weight: 400; transition: color 0.4s ease; }
 
   /* =========================================
-     🔴 终极网格兵法：强迫症极度舒适版 4:3 布局
+     🔴 终极战车：Flex 物理列隔离瀑布流 (绝对不可能溢出/重叠)
   ========================================= */
-  .masonry-wrapper { position: relative; width: 100%; max-width: 1400px; margin: 0 auto; }
-  
-  /* 废弃 Flex Columns，换上真正让它刀劈斧砍般平齐的 CSS Grid！ */
-  .photo-grid-layout { 
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 24px; 
+  .masonry-wrapper { 
+    position: relative; 
+    width: 100%; 
+    max-width: 105rem; 
+    margin: 0 auto; 
+    box-sizing: border-box; 
   }
   
-  @media (max-width: 1024px) { .photo-grid-layout { grid-template-columns: repeat(2, 1fr); gap: 20px;} }
-  @media (max-width: 640px) { .photo-grid-layout { grid-template-columns: repeat(1, 1fr); gap: 16px;} }
+  .masonry-grid-flex { 
+    display: flex; 
+    width: 100%; 
+    gap: 0.618rem; 
+    box-sizing: border-box;
+  }
 
-  .photo-grid-card {
+  .masonry-column-flex {
+    flex: 1;
+    /* 🔴 列宽死锁骨骼：min-width: 0 彻底防止图片撑大列宽，物理层面切断横向撑爆网页的路径 */
+    min-width: 0 !important; 
+    display: flex;
+    flex-direction: column;
+    gap: 0.618rem;
+    box-sizing: border-box;
+  }
+  
+  @media (max-width: 1024px) { .masonry-grid-flex { gap: 20px; } .masonry-column-flex { gap: 20px; } }
+  @media (max-width: 640px) { .masonry-grid-flex { gap: 16px; } .masonry-column-flex { gap: 16px; } }
+
+  .masonry-item-card {
     position: relative;
-    width: 100%;
-    /* 🔴 所有画框死死锁定 4:3，哪怕它是电线杆子也要铺满这片区域，告别航母级黑边！ */
-    aspect-ratio: 4 / 3;
+    display: block;
+    /* 🔴 填平一切大黑边：必须 100% 顶格吃满列容器的物理宽度 */
+    width: 100% !important; 
     background: transparent !important; 
-    border-radius: 16px; 
-    overflow: hidden; 
+    border: none !important; 
+    outline: none !important;
+    padding: 0; margin: 0; 
     cursor: pointer; 
+    border-radius: 16px; 
+    box-sizing: border-box;
+    overflow: hidden; 
     opacity: 0; 
     will-change: transform, opacity;
   }
 
-  .photo-grid-img { 
-    width: 100%; 
-    height: 100%; 
-    /* 🔴 核心引擎：图片宽度不够？直接等比拉伸填满框区，多余部分平滑裁切。效果绝对惊艳！ */
+  .photo-img { 
+    width: 100% !important; 
+    height: auto !important; 
+    /* 🔴 自然等比，绝不裁切多余区域，且平滑无黑边拉满 */
     object-fit: cover; 
     display: block; 
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; 
   }
   
-  .photo-grid-card:hover .photo-grid-img {
-    transform: scale(1.05);
+  .masonry-item-card:hover .photo-img {
+    transform: scale(1.03);
   }
 
   .opacity-hidden { opacity: 0 !important; }
@@ -538,24 +604,16 @@ function fallbackRegexExtract(html: string): any[] {
   .scroll-sentinel { height: 60px; width: 100%; }
 
   /* =========================================
-     🔴 绝不外溢死锁大图舱：100% 完整展示原图
+     大图预览防溢出
   ========================================= */
   .media-frame-container {
     flex-grow: 1; display: block; overflow: hidden;
-    position: relative; 
-    width: 100%; 
-    height: 75vh; /* 将视窗锁死在 75% 屏幕高度，不管原图多高多宽，都不准出界 */
-    margin: 15px 0;
+    position: relative; width: 100%; height: 75vh; margin: 15px 0;
   }
 
-  /* 底图、高图完全共用此类，同等绝对定位，重合无缝隙 */
   .lightbox-layer {
-    position: absolute; 
-    top: 0; left: 0; right: 0; bottom: 0; 
-    margin: auto;
-    width: 100%; 
-    height: 100%;
-    /* 🔴 铁律禁区：严格限制图像完整装在容器内！ */
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto;
+    width: 100%; height: 100%;
     object-fit: contain !important; 
     border-radius: 12px;
     transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -602,10 +660,10 @@ function fallbackRegexExtract(html: string): any[] {
      白昼模式
   ========================================= */
   :global(html.light-mode), :global(html.light-mode body) { background-color: #f5f5f7 !important; color: #1d1d1f !important; }
-  :global(html.light-mode) .page-title { background: linear-gradient(180deg, #1d1d1f 40%, #86868b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  :global(html.light-mode) .page-title { background: linear-gradient(180deg, #1d1d1f 40%, #86868b 100%); -webkit-background-clip: text;}
   :global(html.light-mode) .page-subtitle { color: #555555; }
   
-  :global(html.light-mode) .photo-grid-card { background: transparent !important; border: none !important; box-shadow: none !important; }
+  :global(html.light-mode) .masonry-item-card { background: transparent !important; border: none !important; box-shadow: none !important; }
   
   :global(html.light-mode) .lightbox-backdrop { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(36px) saturate(220%); -webkit-backdrop-filter: blur(36px) saturate(220%); }
   :global(html.light-mode) .meta-badge { background: rgba(0, 0, 0, 0.06); color: #1d1d1f; }

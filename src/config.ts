@@ -58,9 +58,10 @@ searchData: [
     { type: 'Journal', title: '法语学习打卡第一天', url: '/journal/french-1' }
   ]
 
-  export const PHOTO_CONFIG = {
-  // 你的 Google Photos 分享链接
-  sharedAlbumUrl: "https://photos.app.goo.gl/Hj55uVT1gDPqYDu56",
-  // 代理地址 (绕过 Google 的 CORS 限制)
-  proxyUrl: "https://api.allorigins.win/get?url=" 
+  export const ALBUMS_CONFIG = {
+    nav: "Albums",
+    title: "🖼️  Singyan Albums",
+    subtitle: "我的数字相册，捕捉生活中的微光与余热。",
+    // 你的 Google Photos 分享链接
+    googleSharedId: "Hj55uVT1gDPqYDu560",
 };
