@@ -21,7 +21,7 @@ try {
   });
 
   if (!response.ok) {
-    throw new Error(` 或寻找 Google Photos 相册失败，请检查分享外链。: ${response.statusText}`);
+    throw new Error(` 服务端寻找 Google Photos 相册失败，请检查分享外链是否有效。: ${response.statusText}`);
   }
 
   const html = await response.text();
@@ -70,8 +70,8 @@ try {
   }
 
 } catch (err: any) {
-  errorMsg = err.message;
-  console.error("服务端抓取 Google Photos 失败。", err);
+  errorMsg = "服务端抓取失败，当前网络环境可能无法访问 Google Photos 资源。";
+  console.error("相册抓取调试日志:", err.message);
 }
 
 function extractPhotosFromArray(arr: any[]): any[] {
@@ -196,11 +196,15 @@ function fallbackRegexExtract(html: string): any[] {
       style="display: none;"
     ></div>
 
-    {errorMsg && (
-      <div class="error-banner">
-        <p class="error-title">相册数据同步中断</p>
-        {/* <p class="error-desc">服务端抓取 Google Photos 失败，当前可能网络无法访问 Google Services。:{errorMsg}</p> */}
-        <p class="error-desc">服务端抓取 Google Photos 失败，当前可能网络无法访问 Google Services  :{errorMsg}</p> 
+{errorMsg && (
+      <div class="error-card">
+        <div class="error-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 18c-.77 1.333.192 3 1.732 3z"/></svg>
+        </div>
+        <div class="error-content">
+          <h3 class="error-title">画廊同步暂缓</h3>
+          <p class="error-desc">{errorMsg}</p>
+        </div>
       </div>
     )}
 
@@ -532,6 +536,47 @@ function fallbackRegexExtract(html: string): any[] {
   }
   .page-subtitle { font-size: 0.95rem; color: #888888; line-height: 1.6; font-weight: 400; transition: color 0.4s ease; }
 
+  /* 🔴 磨砂玻璃风格错误卡片 */
+  .error-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    margin: 40px auto;
+    max-width: 600px;
+    background: rgba(255, 59, 48, 0.06); /* 极淡的红底 */
+    border: 1px solid rgba(255, 59, 48, 0.2);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    color: #ff453a; /* 苹果风格的警示红 */
+  }
+
+  .error-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    opacity: 0.9;
+  }
+
+  .error-title {
+    margin: 0 0 4px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .error-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    line-height: 1.4;
+  }
+
+  /* 白昼模式适配 */
+  :global(html.light-mode) .error-card {
+    background: rgba(255, 59, 48, 0.05);
+    border: 1px solid rgba(255, 59, 48, 0.15);
+    color: #d63031;
+  }
   /* =========================================
      🔴 终极战车：Flex 物理列隔离瀑布流 (绝对不可能溢出/重叠)
   ========================================= */
