@@ -1,0 +1,414 @@
+---
+// src/components/Earth.astro
+import { EARTH_CONFIG } from '../config';
+---
+
+<div 
+  id="earth-container" 
+  data-lat={EARTH_CONFIG.focusLocation.latitude} 
+  data-lon={EARTH_CONFIG.focusLocation.longitude}
+  data-saturation={EARTH_CONFIG.rendering.saturation}
+  data-starcount={EARTH_CONFIG.rendering.starsCount}
+></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" is:inline></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" is:inline></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" is:inline></script>
+
+<script is:inline>
+  window._isEarthTexturesLoaded = false;
+
+  const container = document.getElementById('earth-container');
+  const latConfig = parseFloat(container.dataset.lat);
+  const lonConfig = parseFloat(container.dataset.lon);
+  const satConfig = parseFloat(container.dataset.saturation);
+  const starConfig = parseInt(container.dataset.starcount);
+
+  let scene, camera, renderer, globe, clouds, atmosphere, starField, starsMaterial, controls;
+
+  // ==================== SHADERS 定义开始 ====================
+    const starVertexShader = `
+      attribute float aSize;
+      attribute float aPhase;
+      attribute float aSpeed;
+      uniform float uTime;
+      varying float vTwinkle;
+      void main() {
+        vTwinkle = 0.35 + 0.65 * sin(uTime * aSpeed + aPhase);
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = aSize * (0.4 + 0.6 * vTwinkle) * (300.0 / -mvPosition.z);
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `;
+
+    const starFragmentShader = `
+      varying float vTwinkle;
+      void main() {
+        vec2 coord = gl_PointCoord - vec2(0.5);
+        float dist = length(coord);
+        if (dist > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.08, dist) * (0.25 + 0.75 * vTwinkle);
+        vec3 starColor = mix(vec3(0.88, 0.93, 1.0), vec3(1.0, 1.0, 1.0), vTwinkle);
+        gl_FragColor = vec4(starColor, alpha * 0.95);
+      }
+    `;
+
+    const earthVertexShader = `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vWorldPosition;
+      void main() {
+        vUv = uv;
+        vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+        vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+
+    const earthFragmentShader = `
+      uniform sampler2D tDay;
+      uniform sampler2D tNight;
+      uniform sampler2D tSpecular;
+      uniform sampler2D tClouds;
+      uniform vec3 uSunDirection;
+      uniform vec3 uCameraPosition;
+      uniform float uTime;
+      uniform float uSaturation;
+      uniform float uIsLightMode; 
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vWorldPosition;
+
+      void main() {
+        vec3 normal = normalize(vNormal);
+        vec3 viewDir = normalize(uCameraPosition - vWorldPosition);
+        float dotProduct = dot(normal, uSunDirection);
+        float dayMix = smoothstep(-0.2, 0.15, dotProduct);
+        vec4 dayColor = texture2D(tDay, vUv);
+        vec4 nightColor = texture2D(tNight, vUv);
+        vec4 specColor = texture2D(tSpecular, vUv);
+
+        vec3 coolSlateBlue = vec3(0.82, 0.94, 1.15);
+        dayColor.rgb = clamp(dayColor.rgb * coolSlateBlue, 0.0, 1.0);
+        float luma = dot(dayColor.rgb, vec3(0.299, 0.587, 0.114));
+        dayColor.rgb = mix(dayColor.rgb, vec3(0.12, 0.28, 0.52) * luma * 1.4, 0.1);
+
+        vec2 cloudUv = vUv + vec2(uTime * 0.001, uTime * 0.0003);
+        vec2 shadowUv = cloudUv - uSunDirection.xy * 0.008; 
+        vec4 shadowCloud = texture2D(tClouds, shadowUv);
+        float shadowFactor = mix(1.0, 1.0 - shadowCloud.r * 0.65, dayMix);
+
+        vec3 cityLights = nightColor.rgb * vec3(2.4, 1.55, 0.82);
+        vec3 lightModeShadow = dayColor.rgb * 0.8; 
+        vec3 darkSide = mix(cityLights, lightModeShadow, uIsLightMode);
+        
+        vec3 finalColor = mix(darkSide, dayColor.rgb, dayMix);
+        finalColor *= mix(shadowFactor, 1.0, uIsLightMode * 0.8); 
+
+        float twilight = smoothstep(-0.25, -0.02, dotProduct) * smoothstep(0.18, -0.02, dotProduct);
+        vec3 twilightGlow = vec3(0.9, 0.32, 0.08) * twilight * (0.5 - uIsLightMode * 0.45); 
+        finalColor += twilightGlow;
+
+        vec3 halfDir = normalize(uSunDirection + viewDir);
+        float spec = pow(max(dot(normal, halfDir), 0.0), 24.0) * specColor.r;
+        vec3 specularReflection = vec3(0.42, 0.58, 0.88) * spec * dayMix * 0.8 * (1.0 - shadowCloud.r * 0.85);
+        finalColor += specularReflection;
+
+        float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 5.0);
+        vec3 atmosphericEdge = vec3(0.2, 0.52, 1.0) * fresnel * dayMix * 0.6;
+        finalColor += atmosphericEdge;
+
+        float gray = dot(finalColor, vec3(0.299, 0.587, 0.114));
+        finalColor = mix(vec3(gray), finalColor, uSaturation);
+
+        gl_FragColor = vec4(finalColor, 1.0);
+      }
+    `;
+
+    const cloudVertexShader = `
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vWorldPosition;
+      void main() {
+        vUv = uv;
+        vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+        vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+
+    const cloudFragmentShader = `
+      uniform sampler2D tClouds;
+      uniform vec3 uSunDirection;
+      uniform vec3 uCameraPosition;
+      uniform float uTime;
+      uniform float uSaturation;
+      uniform float uIsLightMode; 
+      varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vWorldPosition;
+
+      void main() {
+        vec3 normal = normalize(vNormal);
+        vec3 viewDir = normalize(uCameraPosition - vWorldPosition);
+
+        vec2 driftUv = vUv + vec2(uTime * 0.001, uTime * 0.0003);
+        vec4 cloudColor = texture2D(tClouds, driftUv);
+
+        float dotProduct = dot(normal, uSunDirection);
+        float dayMix = smoothstep(-0.25, 0.25, dotProduct);
+
+        vec3 dayCloud = vec3(0.92, 0.96, 1.0) * 1.15;
+        vec3 nightCloud = vec3(0.01, 0.015, 0.03); 
+        
+        vec3 lightModeNightCloud = dayCloud * 0.8;
+        vec3 finalNightCloud = mix(nightCloud, lightModeNightCloud, uIsLightMode);
+
+        vec3 cloudBase = mix(finalNightCloud, dayCloud, dayMix);
+
+        float alpha = cloudColor.r * mix(0.7, 0.85, dayMix);
+        float gray = dot(cloudBase, vec3(0.299, 0.587, 0.114));
+        cloudBase = mix(vec3(gray), cloudBase, uSaturation);
+
+        gl_FragColor = vec4(cloudBase, alpha);
+      }
+    `;
+
+    const atmosphereVertexShader = `
+      varying vec3 vNormal;
+      varying vec3 vWorldPosition;
+      void main() {
+        vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+        vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+
+    const atmosphereFragmentShader = `
+      varying vec3 vNormal;
+      varying vec3 vWorldPosition;
+      uniform vec3 uSunDirection;
+      uniform vec3 uCameraPosition;
+      uniform float uSaturation;
+
+      void main() {
+        vec3 normal = normalize(vNormal);
+        vec3 viewDir = normalize(uCameraPosition - vWorldPosition);
+        
+        float rim = 1.0 + dot(normal, viewDir);
+        float glow = pow(max(rim, 0.0), 5.0) * 0.25; 
+        
+        float sunBlend = smoothstep(-0.2, 0.25, dot(normal, uSunDirection));
+        
+        vec3 dayGlow = vec3(0.18, 0.52, 1.0) * glow * sunBlend * 3.4;
+        vec3 nightGlow = vec3(0.02, 0.08, 0.22) * glow * (1.0 - sunBlend) * 0.35;
+        vec3 finalGlow = dayGlow + nightGlow;
+        
+        float grayGlow = dot(finalGlow, vec3(0.299, 0.587, 0.114));
+        finalGlow = mix(vec3(grayGlow), finalGlow, uSaturation);
+        
+        gl_FragColor = vec4(finalGlow, (finalGlow.r + finalGlow.b) * 1.8);
+      }
+    `;
+  // ==================== SHADERS 定义结束 ====================
+
+  function getLiveSunDirection() {
+      const now = new Date();
+      const declination = 21.5 * (Math.PI / 180);  
+      const utcHours = now.getUTCHours() + now.getUTCMinutes() / 60 + now.getUTCSeconds() / 3600;
+      const sunLon = (12 - utcHours) * 15 * (Math.PI / 180);
+      return new THREE.Vector3(Math.cos(declination) * Math.sin(sunLon), Math.sin(declination), Math.cos(declination) * Math.cos(sunLon)).normalize();
+  }
+
+  function init() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 2500);
+      camera.position.set(0, 0, 200);
+
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping; 
+      renderer.toneMappingExposure = 1.618;
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;       
+      controls.dampingFactor = 0.05;
+      controls.enablePan = false;          
+      controls.enableZoom = false; 
+
+      const ambientLight = new THREE.AmbientLight(0x040404);
+      scene.add(ambientLight);
+
+      const manager = new THREE.LoadingManager();
+      manager.onLoad = function () {
+        window._isEarthTexturesLoaded = true;
+      };
+
+      const textureLoader = new THREE.TextureLoader(manager);
+      textureLoader.setCrossOrigin('anonymous');
+
+      const dayMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+      const nightMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-night.jpg');
+      const specMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-water.png');
+      const cloudMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-clouds.png'); 
+
+      const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+      dayMap.anisotropy = maxAnisotropy; nightMap.anisotropy = maxAnisotropy;
+      specMap.anisotropy = maxAnisotropy; cloudMap.anisotropy = maxAnisotropy;
+
+      const starsGeometry = new THREE.BufferGeometry();
+      const starsCount = starConfig;
+      const starPositions = new Float32Array(starsCount * 3);
+      const starSizes = new Float32Array(starsCount);
+      const starPhases = new Float32Array(starsCount);
+      const starSpeeds = new Float32Array(starsCount);
+
+      for (let i = 0; i < starsCount; i++) {
+        const u = Math.random(); const v = Math.random();
+        const theta = u * 2.0 * Math.PI; const phi = Math.acos(2.0 * v - 1.0);
+        const r = 280 + Math.random() * 670;
+        starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        starPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        starPositions[i * 3 + 2] = r * Math.cos(phi);
+        if (Math.random() < 0.15) { starSizes[i] = 4.5 + Math.random() * 6.5; } 
+        else { starSizes[i] = 0.8 + Math.random() * 2.2; }
+        starPhases[i] = Math.random() * 6.28;        
+        starSpeeds[i] = 0.6 + Math.random() * 2.8;   
+      }
+      starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+      starsGeometry.setAttribute('aSize', new THREE.BufferAttribute(starSizes, 1));
+      starsGeometry.setAttribute('aPhase', new THREE.BufferAttribute(starPhases, 1));
+      starsGeometry.setAttribute('aSpeed', new THREE.BufferAttribute(starSpeeds, 1));
+
+      starsMaterial = new THREE.ShaderMaterial({
+        vertexShader: starVertexShader, fragmentShader: starFragmentShader,
+        uniforms: { uTime: { value: 0 } },
+        transparent: true, blending: THREE.AdditiveBlending, depthWrite: false 
+      });
+      starField = new THREE.Points(starsGeometry, starsMaterial);
+      scene.add(starField);
+
+      const globeMaterial = new THREE.ShaderMaterial({
+        vertexShader: earthVertexShader,
+        fragmentShader: earthFragmentShader,
+        uniforms: {
+          tDay: { value: dayMap }, tNight: { value: nightMap }, tSpecular: { value: specMap }, tClouds: { value: cloudMap },
+          uSunDirection: { value: getLiveSunDirection() }, uCameraPosition: { value: camera.position },
+          uTime: { value: 0 }, uSaturation: { value: satConfig },
+          uIsLightMode: { value: 0.0 } 
+        }
+      });
+      globe = new THREE.Mesh(new THREE.SphereGeometry(51, 64, 64), globeMaterial);
+      scene.add(globe);
+
+      const cloudMaterial = new THREE.ShaderMaterial({
+        vertexShader: cloudVertexShader,
+        fragmentShader: cloudFragmentShader,
+        uniforms: {
+          tClouds: { value: cloudMap }, uSunDirection: { value: getLiveSunDirection() }, uCameraPosition: { value: camera.position },
+          uTime: { value: 0 }, uSaturation: { value: satConfig },
+          uIsLightMode: { value: 0.0 }
+        },
+        transparent: true, blending: THREE.NormalBlending
+      });
+      clouds = new THREE.Mesh(new THREE.SphereGeometry(51.45, 64, 64), cloudMaterial);
+      scene.add(clouds);
+
+      const atmosphereMaterial = new THREE.ShaderMaterial({
+        vertexShader: atmosphereVertexShader,
+        fragmentShader: atmosphereFragmentShader,
+        uniforms: { 
+          uSunDirection: { value: getLiveSunDirection() }, 
+          uCameraPosition: { value: camera.position }, 
+          uSaturation: { value: satConfig } 
+        },
+        blending: THREE.AdditiveBlending, side: THREE.BackSide, transparent: true
+      });
+      atmosphere = new THREE.Mesh(new THREE.SphereGeometry(54.8, 64, 64), atmosphereMaterial);
+      scene.add(atmosphere);
+
+      const lat = latConfig * (Math.PI / 180);
+      const lon = lonConfig * (Math.PI / 180);
+      globe.rotation.y = -lon - Math.PI / 2 + 0.28;
+      globe.rotation.x = lat * 0.48;
+      clouds.rotation.copy(globe.rotation);
+
+      globe.scale.set(0.809, 0.809, 0.809);
+      clouds.scale.set(0.809, 0.809, 0.809);
+      atmosphere.scale.set(0.809, 0.809, 0.809);
+      gsap.to([globe.scale, clouds.scale, atmosphere.scale], { x: 1.0, y: 1.0, z: 1.0, duration: 3.5, ease: "power3.out", delay: 0.1 });
+
+      const clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        const elapsed = clock.getElapsedTime();
+        
+        globe.rotation.y += 0.0002; clouds.rotation.y += 0.00028;
+        
+        starsMaterial.uniforms.uTime.value = elapsed;
+        globeMaterial.uniforms.uTime.value = elapsed;
+        cloudMaterial.uniforms.uTime.value = elapsed;
+        
+        const currentSunDir = getLiveSunDirection();
+        globeMaterial.uniforms.uSunDirection.value.copy(currentSunDir);
+        cloudMaterial.uniforms.uSunDirection.value.copy(currentSunDir);
+        atmosphereMaterial.uniforms.uSunDirection.value.copy(currentSunDir);
+        
+        globeMaterial.uniforms.uCameraPosition.value.copy(camera.position);
+        cloudMaterial.uniforms.uCameraPosition.value.copy(camera.position);
+        atmosphereMaterial.uniforms.uCameraPosition.value.copy(camera.position); 
+        
+        controls.update(); 
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      const themeObserver = new MutationObserver(() => {
+        const isLight = document.documentElement.classList.contains('light-mode');
+        
+        // 🔴 关键调整：白昼模式下将饱和度暴力拉高到 1.80，告别褪色灰暗感
+        const targetSat = isLight ? 1.618 : satConfig; 
+        const targetExp = isLight ? 1.80 : 1.618; 
+        const targetLightMode = isLight ? 1.0 : 0.0; 
+
+        gsap.to([
+          globeMaterial.uniforms.uSaturation,
+          cloudMaterial.uniforms.uSaturation,
+          atmosphereMaterial.uniforms.uSaturation
+        ], { value: targetSat, duration: 1.2, ease: "power2.inOut" });
+
+        gsap.to(renderer, { toneMappingExposure: targetExp, duration: 1.2, ease: "power2.inOut" });
+
+        gsap.to([
+          globeMaterial.uniforms.uIsLightMode,
+          cloudMaterial.uniforms.uIsLightMode
+        ], { value: targetLightMode, duration: 1.2, ease: "power2.inOut" });
+      });
+
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+      // 🔴 初始化强行赋予白昼值：饱和度 1.618
+      if (document.documentElement.classList.contains('light-mode')) {
+        globeMaterial.uniforms.uSaturation.value = 1.618;
+        cloudMaterial.uniforms.uSaturation.value = 1.618;
+        atmosphereMaterial.uniforms.uSaturation.value = 1.618;
+        globeMaterial.uniforms.uIsLightMode.value = 1.0;
+        cloudMaterial.uniforms.uIsLightMode.value = 1.0;
+        renderer.toneMappingExposure = 1.80;
+      }
+  }
+
+  window.addEventListener('load', init);
+</script>
+
+<style>
+  #earth-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; cursor: grab; }
+</style>
