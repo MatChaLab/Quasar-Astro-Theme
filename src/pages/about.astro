@@ -1,112 +1,585 @@
 ---
+// src/pages/about.astro
 import { SITE_CONFIG, ABOUT_CONFIG } from '../config';
 import Navbar from '../components/Navbar.astro';
+import Earth from '../components/Earth.astro';
 ---
 
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>About | {SITE_CONFIG.title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
-  <Navbar />
 
-  <main class="about-viewport">
-    <div class="content-wrapper">
-      
-      <section class="hero anim-item">
-        <img src={ABOUT_CONFIG.avatar.src} alt={ABOUT_CONFIG.avatar.alt} class="avatar-img" />
-        <h1 class="hero-title">{ABOUT_CONFIG.name}</h1>
-        <p class="hero-subtitle">{ABOUT_CONFIG.subtitle}</p>
+  <Navbar />
+  
+  <!-- 地球图层完美下沉至 72.5vh -->
+  <div class="earth-horizon-layer">
+    <Earth />
+  </div>
+
+  <main class="about-cinematic-viewport opacity-0" define:vars={{ themeColor: SITE_CONFIG.themeColor }}>
+    
+    <!-- ========================================================
+         阶段 1：核心能力卡 (Capabilities Stage)
+         ======================================================== -->
+    <section class="story-stage active" id="stage-capabilities">
+      <div class="stage-inner flex-center">
+        <div class="avatar-wrapper anim-s1-avatar">
+          <img src={ABOUT_CONFIG.avatar.src} alt={ABOUT_CONFIG.avatar.alt} class="about-avatar-img" />
+        </div>
         
-        <!-- 社交链接 -->
-        <div class="social-links">
-          {ABOUT_CONFIG.socialLinks.map(link => (
-            <a href={link.url} target="_blank" class="social-icon" aria-label={link.name} set:html={link.icon} />
+        <h1 class="stage-title-large anim-s1-title">About Me.</h1>
+        
+        <div class="skills-grid-wrapper">
+          {ABOUT_CONFIG.skills.map((skill) => (
+            <div class="unified-glass-card anim-s1-card">
+              <div class="card-inner-brand">{skill.title}</div>
+              <div class="card-inner-sub">{skill.sub}</div>
+            </div>
           ))}
         </div>
-      </section>
 
-      <section class="bio anim-item">
-        {ABOUT_CONFIG.bio.map(p => <p>{p}</p>)}
-      </section>
+        <p class="manifesto-claim anim-s1-claim">{ABOUT_CONFIG.manifesto}</p>
+      </div>
+    </section>
 
-      <section class="grid-container">
-        {ABOUT_CONFIG.interests.map(item => (
-          <div class="glass-card anim-item">
-            <h3>{item.title}</h3>
-            <p set:html={item.desc} />
+    <!-- ========================================================
+         阶段 2：项目矩阵图块云
+         ======================================================== -->
+    <section class="story-stage" id="stage-mosaic">
+      <div class="stage-inner flex-center">
+        
+        <div class="mosaic-content-holder">
+          <h2 class="mosaic-main-header">{ABOUT_CONFIG.mosaicHeader.title}</h2>
+          <p class="mosaic-main-sub">{ABOUT_CONFIG.mosaicHeader.subtitle}</p>
+        </div>
+
+        <div class="mosaic-cloud-flexbox">
+          {ABOUT_CONFIG.mosaicMatrix.map((item) => (
+            <div 
+              class="mosaic-drag-card" 
+              data-rot={item.rotate.replace('deg', '')}
+            >
+              <div class="card-tag">{item.tag}</div>
+              <h4 class="card-title">{item.title}</h4>
+              <div class="card-glare"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         阶段 3：深度看板样式 (Tech Sensitivity)
+         ======================================================== -->
+    <section class="story-stage" id="stage-deepdive">
+      <div class="stage-inner flex-center">
+        <div class="aurora-laser-container">
+          <div class="laser-beam" id="laser-1"></div>
+          <div class="laser-beam" id="laser-2"></div>
+          <div class="laser-beam" id="laser-3"></div>
+        </div>
+
+        <div class="deepdive-content-holder">
+          <h2 class="deepdive-main-header">{ABOUT_CONFIG.deepDives.sectionHeader}</h2>
+          <p class="deepdive-main-sub">{ABOUT_CONFIG.deepDives.sectionSub}</p>
+          
+          <div class="deepdive-pillars-matrix">
+            {ABOUT_CONFIG.deepDives.pillars.map((pillar) => (
+              <div class="pillar-glass-block">
+                <div class="pillar-inner-glow"></div>
+                <h3 class="pillar-title">{pillar.title}</h3>
+                <p class="pillar-desc">{pillar.desc}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
+        </div>
+      </div>
+    </section>
 
+    <!-- ========================================================
+         悬浮 Dock 导航岛
+         ======================================================== -->
+    <div class="floating-dock-island">
+      <div class="dock-blur-bg"></div>
+      <div class="dock-buttons-row">
+        {ABOUT_CONFIG.dockLabels.map((item, index) => (
+          <button class={index === 0 ? "dock-btn active" : "dock-btn"} data-target={item.target}>
+            <span class="dot"></span><span class="label">{item.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
+
   </main>
+
 </body>
 </html>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" is:inline></script>
 <script is:inline>
-  // 🔴 优雅的非线性动画：stagger 错落入场，back.out 制造轻微回弹效果
-  gsap.from(".anim-item", {
-    y: 40,
-    opacity: 0,
-    duration: 1.2,
-    ease: "back.out(1.2)",
-    stagger: 0.15
+  document.addEventListener('DOMContentLoaded', () => {
+    const navProgress = document.getElementById('nav-progress');
+    const navSpinner = document.getElementById('global-nav-spinner');
+    const viewport = document.querySelector('.about-cinematic-viewport');
+
+    if (viewport) viewport.classList.remove('opacity-0');
+
+    if (navProgress && navSpinner) {
+      gsap.set(navProgress, { width: "70%", opacity: 1 });
+      gsap.set(navSpinner, { opacity: 1, scale: 1 });
+      gsap.timeline()
+        .to(navProgress, { width: "100%", duration: 0.3, ease: "power3.out" })
+        .to([navProgress, navSpinner], { opacity: 0, scale: (i) => i === 1 ? 0.5 : 1, duration: 0.2, onComplete: initTimelineEngine });
+    } else {
+      initTimelineEngine();
+    }
+
+    let currentStage = 0;
+    const stages = [
+      document.getElementById('stage-capabilities'),
+      document.getElementById('stage-mosaic'),
+      document.getElementById('stage-deepdive')
+    ];
+    const dockButtons = document.querySelectorAll('.dock-btn');
+
+    function animateStage0In() {
+      gsap.set([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], { clearProps: "all" });
+      
+      gsap.timeline()
+        .fromTo(".anim-s1-avatar", { opacity: 0, scale: 0.4, y: 35 }, { opacity: 1, scale: 1, y: 0, duration: 1.1, ease: "back.out(1.4)" })
+        .fromTo(".anim-s1-title", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.9, ease: "expo.out" }, "-=0.8")
+        .fromTo(".anim-s1-card", 
+          { opacity: 0, y: 45, scale: 0.96 }, 
+          { opacity: 1, y: 0, scale: 1, stagger: 0.06, duration: 1.0, ease: "back.out(1.3)" }, 
+          "-=0.6"
+        )
+        .fromTo(".anim-s1-claim", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, "-=0.45");
+    }
+
+    function initTimelineEngine() {
+      animateStage0In();
+      initDragEngine(); 
+    }
+
+    function initDragEngine() {
+      document.querySelectorAll('.mosaic-drag-card').forEach(card => {
+        let isDragging = false;
+        let transformX = 0;
+        let transformY = 0;
+
+        card.addEventListener('mousedown', (e) => {
+          e.preventDefault(); 
+          isDragging = true;
+          card.style.cursor = 'grabbing';
+          card.style.zIndex = '100'; 
+          
+          transformX = gsap.getProperty(card, "x") || 0;
+          transformY = gsap.getProperty(card, "y") || 0;
+
+          const startX = e.clientX - transformX;
+          const startY = e.clientY - transformY;
+
+          const onMouseMove = (ev) => {
+            if (!isDragging) return;
+            transformX = ev.clientX - startX;
+            transformY = ev.clientY - startY;
+            const initialRot = parseFloat(card.getAttribute('data-rot')) || 0;
+            gsap.set(card, { x: transformX, y: transformY, scale: 1.04, rotation: initialRot });
+          };
+
+          const onMouseUp = () => {
+            isDragging = false;
+            card.style.cursor = 'grab';
+            card.style.zIndex = '5';
+            gsap.set(card, { scale: 1 });
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+          };
+
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+      });
+    }
+
+    function switchStage(targetIndex) {
+      if (targetIndex === currentStage) return;
+      const outboundSection = stages[currentStage];
+      const inboundSection = stages[targetIndex];
+
+      dockButtons.forEach((btn, idx) => btn.classList.toggle('active', idx === targetIndex));
+
+      inboundSection.classList.add('active');
+      
+      const transitionTimeline = gsap.timeline({
+        onComplete: () => {
+          outboundSection.classList.remove('active');
+          gsap.set(outboundSection, { clearProps: "all" }); 
+        }
+      });
+
+      if (currentStage === 0) {
+        transitionTimeline.to([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], {
+          opacity: 0, y: -35, scale: 0.96, stagger: 0.03, duration: 0.35, ease: "power4.in"
+        });
+      } else if (currentStage === 1) {
+        transitionTimeline.to(".mosaic-content-holder", { opacity: 0, y: -15, duration: 0.25 })
+                          .to(".mosaic-drag-card", { opacity: 0, scale: 0.7, y: -30, stagger: 0.02, duration: 0.3, ease: "power4.in" }, "-=0.2");
+      } else if (currentStage === 2) {
+        transitionTimeline.to(".pillar-glass-block", { opacity: 0, y: 30, stagger: 0.03, duration: 0.3, ease: "power3.in" })
+                          .to(".deepdive-content-holder, .aurora-laser-container", { opacity: 0, duration: 0.25 }, "-=0.15");
+      }
+
+      if (targetIndex === 0) {
+        transitionTimeline.add(() => { animateStage0In(); }, "-=0.15");
+      } 
+      else if (targetIndex === 1) {
+        transitionTimeline.add(() => {
+          gsap.set([".mosaic-content-holder", ".mosaic-drag-card"], { clearProps: "all" });
+          gsap.timeline()
+            .fromTo(".mosaic-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" })
+            .fromTo(".mosaic-drag-card", 
+              { opacity: 0, scale: 0.75, y: 40, rotation: 0 },
+              { 
+                opacity: 1, 
+                scale: 1, 
+                y: 0, 
+                rotation: (i, target) => parseFloat(target.getAttribute('data-rot')) || 0,
+                stagger: 0.04, 
+                duration: 0.9, 
+                ease: "back.out(1.3)" 
+              },
+              "-=0.4"
+            );
+        }, "-=0.15");
+      } 
+      else if (targetIndex === 2) {
+        transitionTimeline.add(() => {
+          gsap.set([".aurora-laser-container", ".laser-beam", ".deepdive-content-holder", ".pillar-glass-block"], { clearProps: "all" });
+          gsap.timeline()
+            .fromTo(".aurora-laser-container", { opacity: 0, scaleY: 0 }, { opacity: 1, scaleY: 1, duration: 0.4, ease: "power4.out" })
+            .fromTo("#laser-1", { x: 0 }, { x: -window.innerWidth * 0.28, duration: 0.5, ease: "expo.out" }, "-=0.25")
+            .fromTo("#laser-3", { x: 0 }, { x: window.innerWidth * 0.28, duration: 0.5, ease: "expo.out" }, "-=0.5")
+            .fromTo(".laser-beam", { scaleX: 0.005, opacity: 0.3 }, { scaleX: 1, opacity: 0.15, duration: 0.35, ease: "power2.out" }, "-=0.25")
+            .fromTo(".deepdive-content-holder", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "expo.out" }, "-=0.25")
+            .fromTo(".pillar-glass-block", { opacity: 0, y: 35, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, stagger: 0.06, duration: 0.8, ease: "back.out(1.3)" }, "-=0.2");
+        }, "-=0.18");
+      }
+
+      currentStage = targetIndex;
+    }
+
+    dockButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        switchStage(parseInt(e.currentTarget.dataset.target, 10));
+      });
+    });
   });
 </script>
 
 <style>
-  :global(body) { background-color: #030303; color: #ffffff; margin: 0; font-family: 'Noto Sans SC', sans-serif; }
-
-  .about-viewport { padding: 160px 10% 100px 10%;  }
-  .content-wrapper { max-width: 100rem; margin: 0 auto; }
-  
-  .hero { text-align: left; margin-bottom: 80px; }
-  .avatar-img { width: 100px; height: 100px; border-radius: 28px; margin-bottom: 24px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  
-  .hero-title { font-size: 4rem; font-weight: 900; letter-spacing: -0.05em; margin: 0; }
-  .hero-subtitle { font-size: 1.2rem; color: #888; margin-top: 8px; }
-  
-  .social-links { display: flex; gap: 20px; margin-top: 24px; }
-  .social-icon { width: 24px; height: 24px; color: #666; transition: all 0.3s ease; }
-  .social-icon:hover { color: #fff; transform: translateY(-3px); }
-
-  .bio { font-size: 1.1rem; line-height: 1.8; color: #ccc; margin-bottom: 80px; }
-  
-  .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-  .glass-card { padding: 32px; border-radius: 24px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); }
-  .glass-card h3 { font-size: 1rem; margin-top: 0; color: #888; }
-  .glass-card p { font-size: 0.9rem; color: #999; line-height: 1.5; margin-bottom: 0; }
-  
-.glass-card { 
-    padding: 32px; 
-    border-radius: 24px; 
-    /* 1. 更细腻的背景透明度 */
-    background: rgba(255, 255, 255, 0.04); 
-    /* 2. 增加微小内边框，制造高光感 */
-    border: 1px solid rgba(255, 255, 255, 0.1); 
-    /* 3. 极淡的内部高光，让边缘不那么死板 */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease;
+  /* ========================================================
+     全局布局体系
+     ======================================================== */
+  :global(html), :global(body) {
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #030303;
+    color: #ffffff;
+    width: 100% !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    font-family: 'Noto Sans SC', sans-serif !important;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .glass-card:hover { 
-    transform: translateY(-8px) scale(1.02); 
+  .earth-horizon-layer {
+    position: fixed;
+    top: 72.5vh; 
+    left: 50%;
+    transform: translateX(-50%) scale(2.0);
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.85;
+  }
+
+  .about-cinematic-viewport { position: relative; z-index: 2; width: 100vw; height: 100vh; overflow: hidden; }
+  .opacity-0 { opacity: 0 !important; }
+
+  .story-stage {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .story-stage.active { opacity: 1; pointer-events: auto; visibility: visible; }
+  .stage-inner { width: 100%; height: 100%; box-sizing: border-box; }
+  .flex-center { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+  /* ========================================================
+     阶段 1 样式
+     ======================================================== */
+  .avatar-wrapper {
+    margin-bottom: 24px;
+    width: 88px; height: 88px;
+    border-radius: 26px;
+    padding: 1px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  }
+  .about-avatar-img { width: 100%; height: 100%; border-radius: 25px; object-fit: cover; }
+
+  .stage-title-large {
+    font-size: 5.5rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    margin: 0 0 45px 0;
+    background: linear-gradient(180deg, #ffffff 50%, #888888 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .skills-grid-wrapper { display: flex; justify-content: center; gap: 16px; width: 90%; max-width: 1200px; }
+
+  .unified-glass-card {
+    flex: 1;
+    padding: 35px 20px;
+    border-radius: 24px; 
+    background: rgba(255, 255, 255, 0.04); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 20px 50px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s ease, border-color 0.4s ease;
+  }
+  .unified-glass-card:hover {
+    transform: translateY(-8px) scale(1.03); 
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.2);
   }
 
-  /* 🔴 亮色模式下的质感升级 */
-  :global(.light-mode) .glass-card { 
-    background: rgba(255, 255, 255, 0.6); 
-    border: 1px solid rgba(0, 0, 0, 0.05); 
+  .card-inner-brand { font-weight: 900; font-size: 1.15rem; color: #ffffff; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .card-inner-sub { font-size: 0.75rem; color: #888888; letter-spacing: 0.15em; font-weight: 700; }
+  .manifesto-claim { margin-top: 55px; font-size: 1.15rem; font-weight: 400; color: rgba(255, 255, 255, 0.75); }
+
+  /* ========================================================
+     阶段 2 样式：Project Cloud
+     ======================================================== */
+  .mosaic-content-holder { text-align: center; margin-bottom: 40px; }
+  
+  .mosaic-main-header {
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin: 0 0 8px 0;
+    background: linear-gradient(180deg, #ffffff 50%, #888888 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  :global(.light-mode) .glass-card:hover {
-    background: rgba(255, 255, 255, 0.8);
+  
+  .mosaic-main-sub { font-size: 1rem; color: #888888; margin: 0; }
+
+  .mosaic-cloud-flexbox {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 28px;
+    max-width: 1350px;
+    padding: 0 40px;
+    width: 90%;
+  }
+
+  .mosaic-drag-card {
+    position: relative;
+    padding: 24px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.4);
+    
+    /* 🔴 完美的干净自适应定义 */
+    width: fit-content; 
+    max-width: 28rem; 
+    
+    cursor: grab;
+    user-select: none;
+    z-index: 5;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .mosaic-drag-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 25px 50px rgba(0, 0, 0, 0.5);
+  }
+
+  .card-tag { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: var(--themeColor); letter-spacing: 0.1em; margin-bottom: 6px; }
+  .card-title { font-size: 0.9rem; font-weight: 700; line-height: 1.4; color: #ffffff; margin: 0; }
+
+  /* ========================================================
+     阶段 3 样式
+     ======================================================== */
+  .aurora-laser-container { position: absolute; width: 100vw; height: 60vh; display: flex; justify-content: center; pointer-events: none; z-index: 1; }
+  
+  .laser-beam { 
+    position: absolute; 
+    width: 26vw; 
+    height: 100%; 
+    background: linear-gradient(180deg, transparent, var(--themeColor), transparent); 
+    box-shadow: 0 0 30px var(--themeColor); 
+    opacity: 0; 
+    transform: scaleX(0.005); 
+    transform-origin: center;
+  }
+  
+  .deepdive-content-holder { position: relative; z-index: 2; width: 90%; max-width: 1400px; text-align: center; }
+  
+  .deepdive-main-header {
+    font-size: 2.8rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin: 0 0 8px 0;
+    background: linear-gradient(180deg, #ffffff 50%, #888888 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .deepdive-main-sub { font-size: 1rem; color: #888888; margin-bottom: 60px; }
+  .deepdive-pillars-matrix { display: flex; gap: 24px; width: 100%; }
+  
+  .pillar-glass-block {
+    flex: 1; position: relative; padding: 40px 32px; border-radius: 24px;
+    background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3);
+    text-align: left; overflow: hidden; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .pillar-glass-block:hover { transform: translateY(-8px) scale(1.02); border-color: rgba(255, 255, 255, 0.15); }
+  .pillar-title { font-size: 1.25rem; font-weight: 700; color: #ffffff; margin: 0 0 16px 0; }
+  .pillar-desc { font-size: 0.9rem; color: #aaaaaa; line-height: 1.6; margin: 0; }
+
+  /* ========================================================
+     悬浮 Dock 岛样式
+     ======================================================== */
+  .floating-dock-island {
+    position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 999;
+    display: flex; align-items: center; padding: 8px; border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(20, 20, 20, 0.35);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255,255,255,0.05); overflow: hidden;
+  }
+  .dock-blur-bg { position: absolute; inset: 0; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: -1; }
+  .dock-buttons-row { display: flex; gap: 4px; position: relative; z-index: 2; }
+  
+  .dock-btn { 
+    background: transparent; 
+    border: none; 
+    outline: none; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    padding: 10px 22px; 
+    border-radius: 22px; 
+    cursor: pointer; 
+    color: rgba(255, 255, 255, 0.4); 
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); 
+  }
+  
+  .dock-btn .dot { 
+    display: inline-block !important;
+    width: 6px !important; 
+    height: 6px !important; 
+    border-radius: 50% !important; 
+    background: rgba(255, 255, 255, 0.3); 
+    flex-shrink: 0 !important; 
+    transition: all 0.35s ease; 
+  }
+  .dock-btn .label { font-size: 0.8rem; font-weight: 700; }
+  
+  .dock-btn:hover { 
+    color: rgba(255, 255, 255, 0.75); 
+  }
+  
+  .dock-btn.active { 
+    color: #ffffff; 
+    background: rgba(255, 255, 255, 0.09); 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05); 
+  }
+  
+  .dock-btn.active .dot { 
+    background: var(--themeColor, #015efb) !important; 
+    box-shadow: 0 0 12px var(--themeColor, #015efb) !important; 
+  }
+
+  /* ========================================================
+     日夜形态色彩光影重构 (Light Mode)
+     ======================================================== */
+  :global(.light-mode) .stage-title-large { background: linear-gradient(180deg, #1d1d1f 50%, #86868b 100%); -webkit-background-clip: text; }
+  :global(.light-mode) .manifesto-claim { color: #515154; }
+  
+  :global(.light-mode) .mosaic-main-header,
+  :global(.light-mode) .deepdive-main-header {
+    background: linear-gradient(180deg, #1d1d1f 50%, #86868b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  :global(.light-mode) .mosaic-main-sub,
+  :global(.light-mode) .deepdive-main-sub {
+    color: #515154;
+  }
+  
+  :global(.light-mode) .unified-glass-card { 
+    background: rgba(255, 255, 255, 0.65); border: 1px solid rgba(0, 0, 0, 0.05); 
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6), 0 20px 40px rgba(0, 0, 0, 0.04); 
+  }
+  :global(.light-mode) .unified-glass-card .card-inner-brand { color: #1d1d1f; }
+  :global(.light-mode) .unified-glass-card:hover { background: rgba(255, 255, 255, 0.85); }
+
+  :global(.light-mode) .mosaic-drag-card {
+    background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.04);
+  }
+  :global(.light-mode) .mosaic-drag-card .card-title { color: #1d1d1f; }
+  :global(.light-mode) .mosaic-drag-card:hover { background: rgba(255, 255, 255, 0.9); }
+
+  :global(.light-mode) .pillar-glass-block { background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6), 0 20px 40px rgba(0, 0, 0, 0.04); }
+  :global(.light-mode) .pillar-title { color: #1d1d1f; }
+  :global(.light-mode) .pillar-desc { color: #515154; }
+
+  :global(.light-mode) .floating-dock-island { background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(0, 0, 0, 0.06); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06); }
+  :global(.light-mode) .dock-btn { color: rgba(0, 0, 0, 0.4); }
+  :global(.light-mode) .dock-btn:hover { color: rgba(0, 0, 0, 0.6); }
+  :global(.light-mode) .dock-btn.active { 
+    color: #1d1d1f; 
+    background: rgba(0, 0, 0, 0.06); 
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+  }
+  :global(.light-mode) .dock-btn .dot { background: rgba(0, 0, 0, 0.2); flex-shrink: 0 !important; }
+  :global(.light-mode) .dock-btn.active .dot { 
+    background: var(--themeColor, #015efb) !important; 
+    box-shadow: 0 0 10px var(--themeColor, #015efb) !important; 
+  }
+
+  @media (max-width: 768px) {
+    .skills-grid-wrapper, .deepdive-pillars-matrix { flex-direction: column; }
+    .stage-title-large { font-size: 3.5rem; }
+    .floating-dock-island { width: 92%; padding: 4px; bottom: 20px; }
+    .dock-btn { padding: 8px 12px; } .dock-btn .label { font-size: 0.7rem; }
+    .earth-horizon-layer { top: 62vh; transform: translateX(-50%) scale(1.6); }
   }
 </style>
