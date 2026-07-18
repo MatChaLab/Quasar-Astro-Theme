@@ -193,8 +193,7 @@ mosaicHeader: {
 
 // 🔴 第四章：退休倒计时（专属文案与进度条展示）
   retirement: {
-    // 🔴 抛弃刻板的“退休”，换成更有向往感的“旷野”
-    title: "Time Horizon · 奔向旷野的倒计时",
+    title: "Retirement Countdown · 退休倒计时",
     subtitle: "不急不躁，看着数字一点点变小，离随心所欲的日子就又近了一天。",
     
     // 🔴 左侧卡片的文案：从宏大的 Legacy 变成个人的沙盒
@@ -218,7 +217,7 @@ mosaicHeader: {
 // 🔴 文本极致精简，纯粹聚焦技术构建本身
 techStack: {
     // 🔴 标题更生活化，侧重“如何构建这个数字小世界”
-    title: "Digital Construction · 我的数字底座",
+    title: "Digital Construction · 博客的数字技术栈",
     subtitle: "以极简的技术选型，支撑起每一个琐碎的灵感瞬间。",
     
     leftCard: {
@@ -245,7 +244,7 @@ techStack: {
 
   // 🔴 悬浮 Dock 岛：改为中文，风格统一
   dockLabels: [
-    { label: "我的能力", target: "0" },
+    { label: "个人能力", target: "0" },
     { label: "生活切片", target: "1" },
     { label: "成长底色", target: "2" },
     { label: "退休倒数", target: "3" },

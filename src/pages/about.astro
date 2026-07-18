@@ -4,12 +4,12 @@ import { SITE_CONFIG, ABOUT_CONFIG } from '../config';
 import Navbar from '../components/Navbar.astro';
 import Earth from '../components/Earth.astro';
 
-// 自动解析中英文标签线
+// 自動解析中英文標籤線
 const [yearEn, yearZh] = ABOUT_CONFIG.retirement.labels.year.split(' / ');
 const [monthEn, monthZh] = ABOUT_CONFIG.retirement.labels.month.split(' / ');
 const [dayEn, dayZh] = ABOUT_CONFIG.retirement.labels.day.split(' / ');
 
-// 动态拆分左侧 Bento 标题的中英文
+// 動態拆分左側 Bento 標題的中英文
 const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / ');
 ---
 
@@ -41,7 +41,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     
     <section class="story-stage active" id="stage-capabilities">
       <div class="stage-inner flex-center">
-        <div class="avatar-wrapper anim-s1-avatar">
+        <div class="avatar-wrapper margin-bottom: 24px; width: 88px; height: 88px; border-radius: 26px; padding: 1px; background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent); box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
           <img src={ABOUT_CONFIG.avatar.src} alt={ABOUT_CONFIG.avatar.alt} class="about-avatar-img" />
         </div>
         
@@ -236,14 +236,21 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
         <div class="tech-tree-wrapper">
           <div class="tech-branch-node" id="tech-main-dot"></div>
           <svg class="tech-branch-svg" viewBox="0 0 800 60" fill="none">
-            <path class="tech-line-path" id="tech-path-left" d="M 400,0 L 400,30 L 200,30 L 200,60" stroke-width="2" />
-            <path class="tech-line-path" id="tech-path-right" d="M 400,0 L 400,30 L 600,30 L 600,60" stroke-width="2" />
+            <path class="tech-line-path" id="tech-path-left" d="M 400,0 L 400,30 L 200,30 L 200,60" stroke-width="2" stroke-dasharray="260" stroke-dashoffset="260" />
+            <path class="tech-line-path" id="tech-path-right" d="M 400,0 L 400,30 L 600,30 L 600,60" stroke-width="2" stroke-dasharray="260" stroke-dashoffset="260" />
           </svg>
         </div>
 
         <div class="tech-cards-matrix">
           
           <div class="tech-twin-card tech-card-left anim-s5-left">
+            <div class="tech-inner-glow"></div>
+            
+            <svg class="tech-card-corner-logo" viewBox="0 0 85 107" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M27.5893 91.1365C22.7555 86.7178 21.3443 77.4335 23.3583 70.7072C26.8503 74.948 31.6888 76.2914 36.7005 77.0497C44.4374 78.2199 52.0358 77.7822 59.2231 74.2459C60.0453 73.841 60.8052 73.3027 61.7036 72.7574C62.378 74.714 62.5535 76.6892 62.3179 78.6996C61.7452 83.5957 59.3086 87.3778 55.4332 90.2448C53.8835 91.3916 52.2437 92.4167 50.6432 93.4979C45.7262 96.8213 44.3959 100.718 46.2435 106.386C46.2874 106.525 46.3267 106.663 46.426 107C43.9155 105.876 42.0817 104.24 40.6844 102.089C39.2086 99.8193 38.5065 97.3081 38.4696 94.5909C38.4511 93.2686 38.4511 91.9345 38.2733 90.6309C37.8391 87.4527 36.3471 86.0297 33.5364 85.9478C30.6518 85.8636 28.37 87.6469 27.7649 90.4554C27.7187 90.6707 27.6517 90.8837 27.5847 91.1341L27.5893 91.1365Z" fill="currentColor"/>
+              <path d="M0 69.5866C0 69.5866 14.3139 62.6137 28.6678 62.6137L39.4901 29.1204C39.8953 27.5007 41.0783 26.3999 42.4139 26.3999C43.7495 26.3999 44.9325 27.5007 45.3377 29.1204L56.1601 62.6137C73.1601 62.6137 84.8278 69.5866 84.8278 69.5866C84.8278 69.5866 60.5145 3.35233 60.467 3.21944C59.7692 1.2612 58.5911 0 57.0029 0H27.8274C26.2392 0 25.1087 1.2612 24.3634 3.21944C24.3108 3.34983 0 69.5866 0 69.5866Z" fill="currentColor"/>
+            </svg>
+
             <div class="tech-card-header-group">
               <span class="tech-card-meta-tag">{ABOUT_CONFIG.techStack.leftCard.tag}</span>
               <h3 class="tech-card-hero-title">
@@ -263,6 +270,12 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
           </div>
 
           <div class="tech-twin-card tech-card-right anim-s5-right">
+            <div class="tech-inner-glow"></div>
+
+            <svg class="tech-card-corner-logo gemini-logo-spark" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C12 7.523 16.477 12 22 12C16.477 12 12 16.477 12 22C12 16.477 7.523 12 2 12C7.523 12 12 7.523 12 2Z" />
+            </svg>
+
             <div class="tech-card-header-group">
               <span class="tech-card-meta-tag">{ABOUT_CONFIG.techStack.rightCard.tag}</span>
               <h3 class="tech-card-hero-title">
@@ -319,7 +332,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     const dockButtons = document.querySelectorAll('.dock-btn');
 
     // ========================================================
-    // 时钟引擎与高精度微秒级流逝渲染轴
+    // 時鐘引擎與高精度微秒級流逝渲染軸
     // ========================================================
     const retirementSection = document.getElementById('stage-retirement');
     const targetDateStr = retirementSection?.dataset.targetDate || defaultTarget;
@@ -404,7 +417,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     requestAnimationFrame(renderHighPrecisionProgress);
 
     // ========================================================
-    // 舞台流转切换总线
+    // 舞台流轉切換總線
     // ========================================================
     function animateStage0In() {
       gsap.set([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], { clearProps: "all" });
@@ -464,11 +477,12 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
         transitionTimeline.to(".retirement-content-holder", { opacity: 0, y: -20, duration: 0.25 })
                           .to([".anim-s4-left", ".anim-s4-mid", ".anim-s4-right"], { opacity: 0, y: -30, scale: 0.96, stagger: 0.03, duration: 0.3, ease: "power3.in" }, "-=0.15");
       } else if (currentStage === 4) {
-        // 🔴 退出离场时全面重置并抹清 SVG 状态，确保二次切回可以无缝重新执行动画
+        // 完美離場清空：不僅重置子節點，還要將被隱形掉的導線外殼 wrapper 完美全量還原
         transitionTimeline.to(".tech-content-holder", { opacity: 0, y: -20, duration: 0.25 })
-                          .to([".tech-tree-wrapper", ".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: 25, scale: 0.97, stagger: 0.04, duration: 0.3, ease: "power3.in" }, "-=0.15")
+                          .to([".tech-tree-wrapper", ".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: 20, scale: 0.98, duration: 0.3, ease: "power3.in" }, "-=0.15")
                           .add(() => {
-                            gsap.set([".tech-line-path", "#tech-main-dot", ".anim-s5-left", ".anim-s5-right"], { clearProps: "all" });
+                            gsap.set(["#tech-path-left", "#tech-path-right"], { strokeDashoffset: 260 });
+                            gsap.set([".tech-line-path", "#tech-main-dot", ".anim-s5-left", ".anim-s5-right", ".tech-tree-wrapper"], { clearProps: "all" });
                           });
       }
 
@@ -505,27 +519,25 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             .fromTo(".anim-s4-right", { opacity: 0, x: 35, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.75, ease: "back.out(1.1)" }, "-=0.55");
         }, "-=0.15");
       }
-      // 🔴 第五阶段：修复版流体流动绘制动效线（完全解决第2次及之后不显示的问题）
+      // 🔴 第五階段：顯式 fromTo 狀態鎖定，雙向流體分裂生長注入，完美無瑕
       else if (targetIndex === 4) {
         transitionTimeline.add(() => {
-          gsap.set([".tech-content-holder", "#tech-main-dot", ".tech-line-path", ".anim-s5-left", ".anim-s5-right"], { clearProps: "all" });
+          gsap.set([".tech-content-holder", ".tech-tree-wrapper", "#tech-main-dot", "#tech-path-left", "#tech-path-right", ".anim-s5-left", ".anim-s5-right"], { clearProps: "all" });
           
-          const pathLeft = document.getElementById('tech-path-left');
-          const pathRight = document.getElementById('tech-path-right');
-          const lenL = pathLeft ? pathLeft.getTotalLength() : 250;
-          const lenR = pathRight ? pathRight.getTotalLength() : 250;
+          gsap.killTweensOf([".tech-content-holder", ".tech-tree-wrapper", "#tech-path-left", "#tech-path-right", "#tech-main-dot", ".anim-s5-left", ".anim-s5-right"]);
           
-          // 状态强力初始化隔离
-          gsap.set([pathLeft, pathRight], { strokeDasharray: lenL, strokeDashoffset: lenL, opacity: 1 });
+          gsap.set(".tech-tree-wrapper", { opacity: 1 });
+          gsap.set(["#tech-path-left", "#tech-path-right"], { strokeDasharray: 260, strokeDashoffset: 260, opacity: 1 });
+          gsap.set("#tech-main-dot", { scale: 0, opacity: 0 });
+          gsap.set([".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: 30, scale: 0.97 });
           
           gsap.timeline()
-            .fromTo(".tech-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" })
-            .fromTo("#tech-main-dot", { opacity: 0, scale: 0 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2.2)" }, "-=0.25")
-            // 🔴 修复死板动画：采用丝滑的能量流动绘制，而非瞬间出现
-            .to([pathLeft, pathRight], { strokeDashoffset: 0, duration: 0.75, ease: "power2.inOut" }, "-=0.1")
-            // 两侧卡片顺应着生长出的导线末端由内向外位移浮现
-            .fromTo(".anim-s5-left", { opacity: 0, x: -20, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.7, ease: "power3.out" }, "-=0.35")
-            .fromTo(".anim-s5-right", { opacity: 0, x: 20, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.7, ease: "power3.out" }, "-=0.7");
+            .fromTo(".tech-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" })
+            .fromTo("#tech-main-dot", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" }, "-=0.2")
+            .fromTo("#tech-path-left", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, "-=0.1")
+            .fromTo("#tech-path-right", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, "<")
+            .fromTo(".anim-s5-left", { opacity: 0, x: -20, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.6, ease: "power3.out" }, "-=0.35")
+            .fromTo(".anim-s5-right", { opacity: 0, x: 20, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.6, ease: "power3.out" }, "-=0.55");
         }, "-=0.15");
       }
 
@@ -542,7 +554,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
 
 <style>
   /* ========================================================
-     全局布局体系
+     全局布局體系
      ======================================================== */
   :global(html), :global(body) {
     margin: 0 !important;
@@ -568,7 +580,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .stage-inner { width: 100%; height: 100%; box-sizing: border-box; }
   .flex-center { display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
-  /* 第一阶段：核心能力卡纯净毛玻璃 */
+  /* 第一階段：核心能力卡純淨毛玻璃 */
   .avatar-wrapper { margin-bottom: 24px; width: 88px; height: 88px; border-radius: 26px; padding: 1px; background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
   .about-avatar-img { width: 100%; height: 100%; border-radius: 25px; object-fit: cover; }
   .stage-title-large { font-size: 5.5rem; font-weight: 900; letter-spacing: -0.05em; margin: 0 0 45px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -579,7 +591,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .card-inner-sub { font-size: 0.75rem; color: #888888; letter-spacing: 0.15em; font-weight: 700; }
   .manifesto-claim { margin-top: 55px; font-size: 1.15rem; font-weight: 400; color: rgba(255, 255, 255, 0.75); }
 
-  /* 第二阶段 */
+  /* 第二階段 */
   .mosaic-content-holder { text-align: center; margin-bottom: 40px; }
   .mosaic-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .mosaic-main-sub { font-size: 1rem; color: #888888; margin: 0; }
@@ -589,7 +601,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .card-tag { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: var(--page-theme-color); letter-spacing: 0.1em; margin-bottom: 6px; }
   .card-title { font-size: 0.9rem; font-weight: 700; line-height: 1.4; color: #ffffff; margin: 0; }
 
-  /* 第三阶段：高级剧场级锥形聚光灯 */
+  /* 第三階段：高級劇場級錐形聚光燈 */
   .spotlight-container { 
     position: absolute; inset: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; pointer-events: none; z-index: 1; 
   }
@@ -624,12 +636,12 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .pillar-title { font-size: 1.25rem; font-weight: 700; color: #ffffff; margin: 0 0 16px 0; }
   .pillar-desc { font-size: 0.9rem; color: #aaaaaa; line-height: 1.6; margin: 0; }
 
-  /* 第四阶段置顶看板 */
+  /* 第四階段置頂看板 */
   .retirement-content-holder { text-align: center; margin-bottom: 35px; width: 100%; }
   .retirement-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .retirement-main-sub { font-size: 1rem; color: #888888; margin: 0; }
 
-  /* 第四阶段 Bento 核心网格 */
+  /* 第四階段 Bento 核心網格 */
   .bento-container {
     display: grid;
     grid-template-columns: 1.1fr 1.2fr 1.7fr;
@@ -711,7 +723,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     width: 100%; height: 1px; background: rgba(255, 255, 255, 0.08); margin: 18px 0 14px 0; 
   }
 
-  /* 压舱石进度条 */
+  /* 壓艙石進度條 */
   .bento-progress-anchor { margin-top: 2rem; width: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
   .progress-status-row { width: 100%; display: flex; justify-content: space-between; align-items: center; }
   .progress-mini-label { font-size: 0.65rem; font-weight: 700; color: rgba(255, 255, 255, 0.25); text-transform: uppercase; letter-spacing: 0.08em; }
@@ -720,13 +732,13 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .progress-bar-fill { height: 100%; width: 0%; background: var(--page-theme-color); box-shadow: 0 0 10px var(--page-theme-color); border-radius: 2px; }
 
   /* ========================================================
-     🔴 第五阶段：技术栈矩阵看齐前四章（Dock岛质感高级微调版）
+     🔴 第五階段：技術棧矩陣（看齊第三章高級發光折射艙 + 1:1 色彩平權）
      ======================================================== */
   .tech-content-holder { text-align: center; margin-bottom: 20px; width: 100%; }
   .tech-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .tech-main-sub { font-size: 1rem; color: #888888; margin: 0; }
 
-  /* 数字化树状导线网络 */
+  /* 數位化樹狀導線網絡 */
   .tech-tree-wrapper {
     position: relative; width: 100%; max-width: 1200px; height: 50px; 
     display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
@@ -741,56 +753,84 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     width: 100%; height: 100%; pointer-events: none; overflow: visible;
   }
   .tech-line-path {
-    stroke: color-mix(in srgb, var(--page-theme-color) 35%, rgba(255, 255, 255, 0.1));
-    transition: stroke 0.4s ease;
+    stroke: color-mix(in srgb, var(--page-theme-color) 35%, rgba(255, 255, 255, 0.12));
   }
 
   .tech-cards-matrix {
     display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
-    width: 90%; max-width: 1200px; height: 320px; box-sizing: border-box;
+    width: 90%; max-width: 1200px; height: 280px; box-sizing: border-box;
   }
 
-  /* 🔴 核心质感统一：对齐前四章的内敛圆角、无突兀外投影，享受纯血毛玻璃折射 */
+  /* 1:1 像素級同步第三章：剔除一切多餘外投影，全量承接純血發光毛玻璃 */
   .tech-twin-card {
-    border-radius: 28px; padding: 35px; box-sizing: border-box;
+    border-radius: 24px; padding: 35px 32px; box-sizing: border-box;
     display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
-    position: relative; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 25px 50px rgba(0, 0, 0, 0.3);
+    position: relative; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+  .tech-twin-card:hover { transform: translateY(-6px) scale(1.015); }
 
-  /* 🔴 精准融入专属核心颜色：12%的主题色低保和浸润，搭配55%的暗夜黑基底（绝非脏蓝色） */
-  .tech-card-left {
-    background: color-mix(in srgb, var(--page-theme-color) 12%, rgba(20, 20, 20, 0.55));
-    border: 1px solid color-mix(in srgb, var(--page-theme-color) 25%, rgba(255, 255, 255, 0.08));
+  /* 第三章高階內發光流光層 */
+  .tech-inner-glow { position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: 0.65; }
+
+  /* 右上角官方高精度矢量 SVG 絕對定位（顏色與標籤完全共生） */
+  .tech-card-corner-logo {
+    position: absolute; top: 35px; right: 35px; width: 26px; height: 26px; 
+    pointer-events: none; z-index: 5; opacity: 0.3; transition: opacity 0.3s ease, transform 0.3s ease;
   }
+  .tech-twin-card:hover .tech-card-corner-logo { opacity: 0.85; transform: scale(1.05); }
+
+  /* 核心通透優化：左側卡片底色全量剔除混色，改用極高透明底，由內發光艙渲染主題色，絕不再發悶 */
+  .tech-card-left {
+    background: rgba(15, 15, 18, 0.45);
+    border: 1px solid color-mix(in srgb, var(--page-theme-color) 40%, rgba(255, 255, 255, 0.1));
+    color: #ffffff;
+  }
+  /* 透過雙向徑向漸變流光打亮玻璃內部，兼顧透明度與主題色彩飽和度 */
+  .tech-card-left .tech-inner-glow {
+    background: radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--page-theme-color) 25%, transparent), transparent 70%),
+                radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--page-theme-color) 12%, transparent), transparent 60%);
+  }
+  /* 左徽標顏色：與下面的 meta-tag 1:1 絕對平權，完美綻放主題色 */
+  .tech-card-left .tech-card-corner-logo { color: var(--page-theme-color); }
   
-  /* 🔴 霜白卡片看齐 Dock 岛：同步使用微晶黑底，仅保留柔和霜白边框线，透光而沉稳 */
+  /* 右卡片：深色模式下的清冷高透霜白毛玻璃艙 */
   .tech-card-right {
-    background: rgba(20, 20, 20, 0.55);
+    background: rgba(15, 15, 18, 0.45);
     border: 1px solid rgba(255, 255, 255, 0.12);
   }
-
-  .tech-card-header-group { display: flex; flex-direction: column; text-align: left; }
-  .tech-card-meta-tag { font-size: 0.65rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
-  .tech-card-left .tech-card-meta-tag { color: color-mix(in srgb, var(--page-theme-color) 70%, #ffffff); }
-  .tech-card-right .tech-card-meta-tag { color: rgba(255, 255, 255, 0.4); }
-
-  .tech-card-hero-title { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 4px 0; line-height: 1.1; color: #ffffff; }
-  .tech-card-hero-zh { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; margin-left: 2px; color: rgba(255, 255, 255, 0.6); }
-
-  .tech-card-framework-tag { font-size: 0.9rem; font-weight: 700; margin-top: 2px; color: #ffffff; }
-
-  .tech-card-body-group { display: flex; flex-direction: column; gap: 12px; width: 100%; text-align: left; margin-top: 16px; }
-  .tech-card-question { font-size: 0.8rem; font-weight: 500; margin: 0; font-family: monospace; color: rgba(255, 255, 255, 0.4); }
-
-  /* 结构化白皮书文档流 */
-  .tech-structured-doc {
-    border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 6px;
-    background: rgba(0, 0, 0, 0.15); border: 1px solid rgba(255, 255, 255, 0.03);
+  .tech-card-right .tech-inner-glow {
+    background: radial-gradient(circle at 75% 15%, rgba(255, 255, 255, 0.08), transparent 65%);
   }
-  .doc-text-paragraph { font-size: 0.85rem; font-weight: 400; color: rgba(255, 255, 255, 0.75); line-height: 1.6; margin: 0; text-align: left; }
+  /* 右徽標顏色：與右側 meta-tag 的高級霜白色完美共振 */
+  .tech-card-right .tech-card-corner-logo { color: rgba(255, 255, 255, 0.45); }
 
-  /* Dock 导航岛 */
+  @keyframes geminiSparkle { 0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; } 50% { transform: scale(1.08) rotate(5deg); opacity: 0.85; } }
+  .tech-twin-card:hover .gemini-logo-spark { animation: geminiSparkle 2.5s infinite ease-in-out; }
+
+  .tech-card-header-group { display: flex; flex-direction: column; text-align: left; position: relative; z-index: 2; }
+  
+  /* 左側標籤釋放最純粹的主題色，拒絕任何淡化！ */
+  .tech-card-left .tech-card-meta-tag { color: var(--page-theme-color) !important; font-weight: 900; }
+  .tech-card-right .tech-card-meta-tag { color: rgba(255, 255, 255, 0.45); }
+  
+  .tech-card-meta-tag { font-size: 0.65rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .tech-card-hero-title { font-size: 2.3rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 2px 0; line-height: 1.1; color: #ffffff; }
+  .tech-card-hero-zh { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; margin-left: 2px; color: rgba(255, 255, 255, 0.5); }
+  .tech-card-framework-tag { font-size: 0.88rem; font-weight: 700; margin-top: 1px; color: #ffffff; opacity: 0.9; }
+
+  .tech-card-body-group { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; margin-top: 12px; position: relative; z-index: 2; }
+  .tech-card-question { font-size: 0.78rem; font-weight: 500; margin: 0; font-family: monospace; color: rgba(255, 255, 255, 0.35); }
+
+  /* 結構化文檔流 */
+  .tech-structured-doc {
+    border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px;
+    background: rgba(0, 0, 0, 0.12); border: 1px solid rgba(255, 255, 255, 0.02);
+  }
+  .doc-text-paragraph { font-size: 0.84rem; font-weight: 400; color: rgba(255, 255, 255, 0.75); line-height: 1.6; margin: 0; text-align: left; }
+
+  /* Dock 導航島 */
   .floating-dock-island {
     position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 999;
     display: flex; align-items: center; padding: 8px; border-radius: 30px;
@@ -807,12 +847,11 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .dock-btn.active .dot { background: var(--page-theme-color) !important; box-shadow: 0 0 12px var(--page-theme-color) !important; }
 
   /* ========================================================
-     Light Mode 明亮形态全面调优轴
+     Light Mode 明亮形態全面調優軸（徹底將暗色模式與淺色拉開反差）
      ======================================================== */
   :global(.light-mode) .stage-title-large, :global(.light-mode) .mosaic-main-header, :global(.light-mode) .deepdive-main-header, :global(.light-mode) .retirement-main-header, :global(.light-mode) .tech-main-header { background: linear-gradient(180deg, #1d1d1f 50%, #86868b 100%); -webkit-background-clip: text; }
   :global(.light-mode) .manifesto-claim, :global(.light-mode) .mosaic-main-sub, :global(.light-mode) .deepdive-main-sub, :global(.light-mode) .retirement-main-sub, :global(.light-mode) .tech-main-sub { color: #515154; }
   
-  /* 满血毛玻璃平权 */
   :global(.light-mode) .unified-glass-card, 
   :global(.light-mode) .mosaic-drag-card, 
   :global(.light-mode) .pillar-glass-block, 
@@ -829,25 +868,37 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   :global(.light-mode) .pillar-desc, :global(.light-mode) .bento-left-desc { color: #515154; }
   :global(.light-mode) .countdown-value { color: #1d1d1f; text-shadow: none; }
   
-  /* 🔴 明亮模式下的技术卡片光影平衡 */
+  /* 明亮模式技術矩陣平權（高精度透光反光適應） */
   :global(.light-mode) .tech-card-left {
-    background: color-mix(in srgb, var(--page-theme-color) 12%, rgba(255, 255, 255, 0.55)) !important;
+    background: color-mix(in srgb, var(--page-theme-color) 8%, rgba(255, 255, 255, 0.45)) !important;
     border: 1px solid color-mix(in srgb, var(--page-theme-color) 25%, rgba(0, 0, 0, 0.06)) !important;
   }
   :global(.light-mode) .tech-card-right {
-    background: rgba(255, 255, 255, 0.55) !important;
+    background: rgba(255, 255, 255, 0.45) !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
   }
+  :global(.light-mode) .tech-twin-card {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.02) !important;
+  }
   :global(.light-mode) .tech-card-hero-title, :global(.light-mode) .tech-card-framework-tag { color: #1d1d1f !important; }
-  :global(.light-mode) .tech-card-left .tech-card-meta-tag { color: var(--page-theme-color) !important; }
-  :global(.light-mode) .tech-card-right .tech-card-meta-tag { color: #86868b !important; }
-  :global(.light-mode) .tech-card-hero-zh, :global(.light-mode) .tech-card-question { color: #515154 !important; }
   
-  :global(.light-mode) .tech-structured-doc { background: rgba(255, 255, 255, 0.5) !important; border-color: rgba(0,0,0,0.04) !important; }
+  /* 明亮模式下徽標色彩平權同步對齊 */
+  :global(.light-mode) .tech-card-left .tech-card-meta-tag, 
+  :global(.light-mode) .tech-card-left .tech-card-corner-logo { color: var(--page-theme-color) !important; }
+  
+  :global(.light-mode) .tech-card-right .tech-card-meta-tag,
+  :global(.light-mode) .tech-card-right .tech-card-corner-logo { color: #86868b !important; }
+  
+  :global(.light-mode) .tech-card-hero-zh, :global(.light-mode) .tech-card-question { color: #515154 !important; }
+  :global(.light-mode) .tech-card-corner-logo { opacity: 0.35 !important; }
+  :global(.light-mode) .tech-twin-card:hover .tech-card-corner-logo { opacity: 0.75 !important; }
+  
+  :global(.light-mode) .tech-structured-doc { background: rgba(255, 255, 255, 0.45) !important; border-color: rgba(0,0,0,0.04) !important; }
   :global(.light-mode) .doc-text-paragraph { color: #2c2c2e !important; }
-  :global(.light-mode) .tech-line-path { stroke: color-mix(in srgb, var(--page-theme-color) 35%, rgba(0, 0, 0, 0.1)) !important; }
+  :global(.light-mode) .tech-line-path { stroke: color-mix(in srgb, var(--page-theme-color) 35%, rgba(0, 0, 0, 0.12)) !important; }
 
-  /* 浅色投射平权 */
+  /* 淺色投射平權 */
+  .floating-dock-island { background: rgba(20, 20, 20, 0.35); }
   :global(.light-mode) .spotlight-container { mix-blend-mode: normal; }
   :global(.light-mode) .spotlight {
     background: conic-gradient(at top center,
