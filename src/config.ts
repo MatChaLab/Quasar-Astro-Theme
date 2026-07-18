@@ -215,11 +215,40 @@ mosaicHeader: {
     }
   },
 
+// 🔴 文本极致精简，纯粹聚焦技术构建本身
+techStack: {
+    // 🔴 标题更生活化，侧重“如何构建这个数字小世界”
+    title: "Digital Construction · 我的数字底座",
+    subtitle: "以极简的技术选型，支撑起每一个琐碎的灵感瞬间。",
+    
+    leftCard: {
+      tag: "FRAMEWORK From",
+      title: "Astro",
+      subTitle: "软件框架",
+      framework: "Astro · 孤岛架构",
+      question: "为什么选择 Astro？",
+      contentLines: [
+     "博客最不该被繁重的代码拖累。选择 Astro，是为了在加载页面时只留下纯粹的文字与画面，让阅读感轻快如初。"
+]
+    },
+    rightCard: {
+      tag: "CODING With",
+      title: "Gemini",
+      subTitle: "智慧模型",
+      framework: "Gemini · 创作搭档",
+      question: "AI 如何参与创作？",
+      contentLines: [
+        "既是博客的底层逻辑构建师，也是灵感碎片整理者。从辅助代码逻辑推演，到润色生活随笔中的情绪颗粒，它平衡了我的理科思维与文科表达。"
+      ]
+    }
+  },
+
   // 🔴 悬浮 Dock 岛：改为中文，风格统一
   dockLabels: [
     { label: "我的能力", target: "0" },
     { label: "生活切片", target: "1" },
     { label: "成长底色", target: "2" },
-    { label: "退休倒数", target: "3" }
+    { label: "退休倒数", target: "3" },
+    { label: "技术栈", target: "4" }
   ]
 };
