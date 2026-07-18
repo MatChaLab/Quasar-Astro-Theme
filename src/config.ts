@@ -29,8 +29,6 @@ export const NAVBAR_CONFIG = {
   searchBox: "🔍 探索 Singyan Blog...",
   navItems: [
     { label: "Projects", url: "/projects" },
-    { label: "2", url: "/2" },
-    { label: "3", url: "/3" },
     { label: "相册", url: "/albums" },
     { label: "关于", url: "/about" }
   ]
@@ -193,10 +191,35 @@ mosaicHeader: {
     ]
   },
 
+// 🔴 第四章：退休倒计时（专属文案与进度条展示）
+  retirement: {
+    // 🔴 抛弃刻板的“退休”，换成更有向往感的“旷野”
+    title: "Time Horizon · 奔向旷野的倒计时",
+    subtitle: "不急不躁，看着数字一点点变小，离随心所欲的日子就又近了一天。",
+    
+    // 🔴 左侧卡片的文案：从宏大的 Legacy 变成个人的沙盒
+    leftTitle: "Time Sandbox / 时间沙盒",
+    description: "在属于自己的时间沙盒里，看日子如细沙般悄然流淌，而每一粒落下的数字，都是在奔向自由的脚步。",
+    
+    startDate: "2006-08-21T00:00:00",     
+    targetDate: "2069-08-21T00:00:00",     
+    
+    // 🔴 结合机械翻页钟的复古感，加入当下的陪伴感
+    clockCaption: "MECHANICAL FLIP TICKER · 听，时间落下的声音",
+    
+    // 🔴 修正生硬的中文，让字形在 UI 界面上更舒展、更地道
+    labels: {
+      year: "Years Left / 剩余年岁",
+      month: "Months Left / 剩余月份",
+      day: "Days Left / 剩余天数"
+    }
+  },
+
   // 🔴 悬浮 Dock 岛：改为中文，风格统一
   dockLabels: [
     { label: "我的能力", target: "0" },
     { label: "生活切片", target: "1" },
-    { label: "成长底色", target: "2" }
+    { label: "成长底色", target: "2" },
+    { label: "退休倒数", target: "3" }
   ]
 };
