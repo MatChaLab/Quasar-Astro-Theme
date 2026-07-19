@@ -46,7 +46,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
          ======================================================== -->
     <section class="story-stage active" id="stage-capabilities">
       <div class="stage-inner flex-center">
-        <div class="avatar-wrapper">
+        <div class="avatar-wrapper anim-s1-avatar">
           <img src={ABOUT_CONFIG.avatar.src} alt={ABOUT_CONFIG.avatar.alt} class="about-avatar-img" />
         </div>
         
@@ -335,7 +335,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     </section>
 
     <!-- ========================================================
-         🔴 階段 6：聯繫我 (Contact Section) - 100% 完美解耦重磨砂晶體艙
+         🔴 階段 6：聯繫我 (Contact Section) - 偽類隔離超穩晶體艙
          ======================================================== -->
     <section class="story-stage" id="stage-contact">
       <div class="stage-inner flex-center">
@@ -503,15 +503,16 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     requestAnimationFrame(renderHighPrecisionProgress);
 
     // ========================================================
-    // 舞台流轉切換生命週期控制鏈
+    // 🔴 核心重構：第一章動畫封裝與首屏加載秩序器
     // ========================================================
-    function animateStage0In() {
-      gsap.set([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], { clearProps: "all" });
-      gsap.timeline()
-        .fromTo(".anim-s1-avatar", { opacity: 0, scale: 0.4, y: 35 }, { opacity: 1, scale: 1, y: 0, duration: 1.1, ease: "back.out(1.4)" })
-        .fromTo(".anim-s1-title", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.9, ease: "expo.out" }, "-=0.8")
-        .fromTo(".anim-s1-card", { opacity: 0, y: 45, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, stagger: 0.06, duration: 1.0, ease: "back.out(1.3)" }, "-=0.6")
-        .fromTo(".anim-s1-claim", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, "-=0.45");
+    function playStage0Animation(timeline) {
+      // 如果傳入了主時間軸（switchStage 調用），就挂載在主時間軸上；如果是首屏加載，則創建獨立時間軸立即執行
+      const t = timeline || gsap.timeline();
+      
+      t.fromTo(".anim-s1-avatar", { opacity: 0, scale: 0.4, y: 35 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.4)" })
+       .fromTo(".anim-s1-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, "-=0.4")
+       .fromTo(".anim-s1-card", { opacity: 0, y: 35, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, stagger: 0.04, duration: 0.6, ease: "back.out(1.3)" }, "-=0.3")
+       .fromTo(".anim-s1-claim", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, "-=0.25");
     }
 
     function initDragEngine() {
@@ -543,113 +544,104 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       const outboundSection = stages[currentStage];
       const inboundSection = stages[targetIndex];
 
+      // 秩序鎖：切換瞬間將整個導航島鎖死，防止連續高頻點擊導致多重動畫異步踩踏
+      const dock = document.querySelector('.floating-dock-island');
+      if (dock) dock.style.pointerEvents = 'none';
+
       dockButtons.forEach((btn, idx) => btn.classList.toggle('active', idx === targetIndex));
-      inboundSection.classList.add('active');
       
+      // 建立一個嚴格序列化的主時間軸
       const transitionTimeline = gsap.timeline({
         onComplete: () => {
-          outboundSection.classList.remove('active');
-          gsap.set(outboundSection, { clearProps: "all" }); 
+          // 新章節完全順利進場後，釋放秩序鎖，恢復導航點擊
+          if (dock) dock.style.pointerEvents = 'auto';
         }
       });
 
+      // --------------------------------------------------------
+      // 【第一階段】舊章節 (Outbound) 全量部件執行流暢的“退場清場”
+      // --------------------------------------------------------
       if (currentStage === 0) {
-        transitionTimeline.to([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], { opacity: 0, y: -35, scale: 0.96, stagger: 0.03, duration: 0.35, ease: "power4.in" });
+        transitionTimeline.to([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], { opacity: 0, y: -30, scale: 0.95, stagger: 0.02, duration: 0.3, ease: "power3.in" });
       } else if (currentStage === 1) {
-        transitionTimeline.to(".mosaic-content-holder", { opacity: 0, y: -15, duration: 0.25 }).to(".mosaic-drag-card", { opacity: 0, scale: 0.7, y: -30, stagger: 0.02, duration: 0.3, ease: "power4.in" }, "-=0.2");
+        transitionTimeline.to(".mosaic-content-holder", { opacity: 0, y: -15, duration: 0.2 })
+                          .to(".mosaic-drag-card", { opacity: 0, scale: 0.75, y: -25, stagger: 0.02, duration: 0.25, ease: "power3.in" }, "-=0.15");
       } else if (currentStage === 2) {
-        transitionTimeline.to(".pillar-glass-block", { opacity: 0, y: 30, stagger: 0.03, duration: 0.3, ease: "power3.in" }).to(".deepdive-content-holder, .spotlight-container", { opacity: 0, duration: 0.25 }, "-=0.15");
+        transitionTimeline.to(".pillar-glass-block", { opacity: 0, y: -25, stagger: 0.02, duration: 0.25, ease: "power3.in" })
+                          .to(".deepdive-content-holder, .spotlight-container", { opacity: 0, duration: 0.2 }, "-=0.15");
       } else if (currentStage === 3) {
-        transitionTimeline.to(".retirement-content-holder", { opacity: 0, y: -20, duration: 0.25 })
-                          .to([".anim-s4-left", ".anim-s4-mid", ".anim-s4-right"], { opacity: 0, y: -30, scale: 0.96, stagger: 0.03, duration: 0.3, ease: "power3.in" }, "-=0.15");
+        transitionTimeline.to(".retirement-content-holder", { opacity: 0, y: -15, duration: 0.2 })
+                          .to([".anim-s4-left", ".anim-s4-mid", ".anim-s4-right"], { opacity: 0, y: -25, scale: 0.95, stagger: 0.02, duration: 0.25, ease: "power3.in" }, "-=0.15");
       } else if (currentStage === 4) {
-        transitionTimeline.to(".tech-content-holder", { opacity: 0, y: -20, duration: 0.25 })
-                          .to([".tech-tree-wrapper", ".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: 20, scale: 0.98, duration: 0.3, ease: "power3.in" }, "-=0.15")
-                          .add(() => {
-                            gsap.set(["#tech-path-left", "#tech-path-right"], { strokeDashoffset: 260 });
-                            gsap.set([".tech-line-path", "#tech-main-dot", ".anim-s5-left", ".anim-s5-right", ".tech-tree-wrapper"], { clearProps: "all" });
-                          });
+        transitionTimeline.to(".tech-content-holder", { opacity: 0, y: -15, duration: 0.2 })
+                          .to([".tech-tree-wrapper", ".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: -25, scale: 0.95, duration: 0.25, ease: "power3.in" }, "-=0.15");
       } else if (currentStage === 5) {
-        // 離場重構：將解耦的卡片本體和內部元素一同完美淡出清空
-        transitionTimeline.to(".contact-content-holder", { opacity: 0, y: -20, duration: 0.25 })
-                          .to([".anim-s6-card", ".anim-s6-reward"], { opacity: 0, duration: 0.25 }, "-=0.15")
-                          .to([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"], { opacity: 0, y: 30, duration: 0.25 }, "-=0.25")
-                          .add(() => {
-                            gsap.set([".anim-s6-card", ".anim-s6-reward", ".contact-content-holder", ".social-icon-wrapper", ".social-name", ".qr-code-wrapper", ".reward-caption"], { clearProps: "all" });
-                          });
+        transitionTimeline.to(".contact-content-holder", { opacity: 0, y: -15, duration: 0.2 })
+                          .to([".anim-s6-card", ".anim-s6-reward"], { opacity: 0, duration: 0.2 }, "-=0.15")
+                          .to([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"], { opacity: 0, y: -20, duration: 0.2 }, "-=0.2");
       }
 
+      // --------------------------------------------------------
+      // 【第二階段】神聖舞台交接點 (Strict Out-In Swap)
+      // --------------------------------------------------------
+      // 當且僅當上面的退場動畫完全跑完、舊圖層100%消失在文檔流時，才切換激活類
+      transitionTimeline.add(() => {
+        outboundSection.classList.remove('active');
+        gsap.set(outboundSection, { clearProps: "all" }); // 徹底擦除舊內聯樣式緩衝
+        
+        inboundSection.classList.add('active'); // 在乾淨的文檔流中激活新章節
+      });
+
+      // --------------------------------------------------------
+      // 【第三階段】新章節 (Inbound) 組件完美有序地拉開進場序幕
+      // --------------------------------------------------------
       if (targetIndex === 0) {
-        transitionTimeline.add(() => { animateStage0In(); }, "-=0.15");
+        playStage0Animation(transitionTimeline); // 🔴 切換回第一章時調用複用函數
       } 
       else if (targetIndex === 1) {
-        transitionTimeline.add(() => {
-          gsap.set([".mosaic-content-holder", ".mosaic-drag-card"], { clearProps: "all" });
-          gsap.timeline()
-            .fromTo(".mosaic-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" })
-            .fromTo(".mosaic-drag-card", { opacity: 0, scale: 0.75, y: 40, rotation: 0 }, { opacity: 1, scale: 1, y: 0, rotation: (i, t) => parseFloat(t.getAttribute('data-rot')) || 0, stagger: 0.04, duration: 0.9, ease: "back.out(1.3)" }, "-=0.4");
-        }, "-=0.15");
+        transitionTimeline.fromTo(".mosaic-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" })
+                          .fromTo(".mosaic-drag-card", { opacity: 0, scale: 0.8, y: 30, rotation: 0 }, { opacity: 1, scale: 1, y: 0, rotation: (i, t) => parseFloat(t.getAttribute('data-rot')) || 0, stagger: 0.04, duration: 0.7, ease: "back.out(1.2)" }, "-=0.35");
       } 
       else if (targetIndex === 2) {
-        transitionTimeline.add(() => {
-          gsap.set([".spotlight-container", ".spotlight", ".deepdive-content-holder", ".pillar-glass-block"], { clearProps: "all" });
-          gsap.timeline()
-            .fromTo(".spotlight-container", { opacity: 0 }, { opacity: 1, duration: 0.3 })
-            .fromTo("#spotlight-1", { x: 0, scale: 0.7 }, { x: -window.innerWidth * 0.28, scale: 1, duration: 0.85, ease: "power4.out" })
-            .fromTo("#spotlight-3", { x: 0, scale: 0.7 }, { x: window.innerWidth * 0.28, scale: 1, duration: 0.85, ease: "power4.out" }, "-=0.85")
-            .fromTo(".spotlight", { opacity: 0 }, { opacity: 0.45, stagger: 0.04, duration: 0.7, ease: "power2.out" }, "-=0.65")
-            .fromTo(".deepdive-content-holder", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "expo.out" }, "-=0.4")
-            .fromTo(".pillar-glass-block", { opacity: 0, y: 35, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, stagger: 0.06, duration: 0.8, ease: "back.out(1.3)" }, "-=0.25");
-        }, "-=0.18");
+        transitionTimeline.fromTo(".spotlight-container", { opacity: 0 }, { opacity: 1, duration: 0.25 })
+                          .fromTo("#spotlight-1", { x: 0, scale: 0.7 }, { x: -window.innerWidth * 0.28, scale: 1, duration: 0.7, ease: "power3.out" }, "-=0.25")
+                          .fromTo("#spotlight-3", { x: 0, scale: 0.7 }, { x: window.innerWidth * 0.28, scale: 1, duration: 0.7, ease: "power3.out" }, "-=0.7")
+                          .fromTo(".spotlight", { opacity: 0 }, { opacity: 0.45, stagger: 0.03, duration: 0.5, ease: "power2.out" }, "-=0.5")
+                          .fromTo(".deepdive-content-holder", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, "-=0.4")
+                          .fromTo(".pillar-glass-block", { opacity: 0, y: 30, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, stagger: 0.05, duration: 0.65, ease: "back.out(1.2)" }, "-=0.25");
       }
       else if (targetIndex === 3) {
-        transitionTimeline.add(() => {
-          gsap.set([".retirement-content-holder", ".anim-s4-left", ".anim-s4-mid", ".anim-s4-right"], { clearProps: "all" });
-          gsap.timeline()
-            .fromTo(".retirement-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" })
-            .fromTo(".anim-s4-left", { opacity: 0, x: -35, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.7, ease: "expo.out" }, "-=0.45")
-            .fromTo(".anim-s4-mid", { opacity: 0, y: 25, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, stagger: 0.05, duration: 0.7, ease: "back.out(1.2)" }, "-=0.5")
-            .fromTo(".anim-s4-right", { opacity: 0, x: 35, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.75, ease: "back.out(1.1)" }, "-=0.55");
-        }, "-=0.15");
+        transitionTimeline.fromTo(".retirement-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" })
+                          .fromTo(".anim-s4-left", { opacity: 0, x: -30, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.55, ease: "power3.out" }, "-=0.35")
+                          .fromTo(".anim-s4-mid", { opacity: 0, y: 20, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, stagger: 0.04, duration: 0.55, ease: "back.out(1.2)" }, "-=0.4")
+                          .fromTo(".anim-s4-right", { opacity: 0, x: 30, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.6, ease: "back.out(1.1)" }, "-=0.45");
       }
       else if (targetIndex === 4) {
         transitionTimeline.add(() => {
-          gsap.set([".tech-content-holder", ".tech-tree-wrapper", "#tech-main-dot", "#tech-path-left", "#tech-path-right", ".anim-s5-left", ".anim-s5-right"], { clearProps: "all" });
-          gsap.killTweensOf([".tech-content-holder", ".tech-tree-wrapper", "#tech-path-left", "#tech-path-right", "#tech-main-dot", ".anim-s5-left", ".anim-s5-right"]);
-          
           gsap.set(".tech-tree-wrapper", { opacity: 1 });
           gsap.set(["#tech-path-left", "#tech-path-right"], { strokeDasharray: 260, strokeDashoffset: 260, opacity: 1 });
           gsap.set("#tech-main-dot", { scale: 0, opacity: 0 });
-          gsap.set([".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: 30, scale: 0.97 });
-          
-          gsap.timeline()
-            .fromTo(".tech-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "expo.out" })
-            .fromTo("#tech-main-dot", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" }, "-=0.2")
-            .fromTo("#tech-path-left", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, "-=0.1")
-            .fromTo("#tech-path-right", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, "<")
-            .fromTo(".anim-s5-left", { opacity: 0, x: -20, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.6, ease: "power3.out" }, "-=0.35")
-            .fromTo(".anim-s5-right", { opacity: 0, x: 20, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.6, ease: "power3.out" }, "-=0.55");
-        }, "-=0.15");
+          gsap.set([".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: 20, scale: 0.97 });
+        })
+        .fromTo(".tech-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" })
+        .fromTo("#tech-main-dot", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" }, "-=0.2")
+        .fromTo("#tech-path-left", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.55, ease: "power2.inOut" }, "-=0.05")
+        .fromTo("#tech-path-right", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.55, ease: "power2.inOut" }, "<")
+        .fromTo(".anim-s5-left", { opacity: 0, x: -15, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "power3.out" }, "-=0.25")
+        .fromTo(".anim-s5-right", { opacity: 0, x: 15, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "power3.out" }, "-=0.4");
       }
       else if (targetIndex === 5) {
-        // 🔴🔴 終極徹底修正點：卡片底座完全移出 3D 與位移動畫軸！
-        gsap.set([".anim-s6-card", ".anim-s6-reward"], { clearProps: "all" });
-        gsap.set([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"], { clearProps: "all" });
-        
-        gsap.timeline()
-          .fromTo(".contact-content-holder", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" })
-          // 🔴 1. 卡片底座只進行純粹的不透明度淡入，顯式宣告 force3D: false。雷打不動，全程100%留在常規層，30px 毛玻璃從第 1 毫秒起完美鎖死！
-          .fromTo([".anim-s6-card", ".anim-s6-reward"], 
-            { opacity: 0 }, 
-            { opacity: 1, duration: 0.45, ease: "power2.out", force3D: false },
-            "-=0.4"
-          )
-          // 🔴 2. 只有不包含毛玻璃的內部核心內容元素進行 y 軸上滑與 stagger 順序回彈，視覺張力拉滿，且完全不連累底座！
-          .fromTo([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"],
-            { opacity: 0, y: 35 },
-            { opacity: 1, y: 0, stagger: 0.03, duration: 0.8, ease: "back.out(1.4)" },
-            "-=0.35"
-          );
+        transitionTimeline.fromTo(".contact-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" })
+                          .fromTo([".anim-s6-card", ".anim-s6-reward"], 
+                            { opacity: 0 }, 
+                            { opacity: 1, duration: 0.4, ease: "power2.out", force3D: false },
+                            "-=0.3"
+                          )
+                          .fromTo([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"],
+                            { opacity: 0, y: 25 },
+                            { opacity: 1, y: 0, stagger: 0.02, duration: 0.65, ease: "back.out(1.3)" },
+                            "-=0.25"
+                          );
       }
 
       currentStage = targetIndex;
@@ -660,6 +652,12 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
         switchStage(parseInt(e.currentTarget.dataset.target, 10));
       });
     });
+
+    // --------------------------------------------------------
+    // 🔴 首次進入頁面的生命周期執行鉤子
+    // --------------------------------------------------------
+    // 當頁面加載完成、全屏遮罩移出時，立即手動啟動第一章的開場動效，補全死角
+    playStage0Animation();
   });
 </script>
 
@@ -714,7 +712,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
 
   /* 第三階段：自我進化內核聚光燈（同步升級：30px超強毛玻璃深度） */
   .spotlight-container { 
-    position: absolute; inset: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; pointer-events: none; z-index: 1; 
+    position: absolute; inset: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; pointer-events: none; z-1; 
   }
   .spotlight { 
     position: absolute; top: -10vh; width: 75vw; height: 115vh; 
@@ -819,7 +817,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .doc-text-paragraph { font-size: 0.84rem; font-weight: 400; color: rgba(255, 255, 255, 0.75); line-height: 1.6; margin: 0; text-align: left; }
 
   /* ========================================================
-     🔴 階段 6：聯繫我（1:1 像素級絕對同步第三章：重度加厚霧面結晶核樣式表）
+     🔴 階段 6：聯繫我（偽類防污染晶體艙樣式表）
      ======================================================== */
   .contact-content-holder { text-align: center; margin-bottom: 35px; width: 100%; }
   .contact-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -837,61 +835,55 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     width: 100%;
   }
 
-  .social-glass-card {
+  .social-glass-card, .wechat-reward-card {
     text-decoration: none; border-radius: 22px; padding: 26px 20px;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-    /* 像素級對齊：飽和度拉高至 0.72（更黑更深邃），毛玻璃直接狂飆至與第三章同等恐怖的 30px 超重度模糊 */
-    background: rgba(16, 16, 18, 0.72); 
+    position: relative;
+    background: transparent !important; 
     border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(30px); 
-    -webkit-backdrop-filter: blur(30px);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3);
-    /* 核心對齊：移除了 transform 的過渡，防止 Hover 的瞬間硬件加速重新激活破壞 backdrop-filter */
-    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .wechat-reward-card { border-radius: 26px; padding: 35px; gap: 18px; overflow: hidden; }
+
+  .social-glass-card::before, .wechat-reward-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: rgba(16, 16, 18, 0.72); 
+    backdrop-filter: blur(30px) !important; 
+    -webkit-backdrop-filter: blur(30px) !important;
+    z-index: -1;
+    pointer-events: none;
+    transition: background 0.4s ease;
   }
 
-  /* 懸浮變色平權：完全混合你的原生主題色打亮，全面剔除 transform 位移，改用環境光擴散（box-shadow）來製造抬升視覺感，永久鎖死 30px 霧面不失效！ */
   .social-glass-card:hover {
-    background: color-mix(in srgb, var(--page-theme-color) 18%, rgba(16, 16, 18, 0.72)) !important; 
     border-color: color-mix(in srgb, var(--page-theme-color) 50%, rgba(255, 255, 255, 0.08)) !important;
-    /* 透過投影大幅外擴，在不移動像素的前提下達成極致逼真的升浮反差，同時毛玻璃穩如磐石 */
     box-shadow: inset 0 0 15px color-mix(in srgb, var(--page-theme-color) 30%, transparent), 0 25px 60px rgba(0, 0, 0, 0.5);
   }
+  .social-glass-card:hover::before {
+    background: color-mix(in srgb, var(--page-theme-color) 18%, rgba(16, 16, 18, 0.72)) !important; 
+  }
 
-  /* 鎖死反差：平時半透，Hover時深色模式強制鎖定純白色，避免主題色雜交污染 */
+  .wechat-reward-card:hover {
+    border-color: color-mix(in srgb, var(--page-theme-color) 40%, rgba(255, 255, 255, 0.08)) !important;
+    box-shadow: inset 0 0 18px color-mix(in srgb, var(--page-theme-color) 25%, transparent), 0 30px 65px rgba(0, 0, 0, 0.5);
+  }
+  .wechat-reward-card:hover::before {
+    background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(16, 16, 18, 0.72)) !important;
+  }
+
   .social-icon-wrapper :global(svg) {
     width: 30px !important; height: 30px !important;
     color: rgba(255, 255, 255, 0.6) !important;
     transition: color 0.3s ease, transform 0.3s ease;
   }
-  .social-glass-card:hover .social-icon-wrapper :global(svg) {
-    color: #ffffff !important; 
-    transform: scale(1.1); /* 圖標微弱縮放是安全的，不會影響卡片本體的毛玻璃層 */
-  }
-
+  .social-glass-card:hover .social-icon-wrapper :global(svg) { color: #ffffff !important; transform: scale(1.1); }
   .social-name { font-size: 0.85rem; font-weight: 700; color: rgba(255, 255, 255, 0.65); transition: color 0.3s ease; }
-  /* 名字高亮連動：僅當滑過時，名字無縫化身為原生主題色，其餘不發生形變 */
   .social-glass-card:hover .social-name { color: var(--page-theme-color); }
 
-  /* 微信贊賞碼面板 (同樣 1:1 絕對對齊第三章 30px 超高硬核模糊磨砂軸 + 剔除 hover transform) */
-  .wechat-reward-card {
-    border-radius: 26px; padding: 35px; 
-    background: rgba(16, 16, 18, 0.72); 
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(30px); 
-    -webkit-backdrop-filter: blur(30px);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; position: relative; overflow: hidden;
-    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-  }
-  
-  /* 贊賞碼面板 Hover 變色平權：全面剔除 transform 位移，靠強光投影與混色打亮維持 30px 超重度模糊 */
-  .wechat-reward-card:hover {
-    background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(16, 16, 18, 0.72)) !important;
-    border-color: color-mix(in srgb, var(--page-theme-color) 40%, rgba(255, 255, 255, 0.08)) !important;
-    box-shadow: inset 0 0 18px color-mix(in srgb, var(--page-theme-color) 25%, transparent), 0 30px 65px rgba(0, 0, 0, 0.5);
-  }
-  
   .reward-inner-glow { position: absolute; inset: 0; pointer-events: none; z-index: 1; background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--page-theme-color) 10%, transparent), transparent 70%); }
   .qr-code-wrapper { position: relative; z-index: 2; width: 155px; height: 155px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.04); border-radius: 18px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 10px; }
   .qr-code-img { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; }
@@ -914,7 +906,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .dock-btn.active .dot { background: var(--page-theme-color) !important; box-shadow: 0 0 12px var(--page-theme-color) !important; }
 
   /* ========================================================
-     Light Mode 明亮形態全面調優（拉開極致黑白高密度反差）
+     Light Mode 明亮形態全面調優
      ======================================================== */
   :global(.light-mode) .stage-title-large, :global(.light-mode) .mosaic-main-header, :global(.light-mode) .deepdive-main-header, :global(.light-mode) .retirement-main-header, :global(.light-mode) .tech-main-header, :global(.light-mode) .contact-main-header { background: linear-gradient(180deg, #1d1d1f 50%, #86868b 100%); -webkit-background-clip: text; }
   :global(.light-mode) .manifesto-claim, :global(.light-mode) .mosaic-main-sub, :global(.light-mode) .deepdive-main-sub, :global(.light-mode) .retirement-main-sub, :global(.light-mode) .tech-main-sub, :global(.light-mode) .contact-main-sub { color: #515154; }
@@ -922,15 +914,30 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   :global(.light-mode) .unified-glass-card, 
   :global(.light-mode) .mosaic-drag-card, 
   :global(.light-mode) .pillar-glass-block, 
-  :global(.light-mode) .bento-card,
-  :global(.light-mode) .social-glass-card,
-  :global(.light-mode) .wechat-reward-card { 
-    /* 核心對齊：亮色模式下不透明度從 0.55 暴力拉高至 0.72 霜白色，模糊半徑提升至 30px！徹底封鎖任何背景線條對文本閱讀的干擾 */
+  :global(.light-mode) .bento-card {
     background: rgba(255, 255, 255, 0.72) !important; 
     backdrop-filter: blur(30px) !important; 
     -webkit-backdrop-filter: blur(30px) !important; 
     border: 1px solid rgba(0, 0, 0, 0.08) !important; 
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.04) !important; 
+  }
+
+  :global(.light-mode) .social-glass-card, :global(.light-mode) .wechat-reward-card {
+    background: transparent !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important; 
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.04) !important;
+  }
+  :global(.light-mode) .social-glass-card::before, :global(.light-mode) .wechat-reward-card::before { 
+    background: rgba(255, 255, 255, 0.72) !important; 
+    backdrop-filter: blur(30px) !important; 
+    -webkit-backdrop-filter: blur(30px) !important; 
+  }
+  
+  :global(.light-mode) .social-glass-card:hover::before { 
+    background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(255, 255, 255, 0.72)) !important; 
+  }
+  :global(.light-mode) .wechat-reward-card:hover::before { 
+    background: color-mix(in srgb, var(--page-theme-color) 10%, rgba(255, 255, 255, 0.72)) !important; 
   }
   
   :global(.light-mode) .card-inner-brand, :global(.light-mode) .card-title, :global(.light-mode) .pillar-title { color: #1d1d1f; }
@@ -939,28 +946,14 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   :global(.light-mode) .countdown-value { color: #1d1d1f; text-shadow: none; }
   
   :global(.light-mode) .tech-card-left { background: color-mix(in srgb, var(--page-theme-color) 8%, rgba(255, 255, 255, 0.45)) !important; border: 1px solid color-mix(in srgb, var(--page-theme-color) 25%, rgba(0, 0, 0, 0.06)) !important; }
-  :global(.light-mode) .tech-card-right { background: rgba(255, 255, 255, 0.45) !important; border: 1px solid rgba(0, 0, 0, 0.08) !important; }
+  :global(.light-mode) .tech-card-right { background: rgba(255, 255, 255, 0.45) !important; border: 1px solid rgba(0, 0, 0, 0.12) !important; }
   :global(.light-mode) .tech-twin-card { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.02) !important; }
   :global(.light-mode) .tech-card-hero-title, :global(.light-mode) .tech-card-framework-tag { color: #1d1d1f !important; }
   
-  /* 明亮模式下渠道高亮鎖定（Hover時名字精確追蹤主題色） */
   :global(.light-mode) .social-name { color: #2c2c2e; }
   :global(.light-mode) .social-glass-card:hover .social-name { color: var(--page-theme-color) !important; }
-  
   :global(.light-mode) .social-icon-wrapper :global(svg) { color: rgba(0, 0, 0, 0.55) !important; }
   :global(.light-mode) .social-glass-card:hover .social-icon-wrapper :global(svg) { color: #000000 !important; }
-  
-  /* 明亮模式下基於 0.72 霜白底座的真實主題色混色折射打亮 */
-  :global(.light-mode) .social-glass-card:hover { 
-    background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(255, 255, 255, 0.72)) !important; 
-    border-color: color-mix(in srgb, var(--page-theme-color) 35%, rgba(0, 0, 0, 0.06)) !important; 
-    box-shadow: inset 0 0 15px color-mix(in srgb, var(--page-theme-color) 30%, transparent), 0 20px 40px rgba(0, 0, 0, 0.08) !important;
-  }
-  :global(.light-mode) .wechat-reward-card:hover { 
-    background: color-mix(in srgb, var(--page-theme-color) 10%, rgba(255, 255, 255, 0.72)) !important; 
-    border-color: color-mix(in srgb, var(--page-theme-color) 30%, rgba(0, 0, 0, 0.06)) !important; 
-    box-shadow: inset 0 0 18px color-mix(in srgb, var(--page-theme-color) 25%, transparent), 0 25px 45px rgba(0, 0, 0, 0.1) !important;
-  }
 
   :global(.light-mode) .reward-caption { color: #86868b; }
   :global(.light-mode) .qr-placeholder { color: rgba(0, 0, 0, 0.3); }
