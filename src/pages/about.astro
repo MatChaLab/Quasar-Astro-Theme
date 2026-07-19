@@ -502,17 +502,19 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     updateCountdown();
     requestAnimationFrame(renderHighPrecisionProgress);
 
+    // 🔴 核心修復點：首次加載頁面時，主動為第一章節觸發飛入動畫點火
+    animateStage0In();
+
     // ========================================================
-    // 🔴 核心重構：第一章動畫封裝與首屏加載秩序器
+    // 舞台流轉切換生命週期控制鏈 (全面序列化調優)
     // ========================================================
-    function playStage0Animation(timeline) {
-      // 如果傳入了主時間軸（switchStage 調用），就挂載在主時間軸上；如果是首屏加載，則創建獨立時間軸立即執行
-      const t = timeline || gsap.timeline();
-      
-      t.fromTo(".anim-s1-avatar", { opacity: 0, scale: 0.4, y: 35 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.4)" })
-       .fromTo(".anim-s1-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, "-=0.4")
-       .fromTo(".anim-s1-card", { opacity: 0, y: 35, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, stagger: 0.04, duration: 0.6, ease: "back.out(1.3)" }, "-=0.3")
-       .fromTo(".anim-s1-claim", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, "-=0.25");
+    function animateStage0In() {
+      gsap.set([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], { clearProps: "all" });
+      gsap.timeline()
+        .fromTo(".anim-s1-avatar", { opacity: 0, scale: 0.4, y: 35 }, { opacity: 1, scale: 1, y: 0, duration: 1.1, ease: "back.out(1.4)" })
+        .fromTo(".anim-s1-title", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.9, ease: "expo.out" }, "-=0.8")
+        .fromTo(".anim-s1-card", { opacity: 0, y: 45, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, stagger: 0.06, duration: 1.0, ease: "back.out(1.3)" }, "-=0.6")
+        .fromTo(".anim-s1-claim", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, "-=0.45");
     }
 
     function initDragEngine() {
@@ -596,7 +598,10 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       // 【第三階段】新章節 (Inbound) 組件完美有序地拉開進場序幕
       // --------------------------------------------------------
       if (targetIndex === 0) {
-        playStage0Animation(transitionTimeline); // 🔴 切換回第一章時調用複用函數
+        transitionTimeline.fromTo(".anim-s1-avatar", { opacity: 0, scale: 0.4, y: 35 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.4)" })
+                          .fromTo(".anim-s1-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, "-=0.4")
+                          .fromTo(".anim-s1-card", { opacity: 0, y: 35, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, stagger: 0.04, duration: 0.6, ease: "back.out(1.3)" }, "-=0.3")
+                          .fromTo(".anim-s1-claim", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, "-=0.25");
       } 
       else if (targetIndex === 1) {
         transitionTimeline.fromTo(".mosaic-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" })
@@ -652,12 +657,6 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
         switchStage(parseInt(e.currentTarget.dataset.target, 10));
       });
     });
-
-    // --------------------------------------------------------
-    // 🔴 首次進入頁面的生命周期執行鉤子
-    // --------------------------------------------------------
-    // 當頁面加載完成、全屏遮罩移出時，立即手動啟動第一章的開場動效，補全死角
-    playStage0Animation();
   });
 </script>
 
@@ -712,7 +711,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
 
   /* 第三階段：自我進化內核聚光燈（同步升級：30px超強毛玻璃深度） */
   .spotlight-container { 
-    position: absolute; inset: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; pointer-events: none; z-1; 
+    position: absolute; inset: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; pointer-events: none; z-index: 1; 
   }
   .spotlight { 
     position: absolute; top: -10vh; width: 75vw; height: 115vh; 
