@@ -4,7 +4,7 @@ import { SITE_CONFIG, ABOUT_CONFIG } from '../config';
 import Navbar from '../components/Navbar.astro';
 import Earth from '../components/Earth.astro';
 
-// 自動解析中英文標籤線
+// 自動解析中英文 retirement 標籤
 const [yearEn, yearZh] = ABOUT_CONFIG.retirement.labels.year.split(' / ');
 const [monthEn, monthZh] = ABOUT_CONFIG.retirement.labels.month.split(' / ');
 const [dayEn, dayZh] = ABOUT_CONFIG.retirement.labels.day.split(' / ');
@@ -21,8 +21,9 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   <title>About | {SITE_CONFIG.title}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght=300;400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
+  <!-- 建立原生全局CSS變量，確保亮暗調色全鏈路不丟失 -->
   <style is:inline set:html={`
     :root {
       --page-theme-color: ${SITE_CONFIG.themeColor};
@@ -33,15 +34,19 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
 
   <Navbar />
   
+  <!-- 地球圖層完美下沉至 72.5vh -->
   <div class="earth-horizon-layer">
     <Earth />
   </div>
 
   <main class="about-cinematic-viewport opacity-0">
     
+    <!-- ========================================================
+         階段 1：核心能力卡
+         ======================================================== -->
     <section class="story-stage active" id="stage-capabilities">
       <div class="stage-inner flex-center">
-        <div class="avatar-wrapper margin-bottom: 24px; width: 88px; height: 88px; border-radius: 26px; padding: 1px; background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent); box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+        <div class="avatar-wrapper">
           <img src={ABOUT_CONFIG.avatar.src} alt={ABOUT_CONFIG.avatar.alt} class="about-avatar-img" />
         </div>
         
@@ -60,6 +65,9 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       </div>
     </section>
 
+    <!-- ========================================================
+         階段 2：項目矩陣圖塊雲
+         ======================================================== -->
     <section class="story-stage" id="stage-mosaic">
       <div class="stage-inner flex-center">
         <div class="mosaic-content-holder">
@@ -79,8 +87,12 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       </div>
     </section>
 
+    <!-- ========================================================
+         階段 3：深度看板樣式 (Growth Edge 自我進化內核)
+         ======================================================== -->
     <section class="story-stage" id="stage-deepdive">
       <div class="stage-inner flex-center">
+        <!-- 劇場級錐形聚光燈艙 -->
         <div class="spotlight-container">
           <div class="spotlight" id="spotlight-1"></div>
           <div class="spotlight" id="spotlight-2"></div>
@@ -104,6 +116,9 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       </div>
     </section>
 
+    <!-- ========================================================
+         階段 4：Bento 模組化退休倒計時
+         ======================================================== -->
     <section 
       class="story-stage" 
       id="stage-retirement" 
@@ -119,6 +134,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
 
         <div class="bento-container">
           
+          <!-- 左側 -->
           <div class="bento-card bento-left anim-s4-left">
             <div class="bento-left-brand">
               <span class="brand-en">{leftTitleEn}</span>
@@ -127,7 +143,9 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             <p class="bento-left-desc">{ABOUT_CONFIG.retirement.description}</p>
           </div>
 
+          <!-- 中間：分行響應式 + 線框 Icon -->
           <div class="bento-middle-column">
+            <!-- 年份 -->
             <div class="bento-card bento-mid-row anim-s4-mid">
               <div class="bento-mid-value-group">
                 <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -139,6 +157,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
               </div>
             </div>
             
+            <!-- 月份 -->
             <div class="bento-card bento-mid-row anim-s4-mid">
               <div class="bento-mid-value-group">
                 <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
@@ -150,6 +169,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
               </div>
             </div>
             
+            <!-- 日份 -->
             <div class="bento-card bento-mid-row anim-s4-mid">
               <div class="bento-mid-value-group">
                 <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -162,9 +182,12 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             </div>
           </div>
 
+          <!-- 右側：時鐘 + 視覺壓艙石線性進度條 -->
           <div class="bento-card bento-right anim-s4-right">
             
+            <!-- 時鐘框架 -->
             <div class="station-clock-wrapper">
+              <!-- 時 -->
               <div class="flap-group">
                 <div class="flap-card" id="card-h1">
                   <div class="card-half top"><div class="digit-inner">0</div></div>
@@ -178,6 +201,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
                 </div>
               </div>
               <span class="clock-colon">:</span>
+              <!-- 分 -->
               <div class="flap-group">
                 <div class="flap-card" id="card-m1">
                   <div class="card-half top"><div class="digit-inner">0</div></div>
@@ -191,6 +215,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
                 </div>
               </div>
               <span class="clock-colon">:</span>
+              <!-- 秒 -->
               <div class="flap-group">
                 <div class="flap-card" id="card-s1">
                   <div class="card-half top"><div class="digit-inner">0</div></div>
@@ -207,8 +232,10 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             
             <div class="clock-caption">{ABOUT_CONFIG.retirement.clockCaption}</div>
 
+            <!-- 細微分割線 -->
             <div class="bento-divider"></div>
             
+            <!-- 視覺壓艙石結構艙 -->
             <div class="bento-progress-anchor">
               <div class="progress-status-row">
                 <span class="progress-mini-label">Total Era Progression</span>
@@ -225,6 +252,9 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       </div>
     </section>
 
+    <!-- ========================================================
+         階段 5：技術棧矩陣（高級發光折射艙 + 1:1 色彩平權）
+         ======================================================== -->
     <section class="story-stage" id="stage-techstack">
       <div class="stage-inner flex-center">
         
@@ -233,6 +263,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
           <p class="tech-main-sub">{ABOUT_CONFIG.techStack.subtitle}</p>
         </div>
 
+        <!-- 拓撲連接網絡 -->
         <div class="tech-tree-wrapper">
           <div class="tech-branch-node" id="tech-main-dot"></div>
           <svg class="tech-branch-svg" viewBox="0 0 800 60" fill="none">
@@ -243,9 +274,11 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
 
         <div class="tech-cards-matrix">
           
+          <!-- 左側：高定通透主題流光毛玻璃艙 (Astro) -->
           <div class="tech-twin-card tech-card-left anim-s5-left">
             <div class="tech-inner-glow"></div>
             
+            <!-- Astro 官方高定制原裝矢量徽標 (完美融入 fill="currentColor" 色彩平權) -->
             <svg class="tech-card-corner-logo" viewBox="0 0 85 107" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M27.5893 91.1365C22.7555 86.7178 21.3443 77.4335 23.3583 70.7072C26.8503 74.948 31.6888 76.2914 36.7005 77.0497C44.4374 78.2199 52.0358 77.7822 59.2231 74.2459C60.0453 73.841 60.8052 73.3027 61.7036 72.7574C62.378 74.714 62.5535 76.6892 62.3179 78.6996C61.7452 83.5957 59.3086 87.3778 55.4332 90.2448C53.8835 91.3916 52.2437 92.4167 50.6432 93.4979C45.7262 96.8213 44.3959 100.718 46.2435 106.386C46.2874 106.525 46.3267 106.663 46.426 107C43.9155 105.876 42.0817 104.24 40.6844 102.089C39.2086 99.8193 38.5065 97.3081 38.4696 94.5909C38.4511 93.2686 38.4511 91.9345 38.2733 90.6309C37.8391 87.4527 36.3471 86.0297 33.5364 85.9478C30.6518 85.8636 28.37 87.6469 27.7649 90.4554C27.7187 90.6707 27.6517 90.8837 27.5847 91.1341L27.5893 91.1365Z" fill="currentColor"/>
               <path d="M0 69.5866C0 69.5866 14.3139 62.6137 28.6678 62.6137L39.4901 29.1204C39.8953 27.5007 41.0783 26.3999 42.4139 26.3999C43.7495 26.3999 44.9325 27.5007 45.3377 29.1204L56.1601 62.6137C73.1601 62.6137 84.8278 69.5866 84.8278 69.5866C84.8278 69.5866 60.5145 3.35233 60.467 3.21944C59.7692 1.2612 58.5911 0 57.0029 0H27.8274C26.2392 0 25.1087 1.2612 24.3634 3.21944C24.3108 3.34983 0 69.5866 0 69.5866Z" fill="currentColor"/>
@@ -269,9 +302,11 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             </div>
           </div>
 
+          <!-- 右側：極簡黑底霜白毛玻璃艙 (Gemini) -->
           <div class="tech-twin-card tech-card-right anim-s5-right">
             <div class="tech-inner-glow"></div>
 
+            <!-- Google Gemini 原生對稱四芒星智能徽標 -->
             <svg class="tech-card-corner-logo gemini-logo-spark" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C12 7.523 16.477 12 22 12C16.477 12 12 16.477 12 22C12 16.477 7.523 12 2 12C7.523 12 12 7.523 12 2Z" />
             </svg>
@@ -299,6 +334,56 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       </div>
     </section>
 
+    <!-- ========================================================
+         🔴 階段 6：聯繫我 (Contact Section) - 100% 完美解耦重磨砂晶體艙
+         ======================================================== -->
+    <section class="story-stage" id="stage-contact">
+      <div class="stage-inner flex-center">
+        
+        <div class="contact-content-holder">
+          <h2 class="contact-main-header">{ABOUT_CONFIG.contact.title}</h2>
+          <p class="contact-main-sub">{ABOUT_CONFIG.contact.subtitle}</p>
+        </div>
+
+        <div class="contact-layout-container">
+          
+          <!-- 左側：完全由 config 驅動的智能自適應彈性社交網格 -->
+          <div class="social-links-grid">
+            {ABOUT_CONFIG.contact.links.map((link) => (
+              <a href={link.url} target="_blank" rel="noopener noreferrer" class="social-glass-card anim-s6-card">
+                <!-- 通過高階 set:html 直接渲染你在 config.ts 里自定義的整段 SVG 代碼 -->
+                <div class="social-icon-wrapper" set:html={link.iconSvg}></div>
+                <span class="social-name">{link.name}</span>
+              </a>
+            ))}
+          </div>
+
+          <!-- 右側：微信贊賞碼壓艙石面板 (同步鎖定30px超高厚度超模糊機制) -->
+          <div class="wechat-reward-card anim-s6-reward">
+            <div class="reward-inner-glow"></div>
+            <div class="qr-code-wrapper">
+              {ABOUT_CONFIG.contact.wechatRewardImg ? (
+                <img src={ABOUT_CONFIG.contact.wechatRewardImg} alt="微信贊賞碼" class="qr-code-img" />
+              ) : (
+                <div class="qr-placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><line x1="14" y1="14" x2="14" y2="14.01"></line><line x1="17" y1="14" x2="17" y2="14.01"></line><line x1="14" y1="17" x2="17" y2="17"></line>
+                  </svg>
+                  <span>未配置贊賞碼</span>
+                </div>
+              )}
+            </div>
+            <div class="reward-caption">微信贊賞碼 / Reward QR</div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         懸浮 Dock 導航島
+         ======================================================== -->
     <div class="floating-dock-island">
       <div class="dock-blur-bg"></div>
       <div class="dock-buttons-row">
@@ -327,7 +412,8 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       document.getElementById('stage-mosaic'),
       document.getElementById('stage-deepdive'),
       document.getElementById('stage-retirement'),
-      document.getElementById('stage-techstack')
+      document.getElementById('stage-techstack'),
+      document.getElementById('stage-contact') // 將聯繫我節點完美註冊到控制總線
     ];
     const dockButtons = document.querySelectorAll('.dock-btn');
 
@@ -417,7 +503,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     requestAnimationFrame(renderHighPrecisionProgress);
 
     // ========================================================
-    // 舞台流轉切換總線
+    // 舞台流轉切換生命週期控制鏈
     // ========================================================
     function animateStage0In() {
       gsap.set([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], { clearProps: "all" });
@@ -477,12 +563,19 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
         transitionTimeline.to(".retirement-content-holder", { opacity: 0, y: -20, duration: 0.25 })
                           .to([".anim-s4-left", ".anim-s4-mid", ".anim-s4-right"], { opacity: 0, y: -30, scale: 0.96, stagger: 0.03, duration: 0.3, ease: "power3.in" }, "-=0.15");
       } else if (currentStage === 4) {
-        // 完美離場清空：不僅重置子節點，還要將被隱形掉的導線外殼 wrapper 完美全量還原
         transitionTimeline.to(".tech-content-holder", { opacity: 0, y: -20, duration: 0.25 })
                           .to([".tech-tree-wrapper", ".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: 20, scale: 0.98, duration: 0.3, ease: "power3.in" }, "-=0.15")
                           .add(() => {
                             gsap.set(["#tech-path-left", "#tech-path-right"], { strokeDashoffset: 260 });
                             gsap.set([".tech-line-path", "#tech-main-dot", ".anim-s5-left", ".anim-s5-right", ".tech-tree-wrapper"], { clearProps: "all" });
+                          });
+      } else if (currentStage === 5) {
+        // 離場重構：將解耦的卡片本體和內部元素一同完美淡出清空
+        transitionTimeline.to(".contact-content-holder", { opacity: 0, y: -20, duration: 0.25 })
+                          .to([".anim-s6-card", ".anim-s6-reward"], { opacity: 0, duration: 0.25 }, "-=0.15")
+                          .to([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"], { opacity: 0, y: 30, duration: 0.25 }, "-=0.25")
+                          .add(() => {
+                            gsap.set([".anim-s6-card", ".anim-s6-reward", ".contact-content-holder", ".social-icon-wrapper", ".social-name", ".qr-code-wrapper", ".reward-caption"], { clearProps: "all" });
                           });
       }
 
@@ -519,11 +612,9 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             .fromTo(".anim-s4-right", { opacity: 0, x: 35, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.75, ease: "back.out(1.1)" }, "-=0.55");
         }, "-=0.15");
       }
-      // 🔴 第五階段：顯式 fromTo 狀態鎖定，雙向流體分裂生長注入，完美無瑕
       else if (targetIndex === 4) {
         transitionTimeline.add(() => {
           gsap.set([".tech-content-holder", ".tech-tree-wrapper", "#tech-main-dot", "#tech-path-left", "#tech-path-right", ".anim-s5-left", ".anim-s5-right"], { clearProps: "all" });
-          
           gsap.killTweensOf([".tech-content-holder", ".tech-tree-wrapper", "#tech-path-left", "#tech-path-right", "#tech-main-dot", ".anim-s5-left", ".anim-s5-right"]);
           
           gsap.set(".tech-tree-wrapper", { opacity: 1 });
@@ -539,6 +630,26 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             .fromTo(".anim-s5-left", { opacity: 0, x: -20, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.6, ease: "power3.out" }, "-=0.35")
             .fromTo(".anim-s5-right", { opacity: 0, x: 20, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.6, ease: "power3.out" }, "-=0.55");
         }, "-=0.15");
+      }
+      else if (targetIndex === 5) {
+        // 🔴🔴 終極徹底修正點：卡片底座完全移出 3D 與位移動畫軸！
+        gsap.set([".anim-s6-card", ".anim-s6-reward"], { clearProps: "all" });
+        gsap.set([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"], { clearProps: "all" });
+        
+        gsap.timeline()
+          .fromTo(".contact-content-holder", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "expo.out" })
+          // 🔴 1. 卡片底座只進行純粹的不透明度淡入，顯式宣告 force3D: false。雷打不動，全程100%留在常規層，30px 毛玻璃從第 1 毫秒起完美鎖死！
+          .fromTo([".anim-s6-card", ".anim-s6-reward"], 
+            { opacity: 0 }, 
+            { opacity: 1, duration: 0.45, ease: "power2.out", force3D: false },
+            "-=0.4"
+          )
+          // 🔴 2. 只有不包含毛玻璃的內部核心內容元素進行 y 軸上滑與 stagger 順序回彈，視覺張力拉滿，且完全不連累底座！
+          .fromTo([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"],
+            { opacity: 0, y: 35 },
+            { opacity: 1, y: 0, stagger: 0.03, duration: 0.8, ease: "back.out(1.4)" },
+            "-=0.35"
+          );
       }
 
       currentStage = targetIndex;
@@ -591,7 +702,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .card-inner-sub { font-size: 0.75rem; color: #888888; letter-spacing: 0.15em; font-weight: 700; }
   .manifesto-claim { margin-top: 55px; font-size: 1.15rem; font-weight: 400; color: rgba(255, 255, 255, 0.75); }
 
-  /* 第二階段 */
+  /* 第二階段：項目矩陣 */
   .mosaic-content-holder { text-align: center; margin-bottom: 40px; }
   .mosaic-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .mosaic-main-sub { font-size: 1rem; color: #888888; margin: 0; }
@@ -601,129 +712,59 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .card-tag { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: var(--page-theme-color); letter-spacing: 0.1em; margin-bottom: 6px; }
   .card-title { font-size: 0.9rem; font-weight: 700; line-height: 1.4; color: #ffffff; margin: 0; }
 
-  /* 第三階段：高級劇場級錐形聚光燈 */
+  /* 第三階段：自我進化內核聚光燈（同步升級：30px超強毛玻璃深度） */
   .spotlight-container { 
     position: absolute; inset: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; pointer-events: none; z-index: 1; 
   }
   .spotlight { 
-    position: absolute; 
-    top: -10vh; 
-    width: 75vw; 
-    height: 115vh; 
-    background: conic-gradient(at top center,
-      transparent 0%,
-      transparent 43%,
-      color-mix(in srgb, var(--page-theme-color) 4%, transparent) 46.5%,
-      color-mix(in srgb, var(--page-theme-color) 12%, #ffffff) 50%, 
-      color-mix(in srgb, var(--page-theme-color) 4%, transparent) 53.5%,
-      transparent 57%,
-      transparent 100%
-    );
-    filter: blur(32px);
-    mask-image: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 92%);
-    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 92%);
-    mix-blend-mode: screen; 
-    opacity: 0; 
-    transform-origin: top center;
+    position: absolute; top: -10vh; width: 75vw; height: 115vh; 
+    background: conic-gradient(at top center, transparent 0%, transparent 43%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 46.5%, color-mix(in srgb, var(--page-theme-color) 12%, #ffffff) 50%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 53.5%, transparent 57%, transparent 100% );
+    filter: blur(32px); mask-image: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 92%); -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 92%); mix-blend-mode: screen; opacity: 0; transform-origin: top center;
   }
 
   .deepdive-content-holder { position: relative; z-index: 2; width: 90%; max-width: 1400px; text-align: center; }
   .deepdive-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .deepdive-main-sub { font-size: 1rem; color: #888888; margin-bottom: 60px; }
   .deepdive-pillars-matrix { display: flex; gap: 24px; width: 100%; }
-  .pillar-glass-block { flex: 1; position: relative; padding: 40px 32px; border-radius: 24px; background: rgba(20, 20, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3); text-align: left; overflow: hidden; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .pillar-glass-block { flex: 1; position: relative; padding: 40px 32px; border-radius: 24px; background: rgba(16, 16, 18, 0.72); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3); text-align: left; overflow: hidden; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .pillar-glass-block:hover { transform: translateY(-8px) scale(1.02); background: rgba(30, 30, 30, 0.7); border-color: rgba(255, 255, 255, 0.15); }
   .pillar-title { font-size: 1.25rem; font-weight: 700; color: #ffffff; margin: 0 0 16px 0; }
   .pillar-desc { font-size: 0.9rem; color: #aaaaaa; line-height: 1.6; margin: 0; }
 
-  /* 第四階段置頂看板 */
+  /* 第四階段：Bento 倒計時 */
   .retirement-content-holder { text-align: center; margin-bottom: 35px; width: 100%; }
   .retirement-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .retirement-main-sub { font-size: 1rem; color: #888888; margin: 0; }
 
-  /* 第四階段 Bento 核心網格 */
-  .bento-container {
-    display: grid;
-    grid-template-columns: 1.1fr 1.2fr 1.7fr;
-    gap: 24px;
-    width: 90%;
-    max-width: 1350px;
-    height: 440px;
-    box-sizing: border-box;
-  }
-
-  .bento-card {
-    background: rgba(20, 20, 20, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 28px;
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 25px 50px rgba(0, 0, 0, 0.3);
-    padding: 35px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-  }
-
+  .bento-container { display: grid; grid-template-columns: 1.1fr 1.2fr 1.7fr; gap: 24px; width: 90%; max-width: 1350px; height: 440px; box-sizing: border-box; }
+  .bento-card { background: rgba(20, 20, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 25px 50px rgba(0, 0, 0, 0.3); padding: 35px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
   .bento-left { justify-content: space-between; text-align: left; }
   .bento-left-brand { display: flex; flex-direction: column; gap: 6px; }
   .bento-left-brand span { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.02em; color: #ffffff; }
   .bento-left-desc { font-size: 0.85rem; color: #777777; line-height: 1.6; margin: 0; }
-
   .bento-middle-column { display: flex; flex-direction: column; gap: 16px; height: 100%; }
-  .bento-mid-row {
-    flex: 1; padding: 0 24px; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px;
-  }
+  .bento-mid-row { flex: 1; padding: 0 24px; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
   .bento-mid-value-group { display: flex; align-items: center; gap: 14px; }
   .bento-icon { width: 22px; height: 22px; color: var(--page-theme-color); opacity: 0.85; flex-shrink: 0; }
   .countdown-value { font-family: 'Share Tech Mono', monospace; font-size: 2.5rem; font-weight: 700; color: #ffffff; }
-  
   .bento-mid-label-group { display: flex; flex-direction: column; text-align: right; gap: 2px; }
   .bento-mid-label-group .label-en { font-size: 0.65rem; font-weight: 700; color: #444446; text-transform: uppercase; letter-spacing: 0.05em; }
   .bento-mid-label-group .label-zh { font-size: 0.8rem; font-weight: 700; color: #88888b; }
-
-  .bento-right {
-    justify-content: center; align-items: center; position: relative;
-    padding: 30px 35px 25px 35px;
-  }
-  
-  .station-clock-wrapper {
-    display: flex; align-items: center; gap: 10px; background: #080809;
-    padding: 24px 35px; border-radius: 24px;
-    box-shadow: inset 0 4px 30px rgba(0,0,0,0.8), 0 4px 20px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255, 255, 255, 0.03);
-  }
-
+  .bento-right { justify-content: center; align-items: center; position: relative; padding: 30px 35px 25px 35px; }
+  .station-clock-wrapper { display: flex; align-items: center; gap: 10px; background: #080809; padding: 24px 35px; border-radius: 24px; box-shadow: inset 0 4px 30px rgba(0,0,0,0.8), 0 4px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255, 255, 255, 0.03); }
   .flap-group { display: flex; gap: 4px; }
-  .flap-card {
-    position: relative; width: 54px; height: 84px; background: #1c1c1e; border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.5); transform-style: preserve-3d; perspective: 300px;
-  }
-  
+  .flap-card { position: relative; width: 54px; height: 84px; background: #1c1c1e; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); transform-style: preserve-3d; perspective: 300px; }
   .card-half { position: absolute; left: 0; width: 100%; height: 42px; overflow: hidden; }
   .card-half.top { top: 0; background: #1c1c1e; border-radius: 10px 10px 0 0; border-bottom: 1px solid rgba(0, 0, 0, 0.7); }
   .card-half.bottom { bottom: 0; background: #141416; border-radius: 0 0 10px 10px; }
-  
-  .digit-inner {
-    position: absolute; left: 0; width: 100%; height: 84px; line-height: 84px;
-    display: flex; justify-content: center; align-items: center;
-    font-family: 'Share Tech Mono', monospace; font-size: 4.8rem; font-weight: 900; color: #ffffff;
-  }
+  .digit-inner { position: absolute; left: 0; width: 100%; height: 84px; line-height: 84px; display: flex; justify-content: center; align-items: center; font-family: 'Share Tech Mono', monospace; font-size: 4.8rem; font-weight: 900; color: #ffffff; }
   .card-half.top .digit-inner { top: 0; }
   .card-half.bottom .digit-inner { top: -42px; }
-  
   .flip-line { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(0, 0, 0, 0.5); z-index: 10; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04); }
   .clock-colon { font-family: 'Share Tech Mono', monospace; font-size: 3.5rem; color: rgba(255,255,255,0.15); animation: pulse 1s infinite; padding: 0 2px; }
   .clock-caption { font-size: 0.65rem; font-weight: 900; color: rgba(255,255,255,0.12); letter-spacing: 0.2em; margin-top: 16px; margin-bottom: 0px; }
-
   @keyframes pulse { 50% { opacity: 0.3; } }
-
-  .bento-divider {
-    width: 100%; height: 1px; background: rgba(255, 255, 255, 0.08); margin: 18px 0 14px 0; 
-  }
-
-  /* 壓艙石進度條 */
+  .bento-divider { width: 100%; height: 1px; background: rgba(255, 255, 255, 0.08); margin: 18px 0 14px 0; }
   .bento-progress-anchor { margin-top: 2rem; width: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
   .progress-status-row { width: 100%; display: flex; justify-content: space-between; align-items: center; }
   .progress-mini-label { font-size: 0.65rem; font-weight: 700; color: rgba(255, 255, 255, 0.25); text-transform: uppercase; letter-spacing: 0.08em; }
@@ -732,86 +773,37 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .progress-bar-fill { height: 100%; width: 0%; background: var(--page-theme-color); box-shadow: 0 0 10px var(--page-theme-color); border-radius: 2px; }
 
   /* ========================================================
-     🔴 第五階段：技術棧矩陣（看齊第三章高級發光折射艙 + 1:1 色彩平權）
+     階段 5：技術棧矩陣
      ======================================================== */
   .tech-content-holder { text-align: center; margin-bottom: 20px; width: 100%; }
   .tech-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .tech-main-sub { font-size: 1rem; color: #888888; margin: 0; }
 
-  /* 數位化樹狀導線網絡 */
-  .tech-tree-wrapper {
-    position: relative; width: 100%; max-width: 1200px; height: 50px; 
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-    margin-bottom: 12px; z-index: 3;
-  }
-  .tech-branch-node {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--page-theme-color); 
-    box-shadow: 0 0 12px var(--page-theme-color); z-index: 10;
-  }
-  .tech-branch-svg {
-    position: absolute; top: 4px; left: 50%; transform: translateX(-50%); 
-    width: 100%; height: 100%; pointer-events: none; overflow: visible;
-  }
-  .tech-line-path {
-    stroke: color-mix(in srgb, var(--page-theme-color) 35%, rgba(255, 255, 255, 0.12));
-  }
+  .tech-tree-wrapper { position: relative; width: 100%; max-width: 1200px; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; margin-bottom: 12px; z-index: 3; }
+  .tech-branch-node { width: 8px; height: 8px; border-radius: 50%; background: var(--page-theme-color); box-shadow: 0 0 12px var(--page-theme-color); z-index: 10; }
+  .tech-branch-svg { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .tech-line-path { stroke: color-mix(in srgb, var(--page-theme-color) 35%, rgba(255, 255, 255, 0.12)); }
 
-  .tech-cards-matrix {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
-    width: 90%; max-width: 1200px; height: 280px; box-sizing: border-box;
-  }
-
-  /* 1:1 像素級同步第三章：剔除一切多餘外投影，全量承接純血發光毛玻璃 */
-  .tech-twin-card {
-    border-radius: 24px; padding: 35px 32px; box-sizing: border-box;
-    display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
-    position: relative; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3);
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
+  .tech-cards-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 90%; max-width: 1200px; height: 280px; box-sizing: border-box; }
+  .tech-twin-card { border-radius: 24px; padding: 35px 32px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .tech-twin-card:hover { transform: translateY(-6px) scale(1.015); }
-
-  /* 第三章高階內發光流光層 */
   .tech-inner-glow { position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: 0.65; }
 
-  /* 右上角官方高精度矢量 SVG 絕對定位（顏色與標籤完全共生） */
-  .tech-card-corner-logo {
-    position: absolute; top: 35px; right: 35px; width: 26px; height: 26px; 
-    pointer-events: none; z-index: 5; opacity: 0.3; transition: opacity 0.3s ease, transform 0.3s ease;
-  }
+  .tech-card-corner-logo { position: absolute; top: 35px; right: 35px; width: 26px; height: 26px; pointer-events: none; z-index: 5; opacity: 0.3; transition: opacity 0.3s ease, transform 0.3s ease; }
   .tech-twin-card:hover .tech-card-corner-logo { opacity: 0.85; transform: scale(1.05); }
 
-  /* 核心通透優化：左側卡片底色全量剔除混色，改用極高透明底，由內發光艙渲染主題色，絕不再發悶 */
-  .tech-card-left {
-    background: rgba(15, 15, 18, 0.45);
-    border: 1px solid color-mix(in srgb, var(--page-theme-color) 40%, rgba(255, 255, 255, 0.1));
-    color: #ffffff;
-  }
-  /* 透過雙向徑向漸變流光打亮玻璃內部，兼顧透明度與主題色彩飽和度 */
-  .tech-card-left .tech-inner-glow {
-    background: radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--page-theme-color) 25%, transparent), transparent 70%),
-                radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--page-theme-color) 12%, transparent), transparent 60%);
-  }
-  /* 左徽標顏色：與下面的 meta-tag 1:1 絕對平權，完美綻放主題色 */
+  .tech-card-left { background: rgba(15, 15, 18, 0.45); border: 1px solid color-mix(in srgb, var(--page-theme-color) 40%, rgba(255, 255, 255, 0.1)); color: #ffffff; }
+  .tech-card-left .tech-inner-glow { background: radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--page-theme-color) 25%, transparent), transparent 70%), radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--page-theme-color) 12%, transparent), transparent 60%); }
   .tech-card-left .tech-card-corner-logo { color: var(--page-theme-color); }
   
-  /* 右卡片：深色模式下的清冷高透霜白毛玻璃艙 */
-  .tech-card-right {
-    background: rgba(15, 15, 18, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-  .tech-card-right .tech-inner-glow {
-    background: radial-gradient(circle at 75% 15%, rgba(255, 255, 255, 0.08), transparent 65%);
-  }
-  /* 右徽標顏色：與右側 meta-tag 的高級霜白色完美共振 */
+  .tech-card-right { background: rgba(15, 15, 18, 0.45); border: 1px solid rgba(255, 255, 255, 0.12); }
+  .tech-card-right .tech-inner-glow { background: radial-gradient(circle at 75% 15%, rgba(255, 255, 255, 0.08), transparent 65%); }
   .tech-card-right .tech-card-corner-logo { color: rgba(255, 255, 255, 0.45); }
 
   @keyframes geminiSparkle { 0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; } 50% { transform: scale(1.08) rotate(5deg); opacity: 0.85; } }
   .tech-twin-card:hover .gemini-logo-spark { animation: geminiSparkle 2.5s infinite ease-in-out; }
 
   .tech-card-header-group { display: flex; flex-direction: column; text-align: left; position: relative; z-index: 2; }
-  
-  /* 左側標籤釋放最純粹的主題色，拒絕任何淡化！ */
   .tech-card-left .tech-card-meta-tag { color: var(--page-theme-color) !important; font-weight: 900; }
   .tech-card-right .tech-card-meta-tag { color: rgba(255, 255, 255, 0.45); }
   
@@ -823,20 +815,95 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .tech-card-body-group { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; margin-top: 12px; position: relative; z-index: 2; }
   .tech-card-question { font-size: 0.78rem; font-weight: 500; margin: 0; font-family: monospace; color: rgba(255, 255, 255, 0.35); }
 
-  /* 結構化文檔流 */
-  .tech-structured-doc {
-    border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px;
-    background: rgba(0, 0, 0, 0.12); border: 1px solid rgba(255, 255, 255, 0.02);
-  }
+  .tech-structured-doc { border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px; background: rgba(0, 0, 0, 0.12); border: 1px solid rgba(255, 255, 255, 0.02); }
   .doc-text-paragraph { font-size: 0.84rem; font-weight: 400; color: rgba(255, 255, 255, 0.75); line-height: 1.6; margin: 0; text-align: left; }
 
-  /* Dock 導航島 */
-  .floating-dock-island {
-    position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 999;
-    display: flex; align-items: center; padding: 8px; border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(20, 20, 20, 0.35);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255,255,255,0.05); overflow: hidden;
+  /* ========================================================
+     🔴 階段 6：聯繫我（1:1 像素級絕對同步第三章：重度加厚霧面結晶核樣式表）
+     ======================================================== */
+  .contact-content-holder { text-align: center; margin-bottom: 35px; width: 100%; }
+  .contact-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .contact-main-sub { font-size: 1rem; color: #888888; margin: 0; }
+
+  .contact-layout-container {
+    display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px;
+    width: 90%; max-width: 1150px; box-sizing: border-box; align-items: center;
   }
+
+  .social-links-grid {
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+    gap: 18px;
+    width: 100%;
+  }
+
+  .social-glass-card {
+    text-decoration: none; border-radius: 22px; padding: 26px 20px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    /* 像素級對齊：飽和度拉高至 0.72（更黑更深邃），毛玻璃直接狂飆至與第三章同等恐怖的 30px 超重度模糊 */
+    background: rgba(16, 16, 18, 0.72); 
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(30px); 
+    -webkit-backdrop-filter: blur(30px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3);
+    /* 核心對齊：移除了 transform 的過渡，防止 Hover 的瞬間硬件加速重新激活破壞 backdrop-filter */
+    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  /* 懸浮變色平權：完全混合你的原生主題色打亮，全面剔除 transform 位移，改用環境光擴散（box-shadow）來製造抬升視覺感，永久鎖死 30px 霧面不失效！ */
+  .social-glass-card:hover {
+    background: color-mix(in srgb, var(--page-theme-color) 18%, rgba(16, 16, 18, 0.72)) !important; 
+    border-color: color-mix(in srgb, var(--page-theme-color) 50%, rgba(255, 255, 255, 0.08)) !important;
+    /* 透過投影大幅外擴，在不移動像素的前提下達成極致逼真的升浮反差，同時毛玻璃穩如磐石 */
+    box-shadow: inset 0 0 15px color-mix(in srgb, var(--page-theme-color) 30%, transparent), 0 25px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  /* 鎖死反差：平時半透，Hover時深色模式強制鎖定純白色，避免主題色雜交污染 */
+  .social-icon-wrapper :global(svg) {
+    width: 30px !important; height: 30px !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    transition: color 0.3s ease, transform 0.3s ease;
+  }
+  .social-glass-card:hover .social-icon-wrapper :global(svg) {
+    color: #ffffff !important; 
+    transform: scale(1.1); /* 圖標微弱縮放是安全的，不會影響卡片本體的毛玻璃層 */
+  }
+
+  .social-name { font-size: 0.85rem; font-weight: 700; color: rgba(255, 255, 255, 0.65); transition: color 0.3s ease; }
+  /* 名字高亮連動：僅當滑過時，名字無縫化身為原生主題色，其餘不發生形變 */
+  .social-glass-card:hover .social-name { color: var(--page-theme-color); }
+
+  /* 微信贊賞碼面板 (同樣 1:1 絕對對齊第三章 30px 超高硬核模糊磨砂軸 + 剔除 hover transform) */
+  .wechat-reward-card {
+    border-radius: 26px; padding: 35px; 
+    background: rgba(16, 16, 18, 0.72); 
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(30px); 
+    -webkit-backdrop-filter: blur(30px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; position: relative; overflow: hidden;
+    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  
+  /* 贊賞碼面板 Hover 變色平權：全面剔除 transform 位移，靠強光投影與混色打亮維持 30px 超重度模糊 */
+  .wechat-reward-card:hover {
+    background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(16, 16, 18, 0.72)) !important;
+    border-color: color-mix(in srgb, var(--page-theme-color) 40%, rgba(255, 255, 255, 0.08)) !important;
+    box-shadow: inset 0 0 18px color-mix(in srgb, var(--page-theme-color) 25%, transparent), 0 30px 65px rgba(0, 0, 0, 0.5);
+  }
+  
+  .reward-inner-glow { position: absolute; inset: 0; pointer-events: none; z-index: 1; background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--page-theme-color) 10%, transparent), transparent 70%); }
+  .qr-code-wrapper { position: relative; z-index: 2; width: 155px; height: 155px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.04); border-radius: 18px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 10px; }
+  .qr-code-img { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; }
+  .qr-placeholder { display: flex; flex-direction: column; align-items: center; gap: 10px; color: rgba(255,255,255,0.2); }
+  .qr-placeholder svg { width: 44px; height: 44px; }
+  .qr-placeholder span { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; }
+  .reward-caption { position: relative; z-index: 2; font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.35); letter-spacing: 0.05em; }
+
+  /* ========================================================
+     懸浮 Dock 導航島
+     ======================================================== */
+  .floating-dock-island { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; align-items: center; padding: 8px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(20, 20, 20, 0.35); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255,255,255,0.05); overflow: hidden; }
   .dock-blur-bg { position: absolute; inset: 0; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: -1; }
   .dock-buttons-row { display: flex; gap: 4px; position: relative; z-index: 2; }
   .dock-btn { background: transparent; border: none; outline: none; display: flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 22px; cursor: pointer; color: rgba(255, 255, 255, 0.4); transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -847,20 +914,23 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .dock-btn.active .dot { background: var(--page-theme-color) !important; box-shadow: 0 0 12px var(--page-theme-color) !important; }
 
   /* ========================================================
-     Light Mode 明亮形態全面調優軸（徹底將暗色模式與淺色拉開反差）
+     Light Mode 明亮形態全面調優（拉開極致黑白高密度反差）
      ======================================================== */
-  :global(.light-mode) .stage-title-large, :global(.light-mode) .mosaic-main-header, :global(.light-mode) .deepdive-main-header, :global(.light-mode) .retirement-main-header, :global(.light-mode) .tech-main-header { background: linear-gradient(180deg, #1d1d1f 50%, #86868b 100%); -webkit-background-clip: text; }
-  :global(.light-mode) .manifesto-claim, :global(.light-mode) .mosaic-main-sub, :global(.light-mode) .deepdive-main-sub, :global(.light-mode) .retirement-main-sub, :global(.light-mode) .tech-main-sub { color: #515154; }
+  :global(.light-mode) .stage-title-large, :global(.light-mode) .mosaic-main-header, :global(.light-mode) .deepdive-main-header, :global(.light-mode) .retirement-main-header, :global(.light-mode) .tech-main-header, :global(.light-mode) .contact-main-header { background: linear-gradient(180deg, #1d1d1f 50%, #86868b 100%); -webkit-background-clip: text; }
+  :global(.light-mode) .manifesto-claim, :global(.light-mode) .mosaic-main-sub, :global(.light-mode) .deepdive-main-sub, :global(.light-mode) .retirement-main-sub, :global(.light-mode) .tech-main-sub, :global(.light-mode) .contact-main-sub { color: #515154; }
   
   :global(.light-mode) .unified-glass-card, 
   :global(.light-mode) .mosaic-drag-card, 
   :global(.light-mode) .pillar-glass-block, 
-  :global(.light-mode) .bento-card { 
-    background: rgba(255, 255, 255, 0.55) !important; 
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(0, 0, 0, 0.06) !important; 
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 20px 40px rgba(0, 0, 0, 0.03); 
+  :global(.light-mode) .bento-card,
+  :global(.light-mode) .social-glass-card,
+  :global(.light-mode) .wechat-reward-card { 
+    /* 核心對齊：亮色模式下不透明度從 0.55 暴力拉高至 0.72 霜白色，模糊半徑提升至 30px！徹底封鎖任何背景線條對文本閱讀的干擾 */
+    background: rgba(255, 255, 255, 0.72) !important; 
+    backdrop-filter: blur(30px) !important; 
+    -webkit-backdrop-filter: blur(30px) !important; 
+    border: 1px solid rgba(0, 0, 0, 0.08) !important; 
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.04) !important; 
   }
   
   :global(.light-mode) .card-inner-brand, :global(.light-mode) .card-title, :global(.light-mode) .pillar-title { color: #1d1d1f; }
@@ -868,53 +938,47 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   :global(.light-mode) .pillar-desc, :global(.light-mode) .bento-left-desc { color: #515154; }
   :global(.light-mode) .countdown-value { color: #1d1d1f; text-shadow: none; }
   
-  /* 明亮模式技術矩陣平權（高精度透光反光適應） */
-  :global(.light-mode) .tech-card-left {
-    background: color-mix(in srgb, var(--page-theme-color) 8%, rgba(255, 255, 255, 0.45)) !important;
-    border: 1px solid color-mix(in srgb, var(--page-theme-color) 25%, rgba(0, 0, 0, 0.06)) !important;
-  }
-  :global(.light-mode) .tech-card-right {
-    background: rgba(255, 255, 255, 0.45) !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  }
-  :global(.light-mode) .tech-twin-card {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.02) !important;
-  }
+  :global(.light-mode) .tech-card-left { background: color-mix(in srgb, var(--page-theme-color) 8%, rgba(255, 255, 255, 0.45)) !important; border: 1px solid color-mix(in srgb, var(--page-theme-color) 25%, rgba(0, 0, 0, 0.06)) !important; }
+  :global(.light-mode) .tech-card-right { background: rgba(255, 255, 255, 0.45) !important; border: 1px solid rgba(0, 0, 0, 0.08) !important; }
+  :global(.light-mode) .tech-twin-card { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.02) !important; }
   :global(.light-mode) .tech-card-hero-title, :global(.light-mode) .tech-card-framework-tag { color: #1d1d1f !important; }
   
-  /* 明亮模式下徽標色彩平權同步對齊 */
-  :global(.light-mode) .tech-card-left .tech-card-meta-tag, 
-  :global(.light-mode) .tech-card-left .tech-card-corner-logo { color: var(--page-theme-color) !important; }
+  /* 明亮模式下渠道高亮鎖定（Hover時名字精確追蹤主題色） */
+  :global(.light-mode) .social-name { color: #2c2c2e; }
+  :global(.light-mode) .social-glass-card:hover .social-name { color: var(--page-theme-color) !important; }
   
-  :global(.light-mode) .tech-card-right .tech-card-meta-tag,
-  :global(.light-mode) .tech-card-right .tech-card-corner-logo { color: #86868b !important; }
+  :global(.light-mode) .social-icon-wrapper :global(svg) { color: rgba(0, 0, 0, 0.55) !important; }
+  :global(.light-mode) .social-glass-card:hover .social-icon-wrapper :global(svg) { color: #000000 !important; }
   
+  /* 明亮模式下基於 0.72 霜白底座的真實主題色混色折射打亮 */
+  :global(.light-mode) .social-glass-card:hover { 
+    background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(255, 255, 255, 0.72)) !important; 
+    border-color: color-mix(in srgb, var(--page-theme-color) 35%, rgba(0, 0, 0, 0.06)) !important; 
+    box-shadow: inset 0 0 15px color-mix(in srgb, var(--page-theme-color) 30%, transparent), 0 20px 40px rgba(0, 0, 0, 0.08) !important;
+  }
+  :global(.light-mode) .wechat-reward-card:hover { 
+    background: color-mix(in srgb, var(--page-theme-color) 10%, rgba(255, 255, 255, 0.72)) !important; 
+    border-color: color-mix(in srgb, var(--page-theme-color) 30%, rgba(0, 0, 0, 0.06)) !important; 
+    box-shadow: inset 0 0 18px color-mix(in srgb, var(--page-theme-color) 25%, transparent), 0 25px 45px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  :global(.light-mode) .reward-caption { color: #86868b; }
+  :global(.light-mode) .qr-placeholder { color: rgba(0, 0, 0, 0.3); }
+
+  :global(.light-mode) .tech-card-left .tech-card-meta-tag, :global(.light-mode) .tech-card-left .tech-card-corner-logo { color: var(--page-theme-color) !important; }
+  :global(.light-mode) .tech-card-right .tech-card-meta-tag, :global(.light-mode) .tech-card-right .tech-card-corner-logo { color: #86868b !important; }
   :global(.light-mode) .tech-card-hero-zh, :global(.light-mode) .tech-card-question { color: #515154 !important; }
   :global(.light-mode) .tech-card-corner-logo { opacity: 0.35 !important; }
   :global(.light-mode) .tech-twin-card:hover .tech-card-corner-logo { opacity: 0.75 !important; }
-  
   :global(.light-mode) .tech-structured-doc { background: rgba(255, 255, 255, 0.45) !important; border-color: rgba(0,0,0,0.04) !important; }
   :global(.light-mode) .doc-text-paragraph { color: #2c2c2e !important; }
   :global(.light-mode) .tech-line-path { stroke: color-mix(in srgb, var(--page-theme-color) 35%, rgba(0, 0, 0, 0.12)) !important; }
 
-  /* 淺色投射平權 */
   .floating-dock-island { background: rgba(20, 20, 20, 0.35); }
   :global(.light-mode) .spotlight-container { mix-blend-mode: normal; }
-  :global(.light-mode) .spotlight {
-    background: conic-gradient(at top center,
-      transparent 0%,
-      transparent 43%,
-      color-mix(in srgb, var(--page-theme-color) 4%, transparent) 46.5%,
-      var(--page-theme-color) 50%, 
-      color-mix(in srgb, var(--page-theme-color) 4%, transparent) 53.5%,
-      transparent 57%,
-      transparent 100%
-    );
-  }
-
+  :global(.light-mode) .spotlight { background: conic-gradient(at top center, transparent 0%, transparent 43%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 46.5%, var(--page-theme-color) 50%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 53.5%, transparent 57%, transparent 100% ); }
   :global(.light-mode) .progress-percentage { color: var(--page-theme-color) !important; text-shadow: none; }
   :global(.light-mode) .dock-btn.active .dot { background: var(--page-theme-color) !important; box-shadow: 0 0 10px var(--page-theme-color) !important; }
-
   :global(.light-mode) .bento-mid-label-group .label-en { color: #86868b; }
   :global(.light-mode) .bento-mid-label-group .label-zh { color: #424245; }
   :global(.light-mode) .station-clock-wrapper { background: #eaeaea; border-color: rgba(0,0,0,0.06); box-shadow: inset 0 2px 10px rgba(0,0,0,0.06); }
@@ -927,20 +991,25 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   :global(.light-mode) .bento-divider { background: rgba(0, 0, 0, 0.06); }
   :global(.light-mode) .progress-bar-track { background: rgba(0, 0, 0, 0.05); }
   :global(.light-mode) .progress-mini-label { color: rgba(0, 0, 0, 0.35); }
-
   :global(.light-mode) .floating-dock-island { background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(0, 0, 0, 0.06); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06); }
   :global(.light-mode) .dock-btn { color: rgba(0, 0, 0, 0.4); }
   :global(.light-mode) .dock-btn:hover { color: rgba(0, 0, 0, 0.6); }
   :global(.light-mode) .dock-btn.active { color: #1d1d1f; background: rgba(0, 0, 0, 0.06); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.02); }
   :global(.light-mode) .dock-btn .dot { background: rgba(0, 0, 0, 0.2); flex-shrink: 0 !important; }
 
+  /* ========================================================
+     媒體查詢與響應式
+     ======================================================== */
   @media (max-width: 992px) {
-    .bento-container, .tech-cards-matrix { grid-template-columns: 1fr; height: auto; }
+    .bento-container, .tech-cards-matrix, .contact-layout-container { grid-template-columns: 1fr; height: auto; }
+    .social-links-grid { grid-template-columns: repeat(3, 1fr); }
     .bento-divider { margin: 15px 0; }
     .tech-tree-wrapper { display: none; }
+    .wechat-reward-card { margin-top: 15px; }
   }
   @media (max-width: 768px) {
     .skills-grid-wrapper, .deepdive-pillars-matrix { flex-direction: column; }
+    .social-links-grid { grid-template-columns: repeat(2, 1fr); }
     .stage-title-large, .tech-card-hero-title { font-size: 3.5rem; }
     .floating-dock-island { width: 92%; padding: 4px; bottom: 20px; }
     .dock-btn { padding: 8px 12px; } .dock-btn .label { font-size: 0.7rem; }
