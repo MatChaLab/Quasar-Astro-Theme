@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
               <path d="M12 10L6 20H18L12 10Z" fill="currentColor"/>
            </svg>`,
 
-// 🔴 全局主题色 (用于开屏小方块、光标等)
+// 全局主题色 (用于开屏小方块、光标等)
   themeColor: "#015EFB",
   
   // 底部左侧信息（高度定制化）
@@ -244,12 +244,12 @@ techStack: {
       { 
         name: "Gmail", 
         url: "mailto:Singyan.task@Gmail.com", 
-        iconSvg: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><filter id="gmail-clear-thin"><feMorphology operator="erode" radius="0.6"/></filter></defs><g filter="url(#gmail-clear-thin)" fill="currentColor" stroke="none" transform="matrix(0.2273, 0, 0, 0.2273, -9.8182, -5.0455)"><path d="M58 108h14V74L52 59v43c0 3.32 2.69 6 6 6"></path><path d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15"></path><path d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2"></path><path d="M72 74V48l24 18 24-18v26L96 92"></path><path d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2"></path></g></svg>`
+        iconSvg: `<svg viewBox="0 0 24 24" fill="none"><defs><filter id="gmail-clear-thin"><feMorphology operator="erode" radius="0.6"/></filter></defs><g filter="url(#gmail-clear-thin)" fill="currentColor" stroke="none" transform="matrix(0.2273, 0, 0, 0.2273, -9.8182, -5.0455)"><path d="M58 108h14V74L52 59v43c0 3.32 2.69 6 6 6"></path><path d="M120 108h14c3.32 0 6-2.69 6-6V59l-20 15"></path><path d="M120 48v26l20-15v-8c0-7.42-8.47-11.65-14.4-7.2"></path><path d="M72 74V48l24 18 24-18v26L96 92"></path><path d="M52 51v8l20 15V48l-5.6-4.2c-5.94-4.45-14.4-.22-14.4 7.2"></path></g></svg>`
       },
     ]
   },
 
-  // 🔴 悬浮 Dock 岛：改为中文，风格统一
+  // 🔴 悬浮 Dock 岛
   dockLabels: [
     { label: "个人能力", target: "0" },
     { label: "生活切片", target: "1" },
