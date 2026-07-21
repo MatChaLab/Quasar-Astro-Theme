@@ -1,0 +1,67 @@
+---
+// src/components/PerformanceGuard.astro
+import { NAVBAR_CONFIG } from '../config';
+---
+
+<div id="perf-store" data-warning={NAVBAR_CONFIG.perfWarning} style="display: none;"></div>
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    const store = document.getElementById('perf-store');
+    const warningText = store ? store.dataset.warning : '';
+    
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let lowFpsCount = 0;
+    let isMonitoring = true;
+    let forceHigh = false;
+    let checkTimeout;
+
+    setTimeout(() => {
+      if (!isMonitoring || forceHigh) return;
+      detectFps();
+    }, 3500);
+
+    function detectFps() {
+      function loop(time) {
+        if (!isMonitoring || forceHigh) return;
+        frameCount++;
+        
+        if (time >= lastTime + 1000) {
+          const fps = (frameCount * 1000) / (time - lastTime);
+          frameCount = 0;
+          lastTime = time;
+
+          if (fps < 42) {
+            lowFpsCount++;
+          } else {
+            lowFpsCount = Math.max(0, lowFpsCount - 1);
+          }
+
+          if (lowFpsCount >= 3) {
+            triggerDegrade();
+            return;
+          }
+        }
+        checkTimeout = requestAnimationFrame(loop);
+      }
+      checkTimeout = requestAnimationFrame(loop);
+    }
+
+    function triggerDegrade() {
+      isMonitoring = false;
+      window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
+        detail: { status: 'degraded', text: warningText }
+      }));
+    }
+
+    window.addEventListener('sinyan-perf-force', () => {
+      forceHigh = true;
+      isMonitoring = false;
+      cancelAnimationFrame(checkTimeout);
+      window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
+        detail: { status: 'high' }
+      }));
+    });
+  });
+</script>

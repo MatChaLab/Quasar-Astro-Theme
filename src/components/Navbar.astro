@@ -1,98 +1,154 @@
 ---
 // src/components/Navbar.astro
 import { SITE_CONFIG, NAVBAR_CONFIG } from '../config';
+import PerformanceGuard from './PerformanceGuard.astro';
 ---
 
-<header class="sinyan-navbar" define:vars={{ themeColor: SITE_CONFIG.themeColor }}>
-  
-  <!-- 将服务端配置转为 JSON 嵌入 HTML，让前端安全读取 -->
-  <div id="search-data-store" data-json={JSON.stringify(NAVBAR_CONFIG.searchData)} style="display: none;"></div>
+<header 
+  class="sinyan-navbar" 
+  id="sinyan-navbar-element" 
+  define:vars={{ themeColor: SITE_CONFIG.themeColor }}
+  data-restored={NAVBAR_CONFIG.perfRestored}
+  data-manual-degraded={NAVBAR_CONFIG.perfManualDegraded}
+  data-light={NAVBAR_CONFIG.themeLight}
+  data-dark={NAVBAR_CONFIG.themeDark}
+>
+ <div id="search-data-store" data-json={JSON.stringify(NAVBAR_CONFIG.searchData)} style="display: none;"></div>
+ <div class="liquid-glass-bg"></div>
 
-  <!-- iOS 级液态通透背景 -->
-  <div class="liquid-glass-bg"></div>
+ <div class="nav-container">
+   <!-- 左側區塊 -->
+   <div class="nav-left">
+     <a href="/" class="brand-link" id="nav-logo" title={SITE_CONFIG.title}>
+       <Fragment set:html={SITE_CONFIG.logoIconPath} />
+       <span class="brand-text">{SITE_CONFIG.title}</span>
+     </a>
+     <div class="loading-spinner" id="nav-spinner">
+       <svg viewBox="0 0 50 50" class="spinner-svg">
+         <circle cx="25" cy="25" r="20" fill="none" stroke-width="5" class="spinner-path"></circle>
+       </svg>
+     </div>
+     <div class="album-cache-status" id="album-cache-status">
+       <span class="status-divider">|</span>
+       <span class="status-text" id="status-text-display"></span>
+     </div>
+   </div>
 
-  <div class="nav-container">
-    <!-- 左侧 -->
-    <div class="nav-left">
-      <a href="/" class="brand-link" id="nav-logo" title={SITE_CONFIG.title}>
-        <Fragment set:html={SITE_CONFIG.logoIconPath} />
-        <span class="brand-text">{SITE_CONFIG.title}</span>
-      </a>
-      <!-- 加载圈 -->
-      <div class="loading-spinner" id="nav-spinner">
-        <svg viewBox="0 0 50 50" class="spinner-svg">
-          <circle cx="25" cy="25" r="20" fill="none" stroke-width="5" class="spinner-path"></circle>
-        </svg>
-      </div>
+   <!-- 中間內容包裝層 -->
+   <div class="nav-content-wrapper">
+     <!-- 標籤頁導航 -->
+     <nav class="nav-center" id="nav-center">
+       {NAVBAR_CONFIG.navItems.map((item) => (
+         <a href={item.url} class="nav-link">
+           <span class="link-text">{item.label}</span>
+         </a>
+       ))}
+     </nav>
 
-      <!-- 🔴 新增：相册高速缓存看板（平时静默隐藏，只有在相册页同步时平滑滑出） -->
-      <div class="album-cache-status" id="album-cache-status">
-        <span class="status-divider">|</span>
-        <span class="status-text" id="status-text-display"></span>
-      </div>
-    </div>
+     <!-- 動態提示語面板（內嵌倒計時圓圈） -->
+     <div class="perf-warning-notice" id="nav-perf-alert">
+       <div class="countdown-circle-wrapper">
+         <svg class="countdown-svg" viewBox="0 0 20 20">
+           <circle class="countdown-bg" cx="10" cy="10" r="8"></circle>
+           <circle class="countdown-bar" id="countdown-circle-bar" cx="10" cy="10" r="8"></circle>
+         </svg>
+       </div>
+       <span id="perf-alert-text"></span>
+     </div>
 
-    <div class="nav-content-wrapper">
-      <nav class="nav-center" id="nav-center">
-        {NAVBAR_CONFIG.navItems.map((item) => (
-          <a href={item.url} class="nav-link ajax-link">
-            <span class="link-text">{item.label}</span>
-          </a>
-        ))}
-      </nav>
+     <!-- 搜尋框 -->
+     <div class="search-box-wrapper" id="search-box-wrapper">
+       <input type="text" class="search-input" id="search-input" placeholder={NAVBAR_CONFIG.searchBox} autocomplete="off" />
+       <div class="search-results-panel" id="search-results-panel"></div>
+     </div>
+   </div>
 
-      <!-- 搜索框 -->
-      <div class="search-box-wrapper" id="search-box-wrapper">
-        <input 
-          type="text" 
-          class="search-input" 
-          id="search-input"
-          placeholder={NAVBAR_CONFIG.searchBox}
-          autocomplete="off"
-        />
-        <!-- 搜索结果面板 -->
-        <div class="search-results-panel" id="search-results-panel"></div>
-      </div>
-    </div>
+   <!-- 右側區塊（按鈕排序：搜尋 -> 主題 -> 性能） -->
+   <div class="nav-right">
+     <!-- 1. 搜尋按鈕 -->
+     <button class="icon-btn search-trigger" id="search-trigger-btn" aria-label="Toggle Search">
+       <svg viewBox="0 0 24 24" fill="none" class="action-icon" xmlns="http://www.w3.org/2000/svg">
+         <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+       </svg>
+     </button>
 
-    <!-- 右侧 -->
-    <div class="nav-right">
-      <button class="icon-btn search-trigger" id="search-trigger-btn" aria-label="Toggle Search">
-        <svg viewBox="0 0 24 24" fill="none" class="action-icon" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
+     <!-- 2. 日夜模式按鈕 -->
+     <button class="icon-btn theme-toggle" id="theme-toggle-btn" aria-label="Toggle Theme">
+       <svg viewBox="0 0 24 24" fill="none" class="action-icon icon-sun" xmlns="http://www.w3.org/2000/svg">
+         <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2,35"/>
+         <path d="M12 2V4M12 20V22M4 12H2M22 12H20M19.0711 19.0711L17.6569 17.6569M6.34315 6.34315L4.92893 4.92893M19.0711 4.92893L17.6569 6.34315M6.34315 17.6569L4.92893 19.0711" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+       </svg>
+       <svg viewBox="0 0 24 24" fill="none" class="action-icon icon-moon" xmlns="http://www.w3.org/2000/svg">
+         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+       </svg>
+     </button>
 
-      <button class="icon-btn theme-toggle" id="theme-toggle-btn" aria-label="Toggle Theme">
-        <svg viewBox="0 0 24 24" fill="none" class="action-icon icon-sun" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2,35"/>
-          <path d="M12 2V4M12 20V22M4 12H2M22 12H20M19.0711 19.0711L17.6569 17.6569M6.34315 6.34315L4.92893 4.92893M19.0711 4.92893L17.6569 6.34315M6.34315 17.6569L4.92893 19.0711" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <svg viewBox="0 0 24 24" fill="none" class="action-icon icon-moon" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </div>
-  </div>
+     <!-- 3. 性能切換按鈕 -->
+     <button class="icon-btn perf-status-toggle" id="perf-toggle-btn" aria-label="Toggle Animation Quality">
+       <!-- 正常打勾圓圈 -->
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon icon-perf-check" stroke-linecap="round" stroke-linejoin="round">
+         <circle cx="12" cy="12" r="10"/><path d="M22 4L12 14.01l-3-3"/>
+       </svg>
+       <!-- 降級三角形警告 -->
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon icon-perf-warn" stroke-linecap="round" stroke-linejoin="round">
+         <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+       </svg>
+     </button>
+   </div>
+ </div>
 
-  <div class="nav-progress-bar" id="nav-progress"></div>
+ <div class="nav-progress-bar" id="nav-progress"></div>
+ 
+ <PerformanceGuard />
 </header>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" is:inline></script>
 
 <script is:inline>
-  document.addEventListener('DOMContentLoaded', () => {
-    const storeEl = document.getElementById('search-data-store');
-    const searchData = storeEl && storeEl.dataset.json ? JSON.parse(storeEl.dataset.json) : [];
-
-    // --- 搜索框交互逻辑 ---
+  document.addEventListener('astro:page-load', () => {
     const searchTrigger = document.getElementById('search-trigger-btn');
     const searchWrapper = document.getElementById('search-box-wrapper');
     const searchInput = document.getElementById('search-input');
-    const resultsPanel = document.getElementById('search-results-panel');
     const navCenter = document.getElementById('nav-center');
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    
+    const navbarMain = document.getElementById('sinyan-navbar-element');
+    const perfBtn = document.getElementById('perf-toggle-btn');
+    const perfAlert = document.getElementById('nav-perf-alert');
+    const perfAlertText = document.getElementById('perf-alert-text');
+    const countdownBar = document.getElementById('countdown-circle-bar');
     
     let isSearchOpen = false;
+    let alertTimer = null;
+
+    function triggerNavbarNotice(msg, duration = 4000, isRedAlert = false) {
+      if (perfAlertText) perfAlertText.innerText = msg;
+      clearTimeout(alertTimer);
+
+      if (isRedAlert) {
+        perfAlert.classList.add('is-red-warning');
+      } else {
+        perfAlert.classList.remove('is-red-warning');
+      }
+
+      if (countdownBar) {
+        gsap.killTweensOf(countdownBar);
+        gsap.set(countdownBar, { strokeDashoffset: 0 });
+        gsap.to(countdownBar, {
+          strokeDashoffset: 50.26,
+          duration: duration / 1000,
+          ease: "none"
+        });
+      }
+
+      gsap.to(navCenter, { opacity: 0, scale: 0.98, pointerEvents: 'none', duration: 0.35, ease: "power2.out" });
+      gsap.to(perfAlert, { opacity: 1, scale: 1, pointerEvents: 'auto', duration: 0.35, ease: "power2.out" });
+
+      alertTimer = setTimeout(() => {
+        gsap.to(perfAlert, { opacity: 0, scale: 0.98, pointerEvents: 'none', duration: 0.35, ease: "power2.in" });
+        gsap.to(navCenter, { opacity: 1, scale: 1, pointerEvents: 'auto', duration: 0.35, ease: "power2.out" });
+      }, duration);
+    }
 
     searchTrigger.addEventListener('mouseenter', () => {
       if (!isSearchOpen) {
@@ -108,257 +164,116 @@ import { SITE_CONFIG, NAVBAR_CONFIG } from '../config';
         isSearchOpen = false;
         gsap.to(searchWrapper, { width: 0, opacity: 0, duration: 0.4, ease: "expo.in" });
         gsap.to(navCenter, { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" });
-        resultsPanel.classList.remove('active'); 
         searchInput.value = ''; 
       }
     });
 
-    // --- 异步 Ajax 搜索筛选 ---
-    searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.trim().toLowerCase();
-      if (query.length < 1) {
-        resultsPanel.classList.remove('active');
-        return;
-      }
-
-      const results = searchData.filter(item => 
-        item.title.toLowerCase().includes(query) || 
-        item.type.toLowerCase().includes(query)
-      );
-
-      if (results.length > 0) {
-        resultsPanel.innerHTML = results.map(item => `
-          <a href="${item.url}" class="result-item ajax-link">
-            <span class="result-type">${item.type}</span>
-            <span class="result-title">${item.title}</span>
-          </a>
-        `).join('');
-      } else {
-        resultsPanel.innerHTML = '<div class="result-empty">找不到该内容</div>';
-      }
-      resultsPanel.classList.add('active');
-    });
-
-    // --- AJAX 伪进度条导航 ---
-    const progressBar = document.getElementById('nav-progress');
-    const spinner = document.getElementById('nav-spinner');
-
-    function startProgress(e, link) {
-        if (e.metaKey || e.ctrlKey || link.host !== window.location.host) return;
-        e.preventDefault(); 
-        const targetUrl = link.href;
-
-        spinner.classList.add('active');
-        progressBar.style.opacity = '1';
-        progressBar.style.width = '0%';
-        
-        setTimeout(() => {
-          progressBar.style.transition = 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-          progressBar.style.width = '70%';
-        }, 10);
-
-        setTimeout(() => {
-          progressBar.style.transition = 'width 0.2s ease-out';
-          progressBar.style.width = '100%';
-          setTimeout(() => { window.location.assign(targetUrl); }, 200);
-        }, 350); 
-    }
-
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('.ajax-link');
-      if (link) { startProgress(e, link); }
-    });
-
-    // --- 🔴 新增：联动相册页的 "sinyan-album-sync" 全局缓存总线事件 ---
-    const statusTextEl = document.getElementById('status-text-display');
-    const statusContainer = document.getElementById('album-cache-status');
-
-    window.addEventListener('sinyan-album-sync', (e) => {
-      const { showing, cached, isBuffering } = e.detail;
+    window.addEventListener('sinyan-perf-status', (e) => {
+      const { status, text } = e.detail;
       
-      if (statusTextEl && statusContainer) {
-        statusContainer.classList.add('active');
-        statusTextEl.innerText = `DISPLAY ${showing} / CACHED ${cached}`;
-      }
-
-      // 如果相册页在预加载/缓存中，加载圈旋转起来
-      if (isBuffering) {
-        spinner.classList.add('active');
-      } else {
-        // 只有在非页面加载进度条触发的状态下，才安全移除 active 类
-        if (progressBar.style.opacity !== '1') {
-          spinner.classList.remove('active');
-        }
+      if (status === 'degraded') {
+        navbarMain.classList.add('perf-degraded');
+        window.dispatchEvent(new CustomEvent('earth-quality-engine', { detail: { mode: 'low' } }));
+        triggerNavbarNotice(text, 7000, true);
+      } else if (status === 'high') {
+        navbarMain.classList.remove('perf-degraded');
+        window.dispatchEvent(new CustomEvent('earth-quality-engine', { detail: { mode: 'high' } }));
+        triggerNavbarNotice(navbarMain.dataset.restored, 4000, false);
       }
     });
 
-    // --- 日夜模式无缝切换 ---
-    const themeBtn = document.getElementById('theme-toggle-btn');
-    const htmlEl = document.documentElement;
-    
-    if (localStorage.getItem('theme') === 'light') { 
-      htmlEl.classList.add('light-mode'); 
+    if (perfBtn) {
+      perfBtn.addEventListener('click', () => {
+        const isCurrentlyDegraded = navbarMain.classList.contains('perf-degraded');
+        if (isCurrentlyDegraded) {
+          window.dispatchEvent(new CustomEvent('sinyan-perf-force'));
+        } else {
+          // ── 修正：手動降低動畫效果的文字已改為讀取 data 屬性設定 ──
+          window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
+            detail: { status: 'degraded', text: navbarMain.dataset.manualDegraded }
+          }));
+        }
+        gsap.fromTo(perfBtn, { scale: 0.8 }, { scale: 1, duration: 0.4, ease: "back.out(2)" });
+      });
     }
 
     themeBtn.addEventListener('click', () => {
-      htmlEl.classList.toggle('light-mode');
-      const isLight = htmlEl.classList.contains('light-mode');
+      document.documentElement.classList.toggle('light-mode');
+      const isLight = document.documentElement.classList.contains('light-mode');
       localStorage.setItem('theme', isLight ? 'light' : 'dark');
-      
       gsap.fromTo(themeBtn, { scale: 0.8 }, { scale: 1, duration: 0.3, ease: "elastic.out(1.5, 0.5)" });
+      
+      const noticeMsg = isLight ? navbarMain.dataset.light : navbarMain.dataset.dark;
+      triggerNavbarNotice(noticeMsg, 3500, false);
     });
   });
 </script>
 
 <style>
-  /* =========================================
-     核心布局
-  ========================================= */
-  .sinyan-navbar { position: fixed; top: 0; left: 0; width: 100vw; height: 72px; z-index: 100; font-family: 'Noto Sans SC', sans-serif; }
+ .sinyan-navbar { position: fixed; top: 0; left: 0; width: 100vw; height: 72px; z-index: 100; font-family: 'Noto Sans SC', sans-serif; }
+ .liquid-glass-bg { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(32px) saturate(210%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); pointer-events: none; z-index: 1; mix-blend-mode: color-dodge; transition: background 0.4s ease, mix-blend-mode 0.4s ease; }
+ .nav-container { position: relative; z-index: 2; max-width: 90%; margin: 0 auto; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
+ 
+ .nav-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+ .brand-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #ffffff; transition: opacity 0.2s ease; flex-shrink: 0; }
+ .brand-link svg, :global(.brand-link svg) { width: 22px; height: 22px; flex-shrink: 0; display: block; }
+ .brand-text { font-weight: 900; font-size: 1.15rem; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0; }
+ 
+ .loading-spinner { width: 16px; height: 16px; opacity: 0; transform: scale(0.5); transition: all 0.3s ease; }
+ .album-cache-status { display: flex; align-items: center; gap: 12px; opacity: 0; transform: translateX(-10px); }
+ .status-divider { color: rgba(255, 255, 255, 0.15); font-weight: 300; }
+ .status-text { font-family: 'Plus Jakarta Sans', monospace; font-size: 0.65rem; font-weight: 700; color: var(--themeColor); }
+ 
+ .nav-content-wrapper { display: flex; align-items: center; justify-content: center; position: relative; flex: 1; height: 100%; }
+ .nav-center { display: flex; align-items: center; gap: 32px; transition: all 0.35s ease; will-change: transform, opacity; }
+ 
+ .perf-warning-notice { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.98); width: max-content; pointer-events: none; opacity: 0; font-size: 0.85rem; font-weight: 500; color: #ffffff; letter-spacing: 0.02em; text-shadow: 0 0 12px rgba(255, 255, 255, 0.1); will-change: transform, opacity; display: flex; align-items: center; gap: 8px; }
+ .perf-warning-notice.is-red-warning { color: #ff3e18 !important; text-shadow: 0 0 12px rgba(255, 62, 24, 0.2) !important; }
 
-  /* 液态玻璃 */
-  .liquid-glass-bg {
-    position: absolute; inset: 0;
-    background: rgba(255, 255, 255, 0.05); 
-    backdrop-filter: blur(32px) saturate(210%); 
-    -webkit-backdrop-filter: blur(32px) saturate(210%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    pointer-events: none; z-index: 1;
-    mix-blend-mode: color-dodge;
-    transition: background 0.4s ease, mix-blend-mode 0.4s ease;
-  }
+ .countdown-circle-wrapper { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; position: relative; }
+ .countdown-svg { width: 16px; height: 16px; transform: rotate(-90deg); }
+ .countdown-bg { fill: none; stroke: rgba(255, 255, 255, 0.15); stroke-width: 2.5; }
+ :global(.light-mode) .countdown-bg { stroke: rgba(0, 0, 0, 0.08); }
+ .countdown-bar { fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 50.26; stroke-dashoffset: 0; }
 
-  .nav-container { position: relative; z-index: 2; max-width: 90%; margin: 0 auto; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
+ .nav-link { position: relative; text-decoration: none; color: #999999; font-size: 0.85rem; font-weight: 500; padding: 8px 0; transition: color 0.3s ease; }
+ .nav-link:hover { color: #ffffff; }
+ .nav-link::after { content: ''; position: absolute; bottom: 2px; left: 0; width: 100%; height: 1.5px; background-color: #ffffff; transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease; }
+ .nav-link:hover::after { transform: scaleX(1); }
+ .search-box-wrapper { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 0; height: 36px; opacity: 0; z-index: 10; display: flex; align-items: center; pointer-events: none; }
+ .search-box-wrapper[style*="width: 360px"] { pointer-events: auto; }
+ .search-input { width: 100%; height: 100%; background: rgba(255, 255, 255, 0.08); border: none; border-radius: 18px; padding: 0 16px; color: #ffffff; font-size: 0.85rem; outline: none; border: 1px solid rgba(255, 255, 255, 0.06); }
+ .search-results-panel { position: absolute; top: calc(100% + 10px); left: 0; width: 100%; max-height: 0; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(16px); border-radius: 12px; opacity: 0; transition: all 0.4s ease; }
+ 
+ .nav-right { display: flex; align-items: center; gap: 16px; position: relative; z-index: 5; }
+ .icon-btn { background: transparent; border: none; color: #cccccc; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; position: relative; }
+ .icon-btn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
+ .action-icon { width: 18px; height: 18px; }
+ 
+ .perf-status-toggle .icon-perf-check { display: block; color: var(--themeColor); }
+ .perf-status-toggle .icon-perf-warn { display: none; color: #ff3e18; }
+ .sinyan-navbar.perf-degraded .perf-status-toggle .icon-perf-check { display: none; }
+ .sinyan-navbar.perf-degraded .perf-status-toggle .icon-perf-warn { display: block; }
 
-  /* 左侧 */
-  .nav-left { display: flex; align-items: center; gap: 12px; }
-  .brand-link { display: flex; align-items: center; gap: 8px; text-decoration: none; color: #ffffff; transition: opacity 0.2s ease; }
-  .brand-link:hover { opacity: 0.8; }
-  :global(.brand-icon) { width: 22px; height: 22px; }
-  .brand-text { font-weight: 900; font-size: 1.15rem; letter-spacing: 0.02em; }
+ .theme-toggle .icon-sun, .theme-toggle .icon-moon { position: absolute; }
+ .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
+ .nav-progress-bar { position: absolute; bottom: -1px; left: 0; height: 2px; width: 0%; background: var(--themeColor); opacity: 0; }
 
-  /* 加载圈 */
-  .loading-spinner { width: 16px; height: 16px; opacity: 0; transform: scale(0.5); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-  .loading-spinner.active { opacity: 1; transform: scale(1); }
-  .spinner-svg { animation: rotate 2s linear infinite; width: 100%; height: 100%; }
-  .spinner-path { stroke: var(--themeColor); stroke-linecap: round; animation: dash 1.5s ease-in-out infinite; }
-  @keyframes rotate { 100% { transform: rotate(360deg); } }
-  @keyframes dash { 0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; } 50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; } 100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; } }
-
-  /* 🔴 新增：缓存状态面板样式 */
-  .album-cache-status {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    opacity: 0;
-    transform: translateX(-10px);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .album-cache-status.active {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  .status-divider { color: rgba(255, 255, 255, 0.15); font-weight: 300; }
-  .status-text {
-    font-family: 'Plus Jakarta Sans', monospace;
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: var(--themeColor);
-    letter-spacing: 0.1em;
-    text-shadow: 0 0 10px rgba(1, 94, 251, 0.2);
-  }
-
-  /* 中间包装器 */
-  .nav-content-wrapper { display: flex; align-items: center; gap: 32px; position: relative; }
-
-  /* 标签页 */
-  .nav-center { display: flex; align-items: center; gap: 32px; transition: all 0.3s ease; will-change: transform, opacity; }
-  .nav-link { position: relative; text-decoration: none; color: #999999; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.05em; padding: 8px 0; transition: color 0.3s ease; }
-  .nav-link:hover { color: #ffffff; }
-  .nav-link::after { content: ''; position: absolute; bottom: 2px; left: 0; width: 100%; height: 1.5px; background-color: #ffffff; transform: scaleX(0); transform-origin: left; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-  .nav-link:hover::after { transform: scaleX(1); }
-
-  /* 搜索框 (不占空间) */
-  .search-box-wrapper {
-    position: absolute;
-    right: -20px; 
-    width: 0;
-    height: 36px;
-    opacity: 0;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    pointer-events: none;
-    overflow: visible; 
-  }
-
-  .search-box-wrapper[style*="width: 125%"], 
-  .search-box-wrapper:focus-within { pointer-events: auto; }
-
-  .search-input { width: 100%; height: 100%; background: rgba(255, 255, 255, 0.08); border: none; border-radius: 18px; padding: 0 16px; color: #ffffff; font-size: 0.85rem; outline: none; border: 1px solid rgba(255, 255, 255, 0.06); transition: background 0.3s ease, border-color 0.3s ease; }
-  .search-input:focus { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.2); }
-
-  /* 搜索结果面板 */
-  .search-results-panel { position: absolute; top: calc(100% + 10px); left: 0; width: 100%; max-height: 0; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(16px); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06); overflow: hidden; transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); z-index: 10; }
-  .search-results-panel.active { max-height: 300px; opacity: 1; transform: translateY(0); overflow-y: auto; }
-  .result-item { display: flex; flex-direction: column; padding: 12px 16px; text-decoration: none; color: #aaaaaa; transition: background 0.2s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.03); }
-  .result-item:last-child { border-bottom: none; }
-  .result-item:hover { background: rgba(255, 255, 255, 0.05); color: #ffffff; }
-  .result-type { font-size: 0.65rem; color: #888888; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
-  .result-title { font-size: 0.85rem; }
-  .result-empty { padding: 16px; text-align: center; color: #666666; font-size: 0.8rem; }
-
-  /* 右侧按钮 */
-  .nav-right { display: flex; align-items: center; gap: 16px; position: relative; z-index: 5; }
-  .icon-btn { background: transparent; border: none; color: #cccccc; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; position: relative; }
-  .icon-btn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
-  .action-icon { width: 18px; height: 18px; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease; }
-  .theme-toggle .icon-sun, .theme-toggle .icon-moon { position: absolute; }
-  .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
-
-  /* 进度条 */
-  .nav-progress-bar { position: absolute; bottom: -1px; left: 0; height: 2px; width: 0%; background: var(--themeColor); z-index: 3; opacity: 0; box-shadow: 0 0 10px var(--themeColor); }
-
-  /* =========================================
-     全局光影翻转魔法 (Light Mode)
-  ========================================= */
-  :global(.light-mode) body { background-color: #f5f5f7 !important; color: #1d1d1f !important; }
-
-  /* 改变主页银河文字 -> Apple 高级钛金属字 */
-  :global(.light-mode) .main-title { 
-    background: linear-gradient(180deg, #1d1d1f 40%, #86868b 100%) !important; 
-    -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; 
-  }
-  :global(.light-mode) .subtitle { color: #86868b !important; }
-  :global(.light-mode) .studio-card { color: #1d1d1f !important; }
-  :global(.light-mode) .bio-title { color: #1d1d1f !important; }
-  :global(.light-mode) .bio-desc, :global(.light-mode) .studio-details { color: #86868b !important; }
-
-  /* Navbar 白昼形态 */
-  :global(.light-mode) .liquid-glass-bg {
-    background: rgba(255, 255, 255, 0.75); 
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    mix-blend-mode: normal; 
-    backdrop-filter: blur(32px) saturate(210%);
-  }
-  
-  :global(.light-mode) .brand-link { color: #000000; }
-  :global(.light-mode) .nav-link { color: #555555; }
-  :global(.light-mode) .nav-link:hover { color: #000000; }
-  :global(.light-mode) .nav-link::after { background-color: #000000; }
-  
-  :global(.light-mode) .search-input { background: rgba(0, 0, 0, 0.05); color: #000000; border: 1px solid rgba(0, 0, 0, 0.06); }
-  :global(.light-mode) .search-input:focus { background: rgba(0, 0, 0, 0.08); border-color: rgba(0, 0, 0, 0.15); }
-  
-  :global(.light-mode) .search-results-panel { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(0, 0, 0, 0.08); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
-  :global(.light-mode) .result-item { color: #555555; border-bottom: 1px solid rgba(0, 0, 0, 0.04); }
-  :global(.light-mode) .result-item:hover { background: rgba(0, 0, 0, 0.04); color: #000000; }
-
-  :global(.light-mode) .icon-btn { color: #333333; }
-  :global(.light-mode) .icon-btn:hover { background: rgba(0, 0, 0, 0.06); color: #000000; }
-  :global(.light-mode) .theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
-  :global(.light-mode) .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
-
-  /* 🔴 新增：白昼模式下缓存看板的分割线颜色适配 */
-  :global(.light-mode) .status-divider { color: rgba(0, 0, 0, 0.1); }
+ /* ── 明亮模式優化區塊 ── */
+ :global(.light-mode) body { background-color: #f5f5f7 !important; color: #1d1d1f !important; }
+ :global(.light-mode) .liquid-glass-bg { background: rgba(255, 255, 255, 0.75); border-bottom: 1px solid rgba(0, 0, 0, 0.08); mix-blend-mode: normal; backdrop-filter: blur(32px) saturate(210%); }
+ :global(.light-mode) .brand-link { color: #1d1d1f; }
+ :global(.light-mode) .nav-link { color: #555555; }
+ :global(.light-mode) .nav-link:hover { color: #000000; }
+ :global(.light-mode) .nav-link::after { background-color: #000000; }
+ 
+ :global(.light-mode) .perf-warning-notice { color: #1d1d1f; text-shadow: none; }
+ 
+ :global(.light-mode) .icon-btn { color: #1d1d1f !important; opacity: 1 !important; }
+ :global(.light-mode) .icon-btn:hover { background: rgba(0, 0, 0, 0.06); color: #000000 !important; }
+ :global(.light-mode) .action-icon { color: #1d1d1f !important; opacity: 1 !important; }
+ 
+ :global(.light-mode) .theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+ :global(.light-mode) .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
+ :global(.light-mode) .status-divider { color: rgba(0, 0, 0, 0.1); }
 </style>
