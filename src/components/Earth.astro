@@ -435,7 +435,7 @@ import { EARTH_CONFIG } from '../config';
     if (document.documentElement.classList.contains('light-mode')) {
       globeMaterial.uniforms.uSaturation.value = 1.618;
       cloudMaterial.uniforms.uSaturation.value = 1.618;
-      atmosphereMaterial.uniforms.uSaturation.value = 1.618;
+      atmosphereMaterial.uniforms.uSaturation.value = 1.0618;
       globeMaterial.uniforms.uIsLightMode.value = 1.0;
       cloudMaterial.uniforms.uIsLightMode.value = 1.0;
       renderer.toneMappingExposure = 1.80;

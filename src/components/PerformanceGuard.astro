@@ -6,62 +6,105 @@ import { NAVBAR_CONFIG } from '../config';
 <div id="perf-store" data-warning={NAVBAR_CONFIG.perfWarning} style="display: none;"></div>
 
 <script is:inline>
-  document.addEventListener('astro:page-load', () => {
-    const store = document.getElementById('perf-store');
-    const warningText = store ? store.dataset.warning : '';
-    
-    let frameCount = 0;
-    let lastTime = performance.now();
-    let lowFpsCount = 0;
-    let isMonitoring = true;
-    let forceHigh = false;
-    let checkTimeout;
-
-    setTimeout(() => {
-      if (!isMonitoring || forceHigh) return;
-      detectFps();
-    }, 3500);
-
-    function detectFps() {
-      function loop(time) {
-        if (!isMonitoring || forceHigh) return;
-        frameCount++;
-        
-        if (time >= lastTime + 1000) {
-          const fps = (frameCount * 1000) / (time - lastTime);
-          frameCount = 0;
-          lastTime = time;
-
-          if (fps < 42) {
-            lowFpsCount++;
-          } else {
-            lowFpsCount = Math.max(0, lowFpsCount - 1);
-          }
-
-          if (lowFpsCount >= 3) {
-            triggerDegrade();
-            return;
-          }
-        }
-        checkTimeout = requestAnimationFrame(loop);
-      }
-      checkTimeout = requestAnimationFrame(loop);
+  // 🟢 全局状态同步：确保路由切换与初始加载时瞬间恢复 CSS 样式
+  const syncPerfState = () => {
+    const perfState = sessionStorage.getItem('sinyan-perf');
+    if (perfState === 'degraded') {
+      document.documentElement.classList.add('perf-degraded');
+      const nav = document.getElementById('sinyan-navbar-element');
+      if (nav) nav.classList.add('perf-degraded');
+    } else if (perfState === 'high') {
+      document.documentElement.classList.remove('perf-degraded');
+      const nav = document.getElementById('sinyan-navbar-element');
+      if (nav) nav.classList.remove('perf-degraded');
     }
+  };
 
-    function triggerDegrade() {
-      isMonitoring = false;
-      window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
-        detail: { status: 'degraded', text: warningText }
-      }));
-    }
+  // 1. 初始化同步
+  syncPerfState();
+  // 2. 无刷新切换 DOM 后瞬间同步样式
+  document.addEventListener('astro:after-swap', syncPerfState);
 
+  if (!window._perfGuardInitialized) {
+    window._perfGuardInitialized = true;
+
+    // 🟢 将切回高性能模式的监听器提到最外层：保证无论当前是否处于降级状态，随时都能接收切换指令
     window.addEventListener('sinyan-perf-force', () => {
-      forceHigh = true;
-      isMonitoring = false;
-      cancelAnimationFrame(checkTimeout);
+      sessionStorage.setItem('sinyan-perf', 'high');
+      document.documentElement.classList.remove('perf-degraded');
+      const nav = document.getElementById('sinyan-navbar-element');
+      if (nav) nav.classList.remove('perf-degraded');
+      
       window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
         detail: { status: 'high' }
       }));
     });
-  });
+
+    document.addEventListener('astro:page-load', () => {
+      syncPerfState();
+
+      const store = document.getElementById('perf-store');
+      const warningText = store ? store.dataset.warning : '';
+      
+      let frameCount = 0;
+      let lastTime = performance.now();
+      let lowFpsCount = 0;
+      let isMonitoring = true;
+      let checkTimeout;
+
+      // 若已经处于自动/手动设置的状态，通知渲染引擎即可，不再启动后台 FPS 监测
+      const currentPerf = sessionStorage.getItem('sinyan-perf');
+      if (currentPerf === 'degraded') {
+        window.dispatchEvent(new CustomEvent('earth-quality-engine', { detail: { mode: 'low' } }));
+        return;
+      } else if (currentPerf === 'high') {
+        window.dispatchEvent(new CustomEvent('earth-quality-engine', { detail: { mode: 'high' } }));
+        return;
+      }
+
+      // 首次加载且未记录模式时，延时启动 FPS 帧率监测
+      setTimeout(() => {
+        if (!isMonitoring) return;
+        detectFps();
+      }, 3500);
+
+      function detectFps() {
+        function loop(time) {
+          if (!isMonitoring) return;
+          frameCount++;
+          
+          if (time >= lastTime + 1000) {
+            const fps = (frameCount * 1000) / (time - lastTime);
+            frameCount = 0;
+            lastTime = time;
+
+            if (fps < 42) {
+              lowFpsCount++;
+            } else {
+              lowFpsCount = Math.max(0, lowFpsCount - 1);
+            }
+
+            if (lowFpsCount >= 3) {
+              triggerDegrade();
+              return;
+            }
+          }
+          checkTimeout = requestAnimationFrame(loop);
+        }
+        checkTimeout = requestAnimationFrame(loop);
+      }
+
+      function triggerDegrade() {
+        isMonitoring = false;
+        sessionStorage.setItem('sinyan-perf', 'degraded');
+        document.documentElement.classList.add('perf-degraded');
+        const nav = document.getElementById('sinyan-navbar-element');
+        if (nav) nav.classList.add('perf-degraded');
+
+        window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
+          detail: { status: 'degraded', text: warningText }
+        }));
+      }
+    });
+  }
 </script>

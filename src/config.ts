@@ -11,6 +11,7 @@ export const SITE_CONFIG = {
 
 // 全局主题色 (用于开屏小方块、光标等)
   themeColor: "#015EFB",
+    // themeColor: "#FFFFFF",
   
   // 底部左侧信息（高度定制化）
   bioHeader: "Hello, Here is Singyan",

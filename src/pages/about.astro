@@ -1,6 +1,7 @@
 ---
 // src/pages/about.astro
 import { SITE_CONFIG, ABOUT_CONFIG } from '../config';
+import { ClientRouter } from 'astro:transitions'; 
 import Navbar from '../components/Navbar.astro';
 import Earth from '../components/Earth.astro';
 
@@ -21,9 +22,10 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   <title>About | {SITE_CONFIG.title}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght=300;400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
-  <!-- 建立原生全局CSS變量，確保亮暗調色全鏈路不丟失 -->
+  <ClientRouter />
+
   <style is:inline set:html={`
     :root {
       --page-theme-color: ${SITE_CONFIG.themeColor};
@@ -34,16 +36,13 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
 
   <Navbar />
   
-  <!-- 地球圖層完美下沉至 72.5vh -->
   <div class="earth-horizon-layer">
-    <Earth />
+    <Earth transition:persist="earth-canvas" />
   </div>
 
   <main class="about-cinematic-viewport opacity-0">
     
-    <!-- ========================================================
-         階段 1：核心能力卡
-         ======================================================== -->
+    <!-- 階段 1：核心能力卡 -->
     <section class="story-stage active" id="stage-capabilities">
       <div class="stage-inner flex-center">
         <div class="avatar-wrapper anim-s1-avatar">
@@ -65,9 +64,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       </div>
     </section>
 
-    <!-- ========================================================
-         階段 2：項目矩陣圖塊雲
-         ======================================================== -->
+    <!-- 階段 2：項目矩陣圖塊雲 -->
     <section class="story-stage" id="stage-mosaic">
       <div class="stage-inner flex-center">
         <div class="mosaic-content-holder">
@@ -87,12 +84,9 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       </div>
     </section>
 
-    <!-- ========================================================
-         階段 3：深度看板樣式 (Growth Edge 自我進化內核)
-         ======================================================== -->
+    <!-- 階段 3：深度看板樣式 -->
     <section class="story-stage" id="stage-deepdive">
       <div class="stage-inner flex-center">
-        <!-- 劇場級錐形聚光燈艙 -->
         <div class="spotlight-container">
           <div class="spotlight" id="spotlight-1"></div>
           <div class="spotlight" id="spotlight-2"></div>
@@ -116,9 +110,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       </div>
     </section>
 
-    <!-- ========================================================
-         階段 4：Bento 模組化退休倒計時
-         ======================================================== -->
+    <!-- 階段 4：Bento 模組化退休倒計時 -->
     <section 
       class="story-stage" 
       id="stage-retirement" 
@@ -127,7 +119,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
     >
       <div class="stage-inner flex-center">
         
-        <div class="retirement-content-holder">
+        <div class="retirement-content-holder anim-s4-title-fade">
           <h2 class="retirement-main-header">{ABOUT_CONFIG.retirement.title}</h2>
           <p class="retirement-main-sub">{ABOUT_CONFIG.retirement.subtitle}</p>
         </div>
@@ -135,7 +127,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
         <div class="bento-container">
           
           <!-- 左側 -->
-          <div class="bento-card bento-left anim-s4-left">
+          <div class="bento-card bento-left anim-s4-card-unit">
             <div class="bento-left-brand">
               <span class="brand-en">{leftTitleEn}</span>
               {leftTitleZh && <span class="brand-zh">{leftTitleZh}</span>}
@@ -143,51 +135,54 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             <p class="bento-left-desc">{ABOUT_CONFIG.retirement.description}</p>
           </div>
 
-          <!-- 中間：分行響應式 + 線框 Icon -->
+          <!-- 中間 -->
           <div class="bento-middle-column">
             <!-- 年份 -->
-            <div class="bento-card bento-mid-row anim-s4-mid">
-              <div class="bento-mid-value-group">
-                <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                <span class="countdown-value" id="val-year">00</span>
-              </div>
-              <div class="bento-mid-label-group">
-                <span class="label-en">{yearEn}</span>
-                <span class="label-zh">{yearZh}</span>
+            <div class="bento-mid-row">
+              <div class="bento-mid-row-inner anim-s4-card-unit">
+                <div class="bento-mid-value-group">
+                  <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  <span class="countdown-value" id="val-year">00</span>
+                </div>
+                <div class="bento-mid-label-group">
+                  <span class="label-en">{yearEn}</span>
+                  <span class="label-zh">{yearZh}</span>
+                </div>
               </div>
             </div>
             
             <!-- 月份 -->
-            <div class="bento-card bento-mid-row anim-s4-mid">
-              <div class="bento-mid-value-group">
-                <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                <span class="countdown-value" id="val-month">00</span>
-              </div>
-              <div class="bento-mid-label-group">
-                <span class="label-en">{monthEn}</span>
-                <span class="label-zh">{monthZh}</span>
+            <div class="bento-mid-row">
+              <div class="bento-mid-row-inner anim-s4-card-unit">
+                <div class="bento-mid-value-group">
+                  <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                  <span class="countdown-value" id="val-month">00</span>
+                </div>
+                <div class="bento-mid-label-group">
+                  <span class="label-en">{monthEn}</span>
+                  <span class="label-zh">{monthZh}</span>
+                </div>
               </div>
             </div>
             
             <!-- 日份 -->
-            <div class="bento-card bento-mid-row anim-s4-mid">
-              <div class="bento-mid-value-group">
-                <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                <span class="countdown-value" id="val-day">00</span>
-              </div>
-              <div class="bento-mid-label-group">
-                <span class="label-en">{dayEn}</span>
-                <span class="label-zh">{dayZh}</span>
+            <div class="bento-mid-row">
+              <div class="bento-mid-row-inner anim-s4-card-unit">
+                <div class="bento-mid-value-group">
+                  <svg class="bento-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 16 14"></polyline></svg>
+                  <span class="countdown-value" id="val-day">00</span>
+                </div>
+                <div class="bento-mid-label-group">
+                  <span class="label-en">{dayEn}</span>
+                  <span class="label-zh">{dayZh}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- 右側：時鐘 + 視覺壓艙石線性進度條 -->
-          <div class="bento-card bento-right anim-s4-right">
-            
-            <!-- 時鐘框架 -->
+          <!-- 右側 -->
+          <div class="bento-card bento-right anim-s4-card-unit">
             <div class="station-clock-wrapper">
-              <!-- 時 -->
               <div class="flap-group">
                 <div class="flap-card" id="card-h1">
                   <div class="card-half top"><div class="digit-inner">0</div></div>
@@ -201,7 +196,6 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
                 </div>
               </div>
               <span class="clock-colon">:</span>
-              <!-- 分 -->
               <div class="flap-group">
                 <div class="flap-card" id="card-m1">
                   <div class="card-half top"><div class="digit-inner">0</div></div>
@@ -215,7 +209,6 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
                 </div>
               </div>
               <span class="clock-colon">:</span>
-              <!-- 秒 -->
               <div class="flap-group">
                 <div class="flap-card" id="card-s1">
                   <div class="card-half top"><div class="digit-inner">0</div></div>
@@ -231,11 +224,8 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             </div>
             
             <div class="clock-caption">{ABOUT_CONFIG.retirement.clockCaption}</div>
-
-            <!-- 細微分割線 -->
             <div class="bento-divider"></div>
             
-            <!-- 視覺壓艙石結構艙 -->
             <div class="bento-progress-anchor">
               <div class="progress-status-row">
                 <span class="progress-mini-label">Total Era Progression</span>
@@ -245,25 +235,21 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
                 <div class="progress-bar-fill" id="progress-bar-fill"></div>
               </div>
             </div>
-
           </div>
 
         </div>
       </div>
     </section>
 
-    <!-- ========================================================
-         階段 5：技術棧矩陣（高級發光折射艙 + 1:1 色彩平權）
-         ======================================================== -->
+    <!-- 階段 5：技術棧矩陣 -->
     <section class="story-stage" id="stage-techstack">
       <div class="stage-inner flex-center">
         
-        <div class="tech-content-holder">
+        <div class="tech-content-holder anim-s5-title-fade">
           <h2 class="tech-main-header">{ABOUT_CONFIG.techStack.title}</h2>
           <p class="tech-main-sub">{ABOUT_CONFIG.techStack.subtitle}</p>
         </div>
 
-        <!-- 拓撲連接網絡 -->
         <div class="tech-tree-wrapper">
           <div class="tech-branch-node" id="tech-main-dot"></div>
           <svg class="tech-branch-svg" viewBox="0 0 800 60" fill="none">
@@ -273,17 +259,12 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
         </div>
 
         <div class="tech-cards-matrix">
-          
-          <!-- 左側：高定通透主題流光毛玻璃艙 (Astro) -->
-          <div class="tech-twin-card tech-card-left anim-s5-left">
+          <div class="tech-twin-card tech-card-left anim-s5-card-item">
             <div class="tech-inner-glow"></div>
-            
-            <!-- Astro 官方高定制原裝矢量徽標 (完美融入 fill="currentColor" 色彩平權) -->
             <svg class="tech-card-corner-logo" viewBox="0 0 85 107" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M27.5893 91.1365C22.7555 86.7178 21.3443 77.4335 23.3583 70.7072C26.8503 74.948 31.6888 76.2914 36.7005 77.0497C44.4374 78.2199 52.0358 77.7822 59.2231 74.2459C60.0453 73.841 60.8052 73.3027 61.7036 72.7574C62.378 74.714 62.5535 76.6892 62.3179 78.6996C61.7452 83.5957 59.3086 87.3778 55.4332 90.2448C53.8835 91.3916 52.2437 92.4167 50.6432 93.4979C45.7262 96.8213 44.3959 100.718 46.2435 106.386C46.2874 106.525 46.3267 106.663 46.426 107C43.9155 105.876 42.0817 104.24 40.6844 102.089C39.2086 99.8193 38.5065 97.3081 38.4696 94.5909C38.4511 93.2686 38.4511 91.9345 38.2733 90.6309C37.8391 87.4527 36.3471 86.0297 33.5364 85.9478C30.6518 85.8636 28.37 87.6469 27.7649 90.4554C27.7187 90.6707 27.6517 90.8837 27.5847 91.1341L27.5893 91.1365Z" fill="currentColor"/>
               <path d="M0 69.5866C0 69.5866 14.3139 62.6137 28.6678 62.6137L39.4901 29.1204C39.8953 27.5007 41.0783 26.3999 42.4139 26.3999C43.7495 26.3999 44.9325 27.5007 45.3377 29.1204L56.1601 62.6137C73.1601 62.6137 84.8278 69.5866 84.8278 69.5866C84.8278 69.5866 60.5145 3.35233 60.467 3.21944C59.7692 1.2612 58.5911 0 57.0029 0H27.8274C26.2392 0 25.1087 1.2612 24.3634 3.21944C24.3108 3.34983 0 69.5866 0 69.5866Z" fill="currentColor"/>
             </svg>
-
             <div class="tech-card-header-group">
               <span class="tech-card-meta-tag">{ABOUT_CONFIG.techStack.leftCard.tag}</span>
               <h3 class="tech-card-hero-title">
@@ -291,26 +272,23 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
               </h3>
               <div class="tech-card-framework-tag">{ABOUT_CONFIG.techStack.leftCard.framework}</div>
             </div>
-            
             <div class="tech-card-body-group">
               <p class="tech-card-question">{ABOUT_CONFIG.techStack.leftCard.question}</p>
               <div class="tech-structured-doc blue-tint-doc">
-                {ABOUT_CONFIG.techStack.leftCard.contentLines.map((line) => (
+                {ABOUT_CONFIG.techStack.contentLines?.left ? ABOUT_CONFIG.techStack.leftCard.contentLines.map((line) => (
+                  <p class="doc-text-paragraph">{line}</p>
+                )) : ABOUT_CONFIG.techStack.leftCard.contentLines.map((line) => (
                   <p class="doc-text-paragraph">{line}</p>
                 ))}
               </div>
             </div>
           </div>
 
-          <!-- 右側：極簡黑底霜白毛玻璃艙 (Gemini) -->
-          <div class="tech-twin-card tech-card-right anim-s5-right">
+          <div class="tech-twin-card tech-card-right anim-s5-card-item">
             <div class="tech-inner-glow"></div>
-
-            <!-- Google Gemini 原生對稱四芒星智能徽標 -->
             <svg class="tech-card-corner-logo gemini-logo-spark" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C12 7.523 16.477 12 22 12C16.477 12 12 16.477 12 22C12 16.477 7.523 12 2 12C7.523 12 12 7.523 12 2Z" />
             </svg>
-
             <div class="tech-card-header-group">
               <span class="tech-card-meta-tag">{ABOUT_CONFIG.techStack.rightCard.tag}</span>
               <h3 class="tech-card-hero-title">
@@ -318,7 +296,6 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
               </h3>
               <div class="tech-card-framework-tag">{ABOUT_CONFIG.techStack.rightCard.framework}</div>
             </div>
-
             <div class="tech-card-body-group">
               <p class="tech-card-question">{ABOUT_CONFIG.techStack.rightCard.question}</p>
               <div class="tech-structured-doc white-tint-doc">
@@ -328,15 +305,11 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
               </div>
             </div>
           </div>
-
         </div>
-
       </div>
     </section>
 
-    <!-- ========================================================
-         🔴 階段 6：聯繫我 (Contact Section) - 偽類隔離超穩晶體艙
-         ======================================================== -->
+    <!-- 階段 6：聯繫我 -->
     <section class="story-stage" id="stage-contact">
       <div class="stage-inner flex-center">
         
@@ -346,19 +319,15 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
         </div>
 
         <div class="contact-layout-container">
-          
-          <!-- 左側：完全由 config 驅動的智能自適應彈性社交網格 -->
           <div class="social-links-grid">
             {ABOUT_CONFIG.contact.links.map((link) => (
               <a href={link.url} target="_blank" rel="noopener noreferrer" class="social-glass-card anim-s6-card">
-                <!-- 通過高階 set:html 直接渲染你在 config.ts 里自定義的整段 SVG 代碼 -->
                 <div class="social-icon-wrapper" set:html={link.iconSvg}></div>
                 <span class="social-name">{link.name}</span>
               </a>
             ))}
           </div>
 
-          <!-- 右側：微信贊賞碼壓艙石面板 (同步鎖定30px超高厚度超模糊機制) -->
           <div class="wechat-reward-card anim-s6-reward">
             <div class="reward-inner-glow"></div>
             <div class="qr-code-wrapper">
@@ -375,15 +344,11 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
             </div>
             <div class="reward-caption">微信贊賞碼 / Reward QR</div>
           </div>
-
         </div>
-
       </div>
     </section>
 
-    <!-- ========================================================
-         懸浮 Dock 導航島
-         ======================================================== -->
+    <!-- 懸浮 Dock 導航島 -->
     <div class="floating-dock-island">
       <div class="dock-blur-bg"></div>
       <div class="dock-buttons-row">
@@ -402,9 +367,19 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" is:inline></script>
 <script is:inline define:vars={{ defaultStart: ABOUT_CONFIG.retirement.startDate, defaultTarget: ABOUT_CONFIG.retirement.targetDate }}>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('astro:page-load', () => {
     const viewport = document.querySelector('.about-cinematic-viewport');
     if (viewport) viewport.classList.remove('opacity-0');
+
+    // 低性能模式对接监听
+    window.addEventListener('sinyan-perf-status', (e) => {
+      const { status } = e.detail || {};
+      if (status === 'degraded') {
+        document.documentElement.classList.add('perf-degraded');
+      } else if (status === 'high') {
+        document.documentElement.classList.remove('perf-degraded');
+      }
+    });
 
     let currentStage = 0;
     const stages = [
@@ -413,13 +388,10 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       document.getElementById('stage-deepdive'),
       document.getElementById('stage-retirement'),
       document.getElementById('stage-techstack'),
-      document.getElementById('stage-contact') // 將聯繫我節點完美註冊到控制總線
+      document.getElementById('stage-contact')
     ];
     const dockButtons = document.querySelectorAll('.dock-btn');
 
-    // ========================================================
-    // 時鐘引擎與高精度微秒級流逝渲染軸
-    // ========================================================
     const retirementSection = document.getElementById('stage-retirement');
     const targetDateStr = retirementSection?.dataset.targetDate || defaultTarget;
     const startDateStr = retirementSection?.dataset.startDate || defaultStart;
@@ -469,9 +441,12 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       const rMinutes = String(59 - now.getMinutes()).padStart(2, '0');
       const rSeconds = String(59 - now.getSeconds()).padStart(2, '0');
 
-      document.getElementById('val-year').textContent = String(years).padStart(2, '0');
-      document.getElementById('val-month').textContent = String(months).padStart(2, '0');
-      document.getElementById('val-day').textContent = String(days).padStart(2, '0');
+      const yEl = document.getElementById('val-year');
+      const mEl = document.getElementById('val-month');
+      const dEl = document.getElementById('val-day');
+      if (yEl) yEl.textContent = String(years).padStart(2, '0');
+      if (mEl) mEl.textContent = String(months).padStart(2, '0');
+      if (dEl) dEl.textContent = String(days).padStart(2, '0');
 
       setFlapDigitWithAnimation('card-h1', rHours[0]);
       setFlapDigitWithAnimation('card-h2', rHours[1]);
@@ -495,19 +470,19 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       if (progressText) progressText.textContent = currentPercent.toFixed(6) + '%';
       if (progressBarFill) progressBarFill.style.width = currentPercent + '%';
 
-      requestAnimationFrame(renderHighPrecisionProgress);
+      if (document.querySelector('.about-cinematic-viewport')) {
+        requestAnimationFrame(renderHighPrecisionProgress);
+      }
     }
 
-    setInterval(updateCountdown, 1000);
+    if (window._aboutCountdownTimer) clearInterval(window._aboutCountdownTimer);
+    window._aboutCountdownTimer = setInterval(updateCountdown, 1000);
+    
     updateCountdown();
     requestAnimationFrame(renderHighPrecisionProgress);
 
-    // 🔴 核心修復點：首次加載頁面時，主動為第一章節觸發飛入動畫點火
     animateStage0In();
 
-    // ========================================================
-    // 舞台流轉切換生命週期控制鏈 (全面序列化調優)
-    // ========================================================
     function animateStage0In() {
       gsap.set([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], { clearProps: "all" });
       gsap.timeline()
@@ -546,23 +521,17 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
       const outboundSection = stages[currentStage];
       const inboundSection = stages[targetIndex];
 
-      // 秩序鎖：切換瞬間將整個導航島鎖死，防止連續高頻點擊導致多重動畫異步踩踏
       const dock = document.querySelector('.floating-dock-island');
       if (dock) dock.style.pointerEvents = 'none';
 
       dockButtons.forEach((btn, idx) => btn.classList.toggle('active', idx === targetIndex));
       
-      // 建立一個嚴格序列化的主時間軸
       const transitionTimeline = gsap.timeline({
         onComplete: () => {
-          // 新章節完全順利進場後，釋放秩序鎖，恢復導航點擊
           if (dock) dock.style.pointerEvents = 'auto';
         }
       });
 
-      // --------------------------------------------------------
-      // 【第一階段】舊章節 (Outbound) 全量部件執行流暢的“退場清場”
-      // --------------------------------------------------------
       if (currentStage === 0) {
         transitionTimeline.to([".anim-s1-avatar", ".anim-s1-title", ".anim-s1-card", ".anim-s1-claim"], { opacity: 0, y: -30, scale: 0.95, stagger: 0.02, duration: 0.3, ease: "power3.in" });
       } else if (currentStage === 1) {
@@ -572,31 +541,21 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
         transitionTimeline.to(".pillar-glass-block", { opacity: 0, y: -25, stagger: 0.02, duration: 0.25, ease: "power3.in" })
                           .to(".deepdive-content-holder, .spotlight-container", { opacity: 0, duration: 0.2 }, "-=0.15");
       } else if (currentStage === 3) {
-        transitionTimeline.to(".retirement-content-holder", { opacity: 0, y: -15, duration: 0.2 })
-                          .to([".anim-s4-left", ".anim-s4-mid", ".anim-s4-right"], { opacity: 0, y: -25, scale: 0.95, stagger: 0.02, duration: 0.25, ease: "power3.in" }, "-=0.15");
+        transitionTimeline.to([".anim-s4-title-fade", ".anim-s4-card-unit"], { opacity: 0, duration: 0.25, ease: "power2.in" });
       } else if (currentStage === 4) {
-        transitionTimeline.to(".tech-content-holder", { opacity: 0, y: -15, duration: 0.2 })
-                          .to([".tech-tree-wrapper", ".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: -25, scale: 0.95, duration: 0.25, ease: "power3.in" }, "-=0.15");
+        transitionTimeline.to([".anim-s5-title-fade", ".tech-tree-wrapper", ".anim-s5-card-item"], { opacity: 0, duration: 0.25, ease: "power2.in" });
       } else if (currentStage === 5) {
         transitionTimeline.to(".contact-content-holder", { opacity: 0, y: -15, duration: 0.2 })
                           .to([".anim-s6-card", ".anim-s6-reward"], { opacity: 0, duration: 0.2 }, "-=0.15")
                           .to([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"], { opacity: 0, y: -20, duration: 0.2 }, "-=0.2");
       }
 
-      // --------------------------------------------------------
-      // 【第二階段】神聖舞台交接點 (Strict Out-In Swap)
-      // --------------------------------------------------------
-      // 當且僅當上面的退場動畫完全跑完、舊圖層100%消失在文檔流時，才切換激活類
       transitionTimeline.add(() => {
-        outboundSection.classList.remove('active');
-        gsap.set(outboundSection, { clearProps: "all" }); // 徹底擦除舊內聯樣式緩衝
-        
-        inboundSection.classList.add('active'); // 在乾淨的文檔流中激活新章節
+        if (outboundSection) outboundSection.classList.remove('active');
+        gsap.set(outboundSection, { clearProps: "all" });
+        if (inboundSection) inboundSection.classList.add('active');
       });
 
-      // --------------------------------------------------------
-      // 【第三階段】新章節 (Inbound) 組件完美有序地拉開進場序幕
-      // --------------------------------------------------------
       if (targetIndex === 0) {
         transitionTimeline.fromTo(".anim-s1-avatar", { opacity: 0, scale: 0.4, y: 35 }, { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: "back.out(1.4)" })
                           .fromTo(".anim-s1-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, "-=0.4")
@@ -616,32 +575,25 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
                           .fromTo(".pillar-glass-block", { opacity: 0, y: 30, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, stagger: 0.05, duration: 0.65, ease: "back.out(1.2)" }, "-=0.25");
       }
       else if (targetIndex === 3) {
-        transitionTimeline.fromTo(".retirement-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" })
-                          .fromTo(".anim-s4-left", { opacity: 0, x: -30, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.55, ease: "power3.out" }, "-=0.35")
-                          .fromTo(".anim-s4-mid", { opacity: 0, y: 20, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, stagger: 0.04, duration: 0.55, ease: "back.out(1.2)" }, "-=0.4")
-                          .fromTo(".anim-s4-right", { opacity: 0, x: 30, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.6, ease: "back.out(1.1)" }, "-=0.45");
+        transitionTimeline.fromTo(".anim-s4-title-fade", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" })
+                          .fromTo(".anim-s4-card-unit", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", clearProps: "all" }, "-=0.35");
       }
       else if (targetIndex === 4) {
         transitionTimeline.add(() => {
           gsap.set(".tech-tree-wrapper", { opacity: 1 });
           gsap.set(["#tech-path-left", "#tech-path-right"], { strokeDasharray: 260, strokeDashoffset: 260, opacity: 1 });
           gsap.set("#tech-main-dot", { scale: 0, opacity: 0 });
-          gsap.set([".anim-s5-left", ".anim-s5-right"], { opacity: 0, y: 20, scale: 0.97 });
+          gsap.set(".anim-s5-card-item", { opacity: 0, y: 10 });
         })
-        .fromTo(".tech-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" })
-        .fromTo("#tech-main-dot", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(2)" }, "-=0.2")
+        .fromTo(".anim-s5-title-fade", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" })
+        .fromTo("#tech-main-dot", { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" }, "-=0.2")
         .fromTo("#tech-path-left", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.55, ease: "power2.inOut" }, "-=0.05")
         .fromTo("#tech-path-right", { strokeDashoffset: 260 }, { strokeDashoffset: 0, duration: 0.55, ease: "power2.inOut" }, "<")
-        .fromTo(".anim-s5-left", { opacity: 0, x: -15, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "power3.out" }, "-=0.25")
-        .fromTo(".anim-s5-right", { opacity: 0, x: 15, scale: 0.97 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "power3.out" }, "-=0.4");
+        .fromTo(".anim-s5-card-item", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out", clearProps: "all" }, "-=0.25");
       }
       else if (targetIndex === 5) {
         transitionTimeline.fromTo(".contact-content-holder", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" })
-                          .fromTo([".anim-s6-card", ".anim-s6-reward"], 
-                            { opacity: 0 }, 
-                            { opacity: 1, duration: 0.4, ease: "power2.out", force3D: false },
-                            "-=0.3"
-                          )
+                          .fromTo([".anim-s6-card", ".anim-s6-reward"], { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, "-=0.3")
                           .fromTo([".anim-s6-card .social-icon-wrapper", ".anim-s6-card .social-name", ".anim-s6-reward .qr-code-wrapper", ".anim-s6-reward .reward-caption"],
                             { opacity: 0, y: 25 },
                             { opacity: 1, y: 0, stagger: 0.02, duration: 0.65, ease: "back.out(1.3)" },
@@ -665,15 +617,9 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
      全局布局體系
      ======================================================== */
   :global(html), :global(body) {
-    margin: 0 !important;
-    padding: 0 !important;
-    background-color: #030303;
-    color: #ffffff;
-    width: 100% !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-    font-family: 'Noto Sans SC', sans-serif !important;
-    -webkit-font-smoothing: antialiased;
+    margin: 0 !important; padding: 0 !important; background-color: #030303; color: #ffffff;
+    width: 100% !important; height: 100vh !important; overflow: hidden !important;
+    font-family: 'Noto Sans SC', sans-serif !important; -webkit-font-smoothing: antialiased;
   }
 
   .earth-horizon-layer {
@@ -688,7 +634,7 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .stage-inner { width: 100%; height: 100%; box-sizing: border-box; }
   .flex-center { display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
-  /* 第一階段：核心能力卡純淨毛玻璃 */
+  /* 階段 1 */
   .avatar-wrapper { margin-bottom: 24px; width: 88px; height: 88px; border-radius: 26px; padding: 1px; background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
   .about-avatar-img { width: 100%; height: 100%; border-radius: 25px; object-fit: cover; }
   .stage-title-large { font-size: 5.5rem; font-weight: 900; letter-spacing: -0.05em; margin: 0 0 45px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -699,26 +645,31 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .card-inner-sub { font-size: 0.75rem; color: #888888; letter-spacing: 0.15em; font-weight: 700; }
   .manifesto-claim { margin-top: 55px; font-size: 1.15rem; font-weight: 400; color: rgba(255, 255, 255, 0.75); }
 
-  /* 第二階段：項目矩陣 */
+  /* 階段 2：項目矩陣圖塊雲 */
   .mosaic-content-holder { text-align: center; margin-bottom: 40px; }
   .mosaic-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .mosaic-main-sub { font-size: 1rem; color: #888888; margin: 0; }
-  .mosaic-cloud-flexbox { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 28px; max-width: 1350px; padding: 0 40px; width: 90%; }
-  .mosaic-drag-card { position: relative; padding: 24px; border-radius: 20px; background: rgba(20, 20, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.4); width: fit-content; max-width: 28rem; cursor: grab; user-select: none; z-index: 5; transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
-  .mosaic-drag-card:hover { background: rgba(30, 30, 30, 0.7); border-color: rgba(255, 255, 255, 0.2); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 25px 50px rgba(0, 0, 0, 0.5); }
-  .card-tag { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; color: var(--page-theme-color); letter-spacing: 0.1em; margin-bottom: 6px; }
-  .card-title { font-size: 0.9rem; font-weight: 700; line-height: 1.4; color: #ffffff; margin: 0; }
-
-  /* 第三階段：自我進化內核聚光燈（同步升級：30px超強毛玻璃深度） */
-  .spotlight-container { 
-    position: absolute; inset: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; pointer-events: none; z-index: 1; 
+  
+  .mosaic-cloud-flexbox { 
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; 
+    gap: 24px 36px; max-width: 1400px; padding: 0 30px; width: 95%; 
   }
-  .spotlight { 
-    position: absolute; top: -10vh; width: 75vw; height: 115vh; 
-    background: conic-gradient(at top center, transparent 0%, transparent 43%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 46.5%, color-mix(in srgb, var(--page-theme-color) 12%, #ffffff) 50%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 53.5%, transparent 57%, transparent 100% );
-    filter: blur(32px); mask-image: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 92%); -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 92%); mix-blend-mode: screen; opacity: 0; transform-origin: top center;
+  .mosaic-drag-card { 
+    position: relative; padding: 13px 20px; border-radius: 16px; 
+    background: rgba(20, 20, 20, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); 
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05); 
+    width: fit-content; cursor: grab; user-select: none; z-index: 5; 
+    display: flex; flex-direction: column; gap: 4px;
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; 
   }
+  .mosaic-drag-card:hover { background: rgba(30, 30, 30, 0.75); border-color: rgba(255, 255, 255, 0.22); box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5); }
+  .card-tag { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: #3b82f6; letter-spacing: 0.05em; }
+  .card-title { font-size: 0.95rem; font-weight: 700; line-height: 1.4; color: #ffffff; margin: 0; white-space: nowrap; }
 
+  /* 階段 3 */
+  .spotlight-container { position: absolute; inset: 0; width: 100vw; height: 100vh; display: flex; justify-content: center; pointer-events: none; z-index: 1; }
+  .spotlight { position: absolute; top: -10vh; width: 75vw; height: 115vh; background: conic-gradient(at top center, transparent 0%, transparent 43%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 46.5%, color-mix(in srgb, var(--page-theme-color) 12%, #ffffff) 50%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 53.5%, transparent 57%, transparent 100% ); filter: blur(32px); mask-image: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 92%); -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 92%); mix-blend-mode: screen; opacity: 0; transform-origin: top center; }
   .deepdive-content-holder { position: relative; z-index: 2; width: 90%; max-width: 1400px; text-align: center; }
   .deepdive-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .deepdive-main-sub { font-size: 1rem; color: #888888; margin-bottom: 60px; }
@@ -728,19 +679,46 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .pillar-title { font-size: 1.25rem; font-weight: 700; color: #ffffff; margin: 0 0 16px 0; }
   .pillar-desc { font-size: 0.9rem; color: #aaaaaa; line-height: 1.6; margin: 0; }
 
-  /* 第四階段：Bento 倒計時 */
-  .retirement-content-holder { text-align: center; margin-bottom: 35px; width: 100%; }
+  /* 階段 4：Bento 倒計時 */
+  .retirement-content-holder { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 55px; width: 100%; }
   .retirement-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .retirement-main-sub { font-size: 1rem; color: #888888; margin: 0; }
+  .retirement-main-sub { font-size: 1rem; color: #888888; margin: 0; text-align: center; }
 
-  .bento-container { display: grid; grid-template-columns: 1.1fr 1.2fr 1.7fr; gap: 24px; width: 90%; max-width: 1350px; height: 440px; box-sizing: border-box; }
-  .bento-card { background: rgba(20, 20, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 25px 50px rgba(0, 0, 0, 0.3); padding: 35px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+  .bento-container { 
+    display: grid; grid-template-columns: 1.1fr 1.2fr 1.7fr; gap: 24px; 
+    width: 90%; max-width: 1350px; height: 440px; box-sizing: border-box; 
+    align-items: stretch; will-change: auto;
+  }
+  .bento-card { background: rgba(20, 20, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 25px 50px rgba(0, 0, 0, 0.3); padding: 35px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; transform: translateZ(0); }
   .bento-left { justify-content: space-between; text-align: left; }
   .bento-left-brand { display: flex; flex-direction: column; gap: 6px; }
   .bento-left-brand span { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.02em; color: #ffffff; }
   .bento-left-desc { font-size: 0.85rem; color: #777777; line-height: 1.6; margin: 0; }
-  .bento-middle-column { display: flex; flex-direction: column; gap: 16px; height: 100%; }
-  .bento-mid-row { flex: 1; padding: 0 24px; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+  
+  .bento-middle-column { 
+    display: grid !important;
+    grid-template-rows: repeat(3, 1fr) !important;
+    gap: 16px !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .bento-mid-row { 
+    width: 100% !important; height: 100% !important;
+    box-sizing: border-box !important; margin: 0 !important; padding: 0 !important; border: none !important;
+    background: transparent !important; box-shadow: none !important; backdrop-filter: none !important;
+    overflow: visible !important;
+  }
+
+  .bento-mid-row-inner {
+    width: 100%; height: 100%; box-sizing: border-box;
+    background: rgba(20, 20, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); 
+    border-radius: 28px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 25px 50px rgba(0, 0, 0, 0.3);
+    padding: 0 24px; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px;
+    transform: translateZ(0); -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  }
+  
   .bento-mid-value-group { display: flex; align-items: center; gap: 14px; }
   .bento-icon { width: 22px; height: 22px; color: var(--page-theme-color); opacity: 0.85; flex-shrink: 0; }
   .countdown-value { font-family: 'Share Tech Mono', monospace; font-size: 2.5rem; font-weight: 700; color: #ffffff; }
@@ -765,137 +743,69 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .bento-progress-anchor { margin-top: 2rem; width: 100%; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
   .progress-status-row { width: 100%; display: flex; justify-content: space-between; align-items: center; }
   .progress-mini-label { font-size: 0.65rem; font-weight: 700; color: rgba(255, 255, 255, 0.25); text-transform: uppercase; letter-spacing: 0.08em; }
-  .progress-percentage { font-family: 'Google Sans', 'Product Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--page-theme-color); letter-spacing: -0.01em; }
+  .progress-percentage { font-family: 'Share Tech Mono', monospace; font-size: 1.05rem; font-weight: 700; color: var(--page-theme-color); letter-spacing: -0.01em; }
   .progress-bar-track { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; overflow: hidden; position: relative; }
   .progress-bar-fill { height: 100%; width: 0%; background: var(--page-theme-color); box-shadow: 0 0 10px var(--page-theme-color); border-radius: 2px; }
 
-  /* ========================================================
-     階段 5：技術棧矩陣
-     ======================================================== */
-  .tech-content-holder { text-align: center; margin-bottom: 20px; width: 100%; }
+  /* 階段 5 */
+  .tech-content-holder { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px; width: 100%; }
   .tech-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .tech-main-sub { font-size: 1rem; color: #888888; margin: 0; }
-
   .tech-tree-wrapper { position: relative; width: 100%; max-width: 1200px; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; margin-bottom: 12px; z-index: 3; }
   .tech-branch-node { width: 8px; height: 8px; border-radius: 50%; background: var(--page-theme-color); box-shadow: 0 0 12px var(--page-theme-color); z-index: 10; }
   .tech-branch-svg { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 100%; height: 100%; pointer-events: none; overflow: visible; }
   .tech-line-path { stroke: color-mix(in srgb, var(--page-theme-color) 35%, rgba(255, 255, 255, 0.12)); }
-
   .tech-cards-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; width: 90%; max-width: 1200px; height: 280px; box-sizing: border-box; }
-  .tech-twin-card { border-radius: 24px; padding: 35px 32px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .tech-twin-card { border-radius: 24px; padding: 35px 32px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; position: relative; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); transform: translateZ(0); }
   .tech-twin-card:hover { transform: translateY(-6px) scale(1.015); }
   .tech-inner-glow { position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: 0.65; }
-
   .tech-card-corner-logo { position: absolute; top: 35px; right: 35px; width: 26px; height: 26px; pointer-events: none; z-index: 5; opacity: 0.3; transition: opacity 0.3s ease, transform 0.3s ease; }
   .tech-twin-card:hover .tech-card-corner-logo { opacity: 0.85; transform: scale(1.05); }
-
   .tech-card-left { background: rgba(15, 15, 18, 0.45); border: 1px solid color-mix(in srgb, var(--page-theme-color) 40%, rgba(255, 255, 255, 0.1)); color: #ffffff; }
   .tech-card-left .tech-inner-glow { background: radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--page-theme-color) 25%, transparent), transparent 70%), radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--page-theme-color) 12%, transparent), transparent 60%); }
   .tech-card-left .tech-card-corner-logo { color: var(--page-theme-color); }
-  
   .tech-card-right { background: rgba(15, 15, 18, 0.45); border: 1px solid rgba(255, 255, 255, 0.12); }
   .tech-card-right .tech-inner-glow { background: radial-gradient(circle at 75% 15%, rgba(255, 255, 255, 0.08), transparent 65%); }
   .tech-card-right .tech-card-corner-logo { color: rgba(255, 255, 255, 0.45); }
-
-  @keyframes geminiSparkle { 0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.3; } 50% { transform: scale(1.08) rotate(5deg); opacity: 0.85; } }
-  .tech-twin-card:hover .gemini-logo-spark { animation: geminiSparkle 2.5s infinite ease-in-out; }
-
   .tech-card-header-group { display: flex; flex-direction: column; text-align: left; position: relative; z-index: 2; }
   .tech-card-left .tech-card-meta-tag { color: var(--page-theme-color) !important; font-weight: 900; }
   .tech-card-right .tech-card-meta-tag { color: rgba(255, 255, 255, 0.45); }
-  
   .tech-card-meta-tag { font-size: 0.65rem; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
   .tech-card-hero-title { font-size: 2.3rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 2px 0; line-height: 1.1; color: #ffffff; }
   .tech-card-hero-zh { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; margin-left: 2px; color: rgba(255, 255, 255, 0.5); }
   .tech-card-framework-tag { font-size: 0.88rem; font-weight: 700; margin-top: 1px; color: #ffffff; opacity: 0.9; }
-
   .tech-card-body-group { display: flex; flex-direction: column; gap: 10px; width: 100%; text-align: left; margin-top: 12px; position: relative; z-index: 2; }
   .tech-card-question { font-size: 0.78rem; font-weight: 500; margin: 0; font-family: monospace; color: rgba(255, 255, 255, 0.35); }
-
   .tech-structured-doc { border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px; background: rgba(0, 0, 0, 0.12); border: 1px solid rgba(255, 255, 255, 0.02); }
   .doc-text-paragraph { font-size: 0.84rem; font-weight: 400; color: rgba(255, 255, 255, 0.75); line-height: 1.6; margin: 0; text-align: left; }
 
-  /* ========================================================
-     🔴 階段 6：聯繫我（偽類防污染晶體艙樣式表）
-     ======================================================== */
-  .contact-content-holder { text-align: center; margin-bottom: 35px; width: 100%; }
+  /* 階段 6 */
+  .contact-content-holder { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 35px; width: 100%; }
   .contact-main-header { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.03em; margin: 0 0 8px 0; background: linear-gradient(180deg, #ffffff 50%, #888888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .contact-main-sub { font-size: 1rem; color: #888888; margin: 0; }
-
-  .contact-layout-container {
-    display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px;
-    width: 90%; max-width: 1150px; box-sizing: border-box; align-items: center;
-  }
-
-  .social-links-grid {
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-    gap: 18px;
-    width: 100%;
-  }
-
-  .social-glass-card, .wechat-reward-card {
-    text-decoration: none; border-radius: 22px; padding: 26px 20px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-    position: relative;
-    background: transparent !important; 
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3);
-    transition: border-color 0.4s ease, box-shadow 0.4s ease;
-  }
+  .contact-main-sub { font-size: 1rem; color: #888888; margin: 0; text-align: center; }
+  .contact-layout-container { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; width: 90%; max-width: 1150px; box-sizing: border-box; align-items: center; }
+  .social-links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 18px; width: 100%; }
+  .social-glass-card, .wechat-reward-card { text-decoration: none; border-radius: 22px; padding: 26px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; position: relative; background: transparent !important; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03), 0 20px 50px rgba(0, 0, 0, 0.3); transition: border-color 0.4s ease, box-shadow 0.4s ease; }
   .wechat-reward-card { border-radius: 26px; padding: 35px; gap: 18px; overflow: hidden; }
-
-  .social-glass-card::before, .wechat-reward-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: rgba(16, 16, 18, 0.72); 
-    backdrop-filter: blur(30px) !important; 
-    -webkit-backdrop-filter: blur(30px) !important;
-    z-index: -1;
-    pointer-events: none;
-    transition: background 0.4s ease;
-  }
-
-  .social-glass-card:hover {
-    border-color: color-mix(in srgb, var(--page-theme-color) 50%, rgba(255, 255, 255, 0.08)) !important;
-    box-shadow: inset 0 0 15px color-mix(in srgb, var(--page-theme-color) 30%, transparent), 0 25px 60px rgba(0, 0, 0, 0.5);
-  }
-  .social-glass-card:hover::before {
-    background: color-mix(in srgb, var(--page-theme-color) 18%, rgba(16, 16, 18, 0.72)) !important; 
-  }
-
-  .wechat-reward-card:hover {
-    border-color: color-mix(in srgb, var(--page-theme-color) 40%, rgba(255, 255, 255, 0.08)) !important;
-    box-shadow: inset 0 0 18px color-mix(in srgb, var(--page-theme-color) 25%, transparent), 0 30px 65px rgba(0, 0, 0, 0.5);
-  }
-  .wechat-reward-card:hover::before {
-    background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(16, 16, 18, 0.72)) !important;
-  }
-
-  .social-icon-wrapper :global(svg) {
-    width: 30px !important; height: 30px !important;
-    color: rgba(255, 255, 255, 0.6) !important;
-    transition: color 0.3s ease, transform 0.3s ease;
-  }
+  .social-glass-card::before, .wechat-reward-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: rgba(16, 16, 18, 0.72); backdrop-filter: blur(30px) !important; -webkit-backdrop-filter: blur(30px) !important; z-index: -1; pointer-events: none; transition: background 0.4s ease; }
+  .social-glass-card:hover { border-color: color-mix(in srgb, var(--page-theme-color) 50%, rgba(255, 255, 255, 0.08)) !important; box-shadow: inset 0 0 15px color-mix(in srgb, var(--page-theme-color) 30%, transparent), 0 25px 60px rgba(0, 0, 0, 0.5); }
+  .social-glass-card:hover::before { background: color-mix(in srgb, var(--page-theme-color) 18%, rgba(16, 16, 18, 0.72)) !important; }
+  .wechat-reward-card:hover { border-color: color-mix(in srgb, var(--page-theme-color) 40%, rgba(255, 255, 255, 0.08)) !important; box-shadow: inset 0 0 18px color-mix(in srgb, var(--page-theme-color) 25%, transparent), 0 30px 65px rgba(0, 0, 0, 0.5); }
+  .wechat-reward-card:hover::before { background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(16, 16, 18, 0.72)) !important; }
+  .social-icon-wrapper :global(svg) { width: 30px !important; height: 30px !important; color: rgba(255, 255, 255, 0.6) !important; transition: color 0.3s ease, transform 0.3s ease; }
   .social-glass-card:hover .social-icon-wrapper :global(svg) { color: #ffffff !important; transform: scale(1.1); }
   .social-name { font-size: 0.85rem; font-weight: 700; color: rgba(255, 255, 255, 0.65); transition: color 0.3s ease; }
   .social-glass-card:hover .social-name { color: var(--page-theme-color); }
-
   .reward-inner-glow { position: absolute; inset: 0; pointer-events: none; z-index: 1; background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--page-theme-color) 10%, transparent), transparent 70%); }
   .qr-code-wrapper { position: relative; z-index: 2; width: 155px; height: 155px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.04); border-radius: 18px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 10px; }
   .qr-code-img { width: 100%; height: 100%; object-fit: contain; border-radius: 10px; }
   .qr-placeholder { display: flex; flex-direction: column; align-items: center; gap: 10px; color: rgba(255,255,255,0.2); }
   .qr-placeholder svg { width: 44px; height: 44px; }
-  .qr-placeholder span { font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em; }
   .reward-caption { position: relative; z-index: 2; font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.35); letter-spacing: 0.05em; }
 
-  /* ========================================================
-     懸浮 Dock 導航島
-     ======================================================== */
-  .floating-dock-island { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; align-items: center; padding: 8px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(20, 20, 20, 0.35); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255,255,255,0.05); overflow: hidden; }
-  .dock-blur-bg { position: absolute; inset: 0; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: -1; }
+  /* 懸浮 Dock 導航島 */
+  .floating-dock-island { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; align-items: center; padding: 8px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(14, 14, 16, 0.78); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.85), inset 0 0 0 1px rgba(255,255,255,0.04); overflow: hidden; }
+  .dock-blur-bg { position: absolute; inset: 0; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); z-index: -1; }
   .dock-buttons-row { display: flex; gap: 4px; position: relative; z-index: 2; }
   .dock-btn { background: transparent; border: none; outline: none; display: flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: 22px; cursor: pointer; color: rgba(255, 255, 255, 0.4); transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
   .dock-btn .dot { display: inline-block !important; width: 6px !important; height: 6px !important; border-radius: 50% !important; background: rgba(255, 255, 255, 0.3); flex-shrink: 0 !important; transition: all 0.35s ease; }
@@ -904,42 +814,33 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   .dock-btn.active { color: #ffffff; background: rgba(255, 255, 255, 0.09); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05); }
   .dock-btn.active .dot { background: var(--page-theme-color) !important; box-shadow: 0 0 12px var(--page-theme-color) !important; }
 
-  /* ========================================================
-     Light Mode 明亮形態全面調優
-     ======================================================== */
+  /* ☀️ Light Mode 明亮形態調優 */
   :global(.light-mode) .stage-title-large, :global(.light-mode) .mosaic-main-header, :global(.light-mode) .deepdive-main-header, :global(.light-mode) .retirement-main-header, :global(.light-mode) .tech-main-header, :global(.light-mode) .contact-main-header { background: linear-gradient(180deg, #1d1d1f 50%, #86868b 100%); -webkit-background-clip: text; }
   :global(.light-mode) .manifesto-claim, :global(.light-mode) .mosaic-main-sub, :global(.light-mode) .deepdive-main-sub, :global(.light-mode) .retirement-main-sub, :global(.light-mode) .tech-main-sub, :global(.light-mode) .contact-main-sub { color: #515154; }
   
   :global(.light-mode) .unified-glass-card, 
-  :global(.light-mode) .mosaic-drag-card, 
   :global(.light-mode) .pillar-glass-block, 
   :global(.light-mode) .bento-card {
-    background: rgba(255, 255, 255, 0.72) !important; 
-    backdrop-filter: blur(30px) !important; 
-    -webkit-backdrop-filter: blur(30px) !important; 
-    border: 1px solid rgba(0, 0, 0, 0.08) !important; 
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.04) !important; 
+    background: rgba(255, 255, 255, 0.72) !important; backdrop-filter: blur(30px) !important; -webkit-backdrop-filter: blur(30px) !important; border: 1px solid rgba(0, 0, 0, 0.08) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.04) !important; 
   }
 
-  :global(.light-mode) .social-glass-card, :global(.light-mode) .wechat-reward-card {
-    background: transparent !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important; 
+  :global(.light-mode) .bento-mid-row-inner {
+    background: rgba(255, 255, 255, 0.72) !important; border: 1px solid rgba(0, 0, 0, 0.08) !important;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.04) !important;
   }
-  :global(.light-mode) .social-glass-card::before, :global(.light-mode) .wechat-reward-card::before { 
-    background: rgba(255, 255, 255, 0.72) !important; 
-    backdrop-filter: blur(30px) !important; 
-    -webkit-backdrop-filter: blur(30px) !important; 
-  }
   
-  :global(.light-mode) .social-glass-card:hover::before { 
-    background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(255, 255, 255, 0.72)) !important; 
+  :global(.light-mode) .mosaic-drag-card {
+    background: rgba(255, 255, 255, 0.75) !important; border: 1px solid rgba(0, 0, 0, 0.06) !important; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
   }
-  :global(.light-mode) .wechat-reward-card:hover::before { 
-    background: color-mix(in srgb, var(--page-theme-color) 10%, rgba(255, 255, 255, 0.72)) !important; 
-  }
+  :global(.light-mode) .card-tag { color: #2563eb; }
+  :global(.light-mode) .card-title { color: #1d1d1f; }
+
+  :global(.light-mode) .social-glass-card, :global(.light-mode) .wechat-reward-card { background: transparent !important; border: 1px solid rgba(0, 0, 0, 0.08) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 20px 40px rgba(0, 0, 0, 0.04) !important; }
+  :global(.light-mode) .social-glass-card::before, :global(.light-mode) .wechat-reward-card::before { background: rgba(255, 255, 255, 0.72) !important; backdrop-filter: blur(30px) !important; -webkit-backdrop-filter: blur(30px) !important; }
+  :global(.light-mode) .social-glass-card:hover::before { background: color-mix(in srgb, var(--page-theme-color) 15%, rgba(255, 255, 255, 0.72)) !important; }
+  :global(.light-mode) .wechat-reward-card:hover::before { background: color-mix(in srgb, var(--page-theme-color) 10%, rgba(255, 255, 255, 0.72)) !important; }
   
-  :global(.light-mode) .card-inner-brand, :global(.light-mode) .card-title, :global(.light-mode) .pillar-title { color: #1d1d1f; }
+  :global(.light-mode) .card-inner-brand, :global(.light-mode) .pillar-title { color: #1d1d1f; }
   :global(.light-mode) .bento-left-brand span { color: #1d1d1f; }
   :global(.light-mode) .pillar-desc, :global(.light-mode) .bento-left-desc { color: #515154; }
   :global(.light-mode) .countdown-value { color: #1d1d1f; text-shadow: none; }
@@ -953,26 +854,15 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   :global(.light-mode) .social-glass-card:hover .social-name { color: var(--page-theme-color) !important; }
   :global(.light-mode) .social-icon-wrapper :global(svg) { color: rgba(0, 0, 0, 0.55) !important; }
   :global(.light-mode) .social-glass-card:hover .social-icon-wrapper :global(svg) { color: #000000 !important; }
-
   :global(.light-mode) .reward-caption { color: #86868b; }
-  :global(.light-mode) .qr-placeholder { color: rgba(0, 0, 0, 0.3); }
 
   :global(.light-mode) .tech-card-left .tech-card-meta-tag, :global(.light-mode) .tech-card-left .tech-card-corner-logo { color: var(--page-theme-color) !important; }
   :global(.light-mode) .tech-card-right .tech-card-meta-tag, :global(.light-mode) .tech-card-right .tech-card-corner-logo { color: #86868b !important; }
   :global(.light-mode) .tech-card-hero-zh, :global(.light-mode) .tech-card-question { color: #515154 !important; }
-  :global(.light-mode) .tech-card-corner-logo { opacity: 0.35 !important; }
-  :global(.light-mode) .tech-twin-card:hover .tech-card-corner-logo { opacity: 0.75 !important; }
   :global(.light-mode) .tech-structured-doc { background: rgba(255, 255, 255, 0.45) !important; border-color: rgba(0,0,0,0.04) !important; }
   :global(.light-mode) .doc-text-paragraph { color: #2c2c2e !important; }
   :global(.light-mode) .tech-line-path { stroke: color-mix(in srgb, var(--page-theme-color) 35%, rgba(0, 0, 0, 0.12)) !important; }
 
-  .floating-dock-island { background: rgba(20, 20, 20, 0.35); }
-  :global(.light-mode) .spotlight-container { mix-blend-mode: normal; }
-  :global(.light-mode) .spotlight { background: conic-gradient(at top center, transparent 0%, transparent 43%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 46.5%, var(--page-theme-color) 50%, color-mix(in srgb, var(--page-theme-color) 4%, transparent) 53.5%, transparent 57%, transparent 100% ); }
-  :global(.light-mode) .progress-percentage { color: var(--page-theme-color) !important; text-shadow: none; }
-  :global(.light-mode) .dock-btn.active .dot { background: var(--page-theme-color) !important; box-shadow: 0 0 10px var(--page-theme-color) !important; }
-  :global(.light-mode) .bento-mid-label-group .label-en { color: #86868b; }
-  :global(.light-mode) .bento-mid-label-group .label-zh { color: #424245; }
   :global(.light-mode) .station-clock-wrapper { background: #eaeaea; border-color: rgba(0,0,0,0.06); box-shadow: inset 0 2px 10px rgba(0,0,0,0.06); }
   :global(.light-mode) .flap-card { background: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
   :global(.light-mode) .card-half.top { background: #ffffff; border-bottom-color: #e5e5ea; }
@@ -985,19 +875,40 @@ const [leftTitleEn, leftTitleZh] = ABOUT_CONFIG.retirement.leftTitle.split(' / '
   :global(.light-mode) .progress-mini-label { color: rgba(0, 0, 0, 0.35); }
   :global(.light-mode) .floating-dock-island { background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(0, 0, 0, 0.06); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06); }
   :global(.light-mode) .dock-btn { color: rgba(0, 0, 0, 0.4); }
-  :global(.light-mode) .dock-btn:hover { color: rgba(0, 0, 0, 0.6); }
-  :global(.light-mode) .dock-btn.active { color: #1d1d1f; background: rgba(0, 0, 0, 0.06); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.02); }
-  :global(.light-mode) .dock-btn .dot { background: rgba(0, 0, 0, 0.2); flex-shrink: 0 !important; }
+  :global(.light-mode) .dock-btn.active { color: #1d1d1f; background: rgba(0, 0, 0, 0.06); }
+  :global(.light-mode) .dock-btn .dot { background: rgba(0, 0, 0, 0.2); }
 
-  /* ========================================================
-     媒體查詢與響應式
-     ======================================================== */
+  :global(.light-mode) .spotlight-container { mix-blend-mode: normal !important; opacity: 0.95 !important; }
+  :global(.light-mode) .spotlight { 
+    background: conic-gradient(at top center, transparent 0%, transparent 43%, color-mix(in srgb, var(--page-theme-color) 12%, transparent) 46.5%, color-mix(in srgb, var(--page-theme-color) 45%, #ffffff) 50%, color-mix(in srgb, var(--page-theme-color) 12%, transparent) 53.5%, transparent 57%, transparent 100% ) !important; 
+    filter: blur(40px) !important; 
+  }
+  :global(.light-mode) .progress-percentage { color: var(--page-theme-color) !important; }
+
+  /* ⚡ 低性能降級模式 (Performance Guard) 完美無縫對接 */
+  :global(.perf-degraded) .unified-glass-card,
+  :global(.perf-degraded) .mosaic-drag-card,
+  :global(.perf-degraded) .pillar-glass-block,
+  :global(.perf-degraded) .bento-card,
+  :global(.perf-degraded) .bento-mid-row-inner,
+  :global(.perf-degraded) .tech-twin-card,
+  :global(.perf-degraded) .social-glass-card::before,
+  :global(.perf-degraded) .wechat-reward-card::before,
+  :global(.perf-degraded) .dock-blur-bg {
+    backdrop-filter: blur(0px) !important;
+    -webkit-backdrop-filter: blur(0px) !important;
+  }
+
+  /* 響應式斷點 */
   @media (max-width: 992px) {
     .bento-container, .tech-cards-matrix, .contact-layout-container { grid-template-columns: 1fr; height: auto; }
     .social-links-grid { grid-template-columns: repeat(3, 1fr); }
     .bento-divider { margin: 15px 0; }
     .tech-tree-wrapper { display: none; }
     .wechat-reward-card { margin-top: 15px; }
+    
+    .bento-middle-column { grid-template-rows: none !important; gap: 16px !important; }
+    .bento-mid-row { height: 110px !important; }
   }
   @media (max-width: 768px) {
     .skills-grid-wrapper, .deepdive-pillars-matrix { flex-direction: column; }

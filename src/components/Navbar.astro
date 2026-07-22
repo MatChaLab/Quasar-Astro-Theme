@@ -150,14 +150,16 @@ import PerformanceGuard from './PerformanceGuard.astro';
       }, duration);
     }
 
-    searchTrigger.addEventListener('mouseenter', () => {
-      if (!isSearchOpen) {
-        isSearchOpen = true;
-        gsap.to(searchWrapper, { width: 360, opacity: 1, duration: 0.75, ease: "expo.out" });
-        gsap.to(navCenter, { opacity: 0.15, scale: 0.95, duration: 0.4, ease: "power2.out" });
-        setTimeout(() => searchInput.focus(), 50); 
-      }
-    });
+    if (searchTrigger) {
+      searchTrigger.addEventListener('mouseenter', () => {
+        if (!isSearchOpen) {
+          isSearchOpen = true;
+          gsap.to(searchWrapper, { width: 360, opacity: 1, duration: 0.75, ease: "expo.out" });
+          gsap.to(navCenter, { opacity: 0.15, scale: 0.95, duration: 0.4, ease: "power2.out" });
+          setTimeout(() => searchInput.focus(), 50); 
+        }
+      });
+    }
 
     document.addEventListener('click', (e) => {
       if (isSearchOpen && !searchWrapper.contains(e.target) && !searchTrigger.contains(e.target)) {
@@ -170,42 +172,46 @@ import PerformanceGuard from './PerformanceGuard.astro';
 
     window.addEventListener('sinyan-perf-status', (e) => {
       const { status, text } = e.detail;
+      sessionStorage.setItem('sinyan-perf', status);
       
       if (status === 'degraded') {
-        navbarMain.classList.add('perf-degraded');
+        if (navbarMain) navbarMain.classList.add('perf-degraded');
+        document.documentElement.classList.add('perf-degraded');
         window.dispatchEvent(new CustomEvent('earth-quality-engine', { detail: { mode: 'low' } }));
-        triggerNavbarNotice(text, 7000, true);
+        if (text) triggerNavbarNotice(text, 7000, true);
       } else if (status === 'high') {
-        navbarMain.classList.remove('perf-degraded');
+        if (navbarMain) navbarMain.classList.remove('perf-degraded');
+        document.documentElement.classList.remove('perf-degraded');
         window.dispatchEvent(new CustomEvent('earth-quality-engine', { detail: { mode: 'high' } }));
-        triggerNavbarNotice(navbarMain.dataset.restored, 4000, false);
+        if (navbarMain) triggerNavbarNotice(navbarMain.dataset.restored, 4000, false);
       }
     });
 
     if (perfBtn) {
       perfBtn.addEventListener('click', () => {
-        const isCurrentlyDegraded = navbarMain.classList.contains('perf-degraded');
+        const isCurrentlyDegraded = document.documentElement.classList.contains('perf-degraded');
         if (isCurrentlyDegraded) {
           window.dispatchEvent(new CustomEvent('sinyan-perf-force'));
         } else {
-          // ── 修正：手動降低動畫效果的文字已改為讀取 data 屬性設定 ──
           window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
-            detail: { status: 'degraded', text: navbarMain.dataset.manualDegraded }
+            detail: { status: 'degraded', text: navbarMain ? navbarMain.dataset.manualDegraded : '' }
           }));
         }
         gsap.fromTo(perfBtn, { scale: 0.8 }, { scale: 1, duration: 0.4, ease: "back.out(2)" });
       });
     }
 
-    themeBtn.addEventListener('click', () => {
-      document.documentElement.classList.toggle('light-mode');
-      const isLight = document.documentElement.classList.contains('light-mode');
-      localStorage.setItem('theme', isLight ? 'light' : 'dark');
-      gsap.fromTo(themeBtn, { scale: 0.8 }, { scale: 1, duration: 0.3, ease: "elastic.out(1.5, 0.5)" });
-      
-      const noticeMsg = isLight ? navbarMain.dataset.light : navbarMain.dataset.dark;
-      triggerNavbarNotice(noticeMsg, 3500, false);
-    });
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('light-mode');
+        const isLight = document.documentElement.classList.contains('light-mode');
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        gsap.fromTo(themeBtn, { scale: 0.8 }, { scale: 1, duration: 0.3, ease: "elastic.out(1.5, 0.5)" });
+        
+        const noticeMsg = isLight ? (navbarMain ? navbarMain.dataset.light : '') : (navbarMain ? navbarMain.dataset.dark : '');
+        triggerNavbarNotice(noticeMsg, 3500, false);
+      });
+    }
   });
 </script>
 
@@ -252,7 +258,9 @@ import PerformanceGuard from './PerformanceGuard.astro';
  
  .perf-status-toggle .icon-perf-check { display: block; color: var(--themeColor); }
  .perf-status-toggle .icon-perf-warn { display: none; color: #ff3e18; }
+ :global(.perf-degraded) .sinyan-navbar .perf-status-toggle .icon-perf-check,
  .sinyan-navbar.perf-degraded .perf-status-toggle .icon-perf-check { display: none; }
+ :global(.perf-degraded) .sinyan-navbar .perf-status-toggle .icon-perf-warn,
  .sinyan-navbar.perf-degraded .perf-status-toggle .icon-perf-warn { display: block; }
 
  .theme-toggle .icon-sun, .theme-toggle .icon-moon { position: absolute; }

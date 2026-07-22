@@ -1,10 +1,10 @@
 ---
 // src/pages/index.astro
-// Frontmatter 部分保持原样，无需修改
-import { SITE_CONFIG } from '../config';
+import { SITE_CONFIG } from '../config.ts';
 import Intro from '../components/Intro.astro';
 import Earth from '../components/Earth.astro';
 import Navbar from '../components/Navbar.astro';
+import { ClientRouter } from 'astro:transitions';
 ---
 
 <!DOCTYPE html>
@@ -15,35 +15,53 @@ import Navbar from '../components/Navbar.astro';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{SITE_CONFIG.title}</title>
     
-    <!-- 统一载入 Noto Sans SC 字族与高级雅加达几何体 -->
+    <!-- 載入 Noto Sans SC 與 Plus Jakarta Sans 字型 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100;400;700;900&family=Plus+Jakarta+Sans:wght@300;900&display=swap" rel="stylesheet">
+    
+    <!-- 全局核心：啟用 Astro 5+ 原生 ClientRouter 檢視過渡引擎 -->
+    <ClientRouter />
+
+    <!-- 主題狀態持久化守衛：防止無刷新路由切換時產生視覺閃爍 -->
+    <script is:inline>
+      const syncSystemTheme = () => {
+        if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      };
+      // 初始化加載時執行
+      syncSystemTheme();
+      // 在 ClientRouter 頁面完成替換後獨立同步狀態
+      document.addEventListener('astro:after-swap', syncSystemTheme);
+    </script>
   </head>
   <body>
 
-    <!-- 1. 德芙级物理开屏动画 -->
+    <!-- 1. 開屏物理動畫組件 -->
     <Intro />
 
-    <!-- 2. 主首页 -->
+    <!-- 2. 主視口容器 -->
     <div class="main-viewport">
       
-      <!-- 顶部液态玻璃导航栏 -->
+      <!-- 頂部液態玻璃導航欄組件 -->
       <Navbar />
 
-      <!-- NASA 极清 3D 地球 -->
-      <Earth />
+      <!-- 3D 地球渲染島組件（使用 transition:persist 保持 Canvas 上下文持久化） -->
+      <Earth transition:persist="earth-canvas" />
 
-      <!-- 两侧文字信息层 -->
+      <!-- 中央核心資訊層 -->
       <div class="hero-container">
-        <!-- 左侧：Sinyan 大标题与副标题 -->
+        <!-- 左側：品牌標題與副標題 -->
         <div class="title-group">
-          <h1 class="main-title">{SITE_CONFIG.logo}</h1>
-          <p class="subtitle">{SITE_CONFIG.subtitle}</p>
+          <h1 class="main-title anim-title-item">{SITE_CONFIG.logo}</h1>
+          <p class="subtitle anim-title-item">{SITE_CONFIG.subtitle}</p>
         </div>
 
-        <!-- 右侧：高档工作室详情卡片 -->
-        <div class="studio-card">
+        <!-- 右側：工作室詳情卡片 -->
+        <div class="studio-card anim-studio-card">
           <p class="studio-title">©2026 {SITE_CONFIG.copyRight}</p>
           <ul class="studio-details">
             <li><span class="red-star">*</span> {SITE_CONFIG.redStar1}</li>
@@ -53,56 +71,182 @@ import Navbar from '../components/Navbar.astro';
         </div>
       </div>
 
-      <!-- 底部左侧信息叙事 (Bug 修复目标) -->
+      <!-- 底部左側個人敘事區塊 -->
       <div class="footer-caption">
-        <p class="bio-tagline">
+        <!-- 第一行：标签 -->
+        <p class="bio-tagline anim-tagline-item">
           <span class="blue-dot"></span> {SITE_CONFIG.bioHeader}
         </p>
-        <h2 class="bio-title">{SITE_CONFIG.bioTitle}</h2>
-        <p class="bio-desc">{SITE_CONFIG.bioDesc}</p>
+        <!-- 第二行：主标题（逐字动画目标） -->
+        <h2 class="bio-title" id="bio-title-el">{SITE_CONFIG.bioTitle}</h2>
+        <!-- 第三行：描述文字（逐字动画目标） -->
+        <p class="bio-desc" id="bio-desc-el">{SITE_CONFIG.bioDesc}</p>
       </div>
 
     </div>
 
+    <!-- GSAP 核心动画引擎 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" is:inline></script>
+
+    <script is:inline>
+      document.addEventListener('astro:page-load', () => {
+        const titleItems = document.querySelectorAll('.anim-title-item');
+        const taglineItem = document.querySelector('.anim-tagline-item');
+        const studioCard = document.querySelector('.anim-studio-card');
+        
+        const bioTitleEl = document.getElementById('bio-title-el');
+        const bioDescEl = document.getElementById('bio-desc-el');
+
+        if (!titleItems.length) return;
+
+        // 🟢 将文本拆分为逐字 span 节点的辅助函数
+        const splitTextToChars = (el) => {
+          if (!el) return [];
+          const rawText = el.textContent.trim();
+          el.innerHTML = '';
+          const charSpans = [];
+          
+          Array.from(rawText).forEach(char => {
+            const span = document.createElement('span');
+            span.className = 'char-span';
+            span.textContent = char;
+            el.appendChild(span);
+            charSpans.push(span);
+          });
+          return charSpans;
+        };
+
+        const titleChars = splitTextToChars(bioTitleEl);
+        const descChars = splitTextToChars(bioDescEl);
+
+        // 电影级分步梯队入场动画
+        const runCinematicEntrance = () => {
+          gsap.killTweensOf([titleItems, taglineItem, titleChars, descChars, studioCard]);
+
+          const tl = gsap.timeline({
+            defaults: { ease: "power3.out" }
+          });
+
+          // 1️⃣ 第一阶段：左上标题与副标题（由模糊逐渐凝聚、轻盈浮现）
+          tl.fromTo(
+            titleItems,
+            { opacity: 0, y: 50, filter: "blur(10px)" },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 1.3,
+              stagger: 0.16,
+              clearProps: "transform,filter"
+            }
+          )
+          // 2️⃣ 第二阶段：左下角第 1 行标签
+          .fromTo(
+            taglineItem,
+            { opacity: 0, y: 25, filter: "blur(4px)" },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 0.9,
+              clearProps: "transform,filter"
+            },
+            "-=0.8"
+          )
+          // 3️⃣ 第三阶段：左下角第 2 行标题（一个字一个字显现）
+          .fromTo(
+            titleChars,
+            { opacity: 0, y: 15, filter: "blur(5px)" },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 0.45,
+              stagger: 0.04, // 字与字之间的间隔时间
+              ease: "power2.out",
+              clearProps: "transform,filter"
+            },
+            "-=0.5"
+          )
+          // 4️⃣ 第四阶段：左下角第 3 行描述（一个字一个字显现，节奏略快）
+          .fromTo(
+            descChars,
+            { opacity: 0, y: 12, filter: "blur(4px)" },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 0.35,
+              stagger: 0.018, // 描述文字较多，适当加快逐字速率
+              ease: "power1.out",
+              clearProps: "transform,filter"
+            },
+            "-=0.2"
+          )
+          // 5️⃣ 第五阶段：右侧工作室卡片压轴亮相
+          .fromTo(
+            studioCard,
+            { opacity: 0, y: 35, filter: "blur(8px)" },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 1.2,
+              clearProps: "transform,filter"
+            },
+            "-=0.5"
+          );
+        };
+
+        // 状态判断：若开屏动画已播放过或二次切回首页，直接播放动画
+        if (window._introHasPlayed) {
+          runCinematicEntrance();
+        } else {
+          // 首次加载先隐去节点，等开屏吞噬动画完成事件唤醒
+          gsap.set([titleItems, taglineItem, titleChars, descChars, studioCard], { opacity: 0 });
+          window.addEventListener('intro-complete', runCinematicEntrance, { once: true });
+        }
+      });
+    </script>
+
   </body>
 </html>
 
-<!-- 🔴 CSS 修复区块 -->
 <style>
+  /* =========================================
+     核心布局樣式
+     ========================================= */
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
-  body {
-    background-color: #030303; /* 全局深邃黑 */
+  html, body {
+    background-color: #030303;
     color: #ffffff;
-    /* 默认使用 Noto Sans SC，保证中文高级感 */
     font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
-    overflow: hidden; /* 严禁出现滚动条 */
+    overflow: hidden; /* 嚴禁出現全局滾動條 */
   }
 
   .main-viewport {
     position: relative;
     width: 100vw;
     height: 100vh;
-    /* 🔴 Bug 修复 1：移除之前的 Flexbox 布局 */
-    /* 因为内部充满了绝对定位元素，Flexbox 无法正确计算空间分配 */
   }
 
-  /* 中央 Hero 信息层 */
+  /* 中央資訊容器 */
   .hero-container {
     position: absolute;
-    top: 55%; /* 物理重心稍微偏下 */
-    left: 4%; /* 保持呼吸感边距 */
+    top: 55%;
+    left: 4%;
     right: 6%;
     transform: translateY(-50%);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    z-index: 2; /* 浮在地球之上 */
-    pointer-events: none; /* 穿透鼠标，保证地球可拖拽 */
+    z-index: 2;
+    pointer-events: none; /* 穿透鼠標以保證背景地球可進行 3D 拖拽交互 */
   }
 
   .title-group {
@@ -111,19 +255,19 @@ import Navbar from '../components/Navbar.astro';
     align-items: flex-start;
   }
 
-  /* 银灰色渐变 Sinyan */
+  /* 主標題鈦金屬漸變 */
   .main-title {
     font-weight: 900;
     font-size: 10.618rem;
     line-height: 1.25;
     letter-spacing: -0.05em;
-    /* 银灰色渐变，高雅冷酷 */
     background: linear-gradient(180deg, #ffffff 60%, #999999 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    will-change: transform, opacity, filter;
   }
 
-  /* 极细副标题 */
+  /* 極細副標題 */
   .subtitle {
     font-weight: 200;
     font-size: 2.618rem;
@@ -131,19 +275,20 @@ import Navbar from '../components/Navbar.astro';
     letter-spacing: 0.05em;
     color: #cccccc;
     padding-left: 6px;
+    will-change: transform, opacity, filter;
   }
 
-  /* 右侧工作室卡片 */
+  /* 右側工作室卡片 */
   .studio-card {
     max-width: 380px;
     color: #ffffff;
     text-align: left;
     margin-top: 50px;
-    pointer-events: auto; /* 恢复交互，如果将来有链接 */
+    pointer-events: auto; /* 恢復卡片內部交互 */
+    will-change: transform, opacity, filter;
   }
 
   .studio-title {
-    /* 标题使用 Jakarta，增加几何几何感 */
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 900;
     font-size: 1rem;
@@ -159,19 +304,18 @@ import Navbar from '../components/Navbar.astro';
   }
 
   .red-star {
-    color: #ff3e18; /* 亮橙色星星 */
+    color: #ff3e18;
     font-weight: bold;
     margin-right: 6px;
   }
 
-  /* 底部左侧信息叙事 */
+  /* 底部左側敘事面板 */
   .footer-caption {
-    /* 🔴 Bug 修复 2：彻底改为绝对定位，钉在左下角 */
     position: absolute;
-    bottom: 40px; /* 离底部边距 */
-    left: 4%;    /* 🟢 物理修正：与 Hero 大标题 Sinyan 左侧严格垂直对齐 */
+    bottom: 40px;
+    left: 4%;
     z-index: 2;
-    padding: 0;   /* 清除之前的 Padding */
+    padding: 0;
     max-width: 480px;
     pointer-events: none;
   }
@@ -186,13 +330,14 @@ import Navbar from '../components/Navbar.astro';
     align-items: center;
     gap: 8px;
     margin-bottom: 12px;
+    will-change: transform, opacity, filter;
   }
 
   .blue-dot {
     display: inline-block;
     width: 6px;
     height: 6px;
-    background-color: #102ea0; /* 深邃蓝点 */
+    background-color: #102ea0;
     border-radius: 50%;
   }
 
@@ -202,15 +347,24 @@ import Navbar from '../components/Navbar.astro';
     color: #ffffff;
     margin-bottom: 10px;
     letter-spacing: 0.02em;
+    word-break: break-word;
   }
 
   .bio-desc {
     font-size: 0.95rem;
     color: #777777;
     line-height: 1.6;
+    word-break: break-word;
   }
 
-  /* 响应式媒体查询保持不变 */
+  /* 🟢 单字容器，确保空格和排版不塌陷 */
+  :global(.char-span) {
+    display: inline-block;
+    white-space: pre;
+    will-change: transform, opacity, filter;
+  }
+
+  /* 響應式佈局適配 */
   @media (max-width: 900px) {
     .main-title { font-size: 4.5rem; }
     .subtitle { font-size: 1.4rem; }
@@ -225,25 +379,22 @@ import Navbar from '../components/Navbar.astro';
     .footer-caption { left: 5%; bottom: 20px; }
   }
 
-
   /* =========================================
-     🔴 修复：白昼模式 (Light Mode) 强制翻转主页文字
-     使用 :global 彻底打破 Astro 的作用域隔离
-  ========================================= */
-  
+     白晝模式樣式翻轉 (Light Mode)
+     ========================================= */
   :global(html.light-mode) body {
-    background-color: #f5f5f7 !important; /* Apple 标志性冷白底色 */
+    background-color: #f5f5f7 !important;
     color: #1d1d1f !important;
   }
   
-  /* Sinyan 巨大主标题：转换为高级太空灰金属渐变 */
+  /* 主標題：轉換為高級鈦灰色漸變 */
   :global(html.light-mode) .main-title {
     background: linear-gradient(180deg, #1d1d1f 40%, #86868b 100%) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
   }
   
-  /* 所有的副标题与描述文字：转换为深邃的高级灰 */
+  /* 副標題與描述文字變更為深灰色 */
   :global(html.light-mode) .subtitle,
   :global(html.light-mode) .studio-details,
   :global(html.light-mode) .bio-desc,
@@ -251,10 +402,9 @@ import Navbar from '../components/Navbar.astro';
     color: #86868b !important;
   }
 
-  /* 所有的小标题与卡片：转换为纯正深黑 */
+  /* 文字卡片與小標題轉換為深黑色 */
   :global(html.light-mode) .studio-card,
   :global(html.light-mode) .bio-title {
     color: #1d1d1f !important;
   }
-  
 </style>
