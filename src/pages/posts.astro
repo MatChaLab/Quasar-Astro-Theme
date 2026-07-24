@@ -173,31 +173,39 @@ const themeColorRgb = hexToRgb(themeColor);
         filterBtns.forEach((btn) => {
           btn.addEventListener('click', () => {
             const selectedCategory = btn.dataset.category;
+            const isPerfDegraded = document.documentElement.classList.contains('perf-degraded');
 
             filterBtns.forEach((b) => b.classList.remove('active'));
             btn.classList.add('active');
 
             postCards.forEach((card) => {
               const cardCat = card.dataset.category;
-              if (selectedCategory === 'All' || cardCat === selectedCategory) {
-                card.style.display = 'block';
-                if (window.gsap) {
-                  gsap.to(card, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.35, ease: 'power2.out' });
-                } else {
-                  card.style.opacity = '1';
-                }
+              const shouldShow = (selectedCategory === 'All' || cardCat === selectedCategory);
+
+              if (isPerfDegraded) {
+                card.style.display = shouldShow ? 'block' : 'none';
+                card.style.opacity = shouldShow ? '1' : '0';
               } else {
-                if (window.gsap) {
-                  gsap.to(card, {
-                    opacity: 0,
-                    scale: 0.96,
-                    filter: 'blur(4px)',
-                    duration: 0.25,
-                    ease: 'power2.in',
-                    onComplete: () => { card.style.display = 'none'; }
-                  });
+                if (shouldShow) {
+                  card.style.display = 'block';
+                  if (window.gsap) {
+                    gsap.to(card, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.35, ease: 'power2.out' });
+                  } else {
+                    card.style.opacity = '1';
+                  }
                 } else {
-                  card.style.display = 'none';
+                  if (window.gsap) {
+                    gsap.to(card, {
+                      opacity: 0,
+                      scale: 0.96,
+                      filter: 'blur(4px)',
+                      duration: 0.25,
+                      ease: 'power2.in',
+                      onComplete: () => { card.style.display = 'none'; }
+                    });
+                  } else {
+                    card.style.display = 'none';
+                  }
                 }
               }
             });
@@ -213,10 +221,11 @@ const themeColorRgb = hexToRgb(themeColor);
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background-color: #030303; color: #ffffff; font-family: 'Noto Sans SC', sans-serif; min-height: 100vh; }
   
-  /* 🔑 iOS 丝滑平滑过渡引擎 */
+  /* 🔑 修复 View Transition 溢出与黑底问题 */
   ::view-transition-group(*) {
-    animation-duration: 0.45s;
+    animation-duration: 0.68s;
     animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+    overflow: hidden !important;
   }
   
   ::view-transition-old(*),
@@ -227,11 +236,23 @@ const themeColorRgb = hexToRgb(themeColor);
     backface-visibility: hidden;
   }
 
-  /* 解决过渡时图片被拉伸变形的问题 */
+  ::view-transition-group(card-cover-*) {
+    overflow: hidden !important;
+    border-radius: 12px;
+  }
+
   ::view-transition-old(card-cover-*),
   ::view-transition-new(card-cover-*) {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: center;
     border-radius: 12px;
+  }
+
+  ::view-transition-group(card-bg-*) {
+    overflow: hidden !important;
+    border-radius: 16px;
   }
 
   .posts-viewport { width: 100vw; min-height: calc(100vh - 72px); margin-top: 0; padding: 8rem 0 80px 0; display: flex; justify-content: center; }
@@ -254,7 +275,9 @@ const themeColorRgb = hexToRgb(themeColor);
   .post-card:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.2); transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); }
   
   .card-inner-link { text-decoration: none; color: inherit; display: flex; flex-direction: column; height: 100%; }
-  .card-cover-box { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #111; border-radius: 12px 12px 0 0; }
+  
+  /* 🔑 彻底干掉硬编码的 #111 黑底 */
+  .card-cover-box { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: transparent !important; border-radius: 12px 12px 0 0; }
   .card-cover-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
   .post-card:hover .card-cover-box img { transform: scale(1.05); }
   
@@ -269,6 +292,25 @@ const themeColorRgb = hexToRgb(themeColor);
   .post-desc { font-size: 0.9rem; color: #86868b; line-height: 1.6; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex: 1; }
   .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; font-family: 'Plus Jakarta Sans', sans-serif; color: #666666; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 14px; margin-top: auto; }
   .empty-state { text-align: center; padding: 80px 0; color: #666666; }
+
+  /* 低性能模式 (perf-degraded) 强行注销 iOS 动画与 View Transitions */
+  :global(html.perf-degraded) ::view-transition-group(*),
+  :global(html.perf-degraded) ::view-transition-old(*),
+  :global(html.perf-degraded) ::view-transition-new(*) {
+    animation-duration: 0s !important;
+    animation: none !important;
+  }
+
+  :global(html.perf-degraded) .post-card,
+  :global(html.perf-degraded) .post-card:hover,
+  :global(html.perf-degraded) .card-cover-box img,
+  :global(html.perf-degraded) .post-card:hover .card-cover-box img,
+  :global(html.perf-degraded) .filter-btn {
+    transition: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
 
   :global(html.light-mode) body { background-color: #f5f5f7 !important; color: #1d1d1f !important; }
   :global(html.light-mode) .main-title { background: linear-gradient(180deg, #1d1d1f 40%, #86868b 100%) !important; -webkit-background-clip: text !important; }

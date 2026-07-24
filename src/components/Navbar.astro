@@ -17,7 +17,7 @@ import PerformanceGuard from './PerformanceGuard.astro';
  <div class="liquid-glass-bg"></div>
 
  <div class="nav-container">
-   <!-- 左側區塊：Logo + 进度圆圈 + 动态章节名称 -->
+   <!-- 左侧区块：Logo + 进度圆圈 + 动态章节名称 -->
    <div class="nav-left">
      <a href="/" class="brand-link" id="nav-logo" title={SITE_CONFIG.title}>
        <Fragment set:html={SITE_CONFIG.logoIconPath} />
@@ -58,9 +58,9 @@ import PerformanceGuard from './PerformanceGuard.astro';
      </div>
    </div>
 
-   <!-- 中間內容包裝層 (🔑 绝对居中解耦) -->
+   <!-- 中间内容包装层 (绝对居中解耦) -->
    <div class="nav-content-wrapper">
-     <!-- 標籤頁導航 -->
+     <!-- 标签页导航 -->
      <nav class="nav-center" id="nav-center">
        {NAVBAR_CONFIG.navItems.map((item) => (
          <a href={item.url} class="nav-link">
@@ -69,7 +69,7 @@ import PerformanceGuard from './PerformanceGuard.astro';
        ))}
      </nav>
 
-     <!-- 動態提示語面板（內嵌倒計時圓圈） -->
+     <!-- 动态提示语面板（内嵌倒计时圆圈） -->
      <div class="perf-warning-notice" id="nav-perf-alert">
        <div class="countdown-circle-wrapper">
          <svg class="countdown-svg" viewBox="0 0 20 20">
@@ -80,14 +80,14 @@ import PerformanceGuard from './PerformanceGuard.astro';
        <span id="perf-alert-text"></span>
      </div>
 
-     <!-- 搜尋框 -->
+     <!-- 搜索框 -->
      <div class="search-box-wrapper" id="search-box-wrapper">
        <input type="text" class="search-input" id="search-input" placeholder={NAVBAR_CONFIG.searchBox} autocomplete="off" />
        <div class="search-results-panel" id="search-results-panel"></div>
      </div>
    </div>
 
-   <!-- 右側區塊（按鈕排序：返回顶部 -> 搜尋 -> 主題 -> 性能） -->
+   <!-- 右侧区块（按钮排序：返回顶部 -> 搜索 -> 主题 -> 性能） -->
    <div class="nav-right">
      <!-- 返回顶部按钮 -->
      <button class="icon-btn back-to-top-btn" id="back-to-top-btn" aria-label="Back to Top" title="返回顶部">
@@ -96,14 +96,14 @@ import PerformanceGuard from './PerformanceGuard.astro';
        </svg>
      </button>
 
-     <!-- 1. 搜尋按鈕 -->
+     <!-- 1. 搜索按钮 -->
      <button class="icon-btn search-trigger" id="search-trigger-btn" aria-label="Toggle Search">
        <svg viewBox="0 0 24 24" fill="none" class="action-icon" xmlns="http://www.w3.org/2000/svg">
          <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
        </svg>
      </button>
 
-     <!-- 2. 日夜模式按鈕 -->
+     <!-- 2. 日夜模式按钮 -->
      <button class="icon-btn theme-toggle" id="theme-toggle-btn" aria-label="Toggle Theme">
        <svg viewBox="0 0 24 24" fill="none" class="action-icon icon-sun" xmlns="http://www.w3.org/2000/svg">
          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2.35"/>
@@ -114,7 +114,7 @@ import PerformanceGuard from './PerformanceGuard.astro';
        </svg>
      </button>
 
-     <!-- 3. 性能切換按鈕 -->
+     <!-- 3. 性能切换按钮 -->
      <button class="icon-btn perf-status-toggle" id="perf-toggle-btn" aria-label="Toggle Animation Quality">
        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon icon-perf-check" stroke-linecap="round" stroke-linejoin="round">
          <circle cx="12" cy="12" r="10"/><path d="M22 4L12 14.01l-3-3"/>
@@ -185,14 +185,12 @@ import PerformanceGuard from './PerformanceGuard.astro';
       }, duration);
     }
 
-    // 1. 返回顶部按钮逻辑
     if (backToTopBtn) {
       backToTopBtn.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
     }
 
-    // 2. 阅读进度与章节名平滑过度
     const updateArticleScrollState = () => {
       const scrollY = window.scrollY;
 
@@ -242,7 +240,6 @@ import PerformanceGuard from './PerformanceGuard.astro';
           }
         }
 
-        // 🔑 动画过度：位移 + 透明度 + 模糊高定效果
         if (currentSection && currentSection !== lastActiveChapter) {
           lastActiveChapter = currentSection;
 
@@ -256,7 +253,6 @@ import PerformanceGuard from './PerformanceGuard.astro';
                 { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.35, ease: "power2.out" }
               );
             } else {
-              // 旧文字向上退场，新文字从下方升入
               gsap.to(chapterText, {
                 opacity: 0,
                 y: -6,
@@ -348,17 +344,36 @@ import PerformanceGuard from './PerformanceGuard.astro';
 </script>
 
 <style>
- .quasar-navbar { position: fixed; top: 0; left: 0; width: 100vw; height: 72px; z-index: 100; font-family: 'Noto Sans SC', sans-serif; }
- .liquid-glass-bg { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(32px) saturate(210%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); pointer-events: none; z-index: 1; mix-blend-mode: color-dodge; transition: background 0.4s ease, mix-blend-mode 0.4s ease; }
+ .quasar-navbar { 
+   position: fixed; 
+   top: 0; 
+   left: 0; 
+   width: 100vw; 
+   height: 72px; 
+   z-index: 100; 
+   font-family: 'Noto Sans SC', sans-serif; 
+ }
+ 
+ .liquid-glass-bg { 
+   position: absolute; 
+   inset: 0; 
+   background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(16, 16, 22, 0.65); 
+   backdrop-filter: blur(24px) saturate(200%); 
+   -webkit-backdrop-filter: blur(24px) saturate(200%);
+   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+   pointer-events: none; 
+   z-index: 1; 
+   transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease; 
+ }
+
  .nav-container { position: relative; z-index: 2; max-width: 90%; margin: 0 auto; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
  
- /* 左侧盒子限制最大宽度，防止与绝对居中的菜单重叠 */
  .nav-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; max-width: 35vw; }
  .brand-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #ffffff; transition: opacity 0.2s ease; flex-shrink: 0; }
  .brand-link svg, :global(.brand-link svg) { width: 22px; height: 22px; flex-shrink: 0; display: block; }
  .brand-text { font-weight: 900; font-size: 1.15rem; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0; }
 
- /* ── 阅读进度与章节样式 ── */
  .article-reading-info {
    display: flex;
    align-items: center;
@@ -427,7 +442,6 @@ import PerformanceGuard from './PerformanceGuard.astro';
  .status-divider { color: rgba(255, 255, 255, 0.15); font-weight: 300; }
  .status-text { font-family: 'Plus Jakarta Sans', monospace; font-size: 0.65rem; font-weight: 700; color: var(--themeColor); }
  
- /* 🔑 核心修正：绝对定位固定在视口正中心 */
  .nav-content-wrapper { 
    position: absolute; 
    left: 50%; 
@@ -479,20 +493,70 @@ import PerformanceGuard from './PerformanceGuard.astro';
    pointer-events: auto;
  }
  
+ /* 🔑 硬件级加速的高质感 60/120fps 顺滑 Keyframe 定义（去除了昂贵的逐帧高斯模糊重绘） */
+ @keyframes pulseWarnDark {
+   0%, 100% {
+     color: #ffffff;
+     opacity: 0.4;
+   }
+   50% {
+     color: #ff3e18;
+     opacity: 1;
+   }
+ }
+
+ @keyframes pulseWarnLight {
+   0%, 100% {
+     color: #1d1d1f;
+     opacity: 0.35;
+   }
+   50% {
+     color: #ff3e18;
+     opacity: 1;
+   }
+ }
+
  .perf-status-toggle .icon-perf-check { display: block; }
- .perf-status-toggle .icon-perf-warn { display: none; color: #ff3e18; }
+ .perf-status-toggle .icon-perf-warn { 
+   display: none;
+   /* 硬件合成加速声明 */
+   will-change: color, opacity;
+   transform: translateZ(0);
+ }
+
+ /* 深色低性能模式：白/红 GPU 加速平滑呼吸 */
  :global(.perf-degraded) .quasar-navbar .perf-status-toggle .icon-perf-check,
  .quasar-navbar.perf-degraded .perf-status-toggle .icon-perf-check { display: none; }
+
  :global(.perf-degraded) .quasar-navbar .perf-status-toggle .icon-perf-warn,
- .quasar-navbar.perf-degraded .perf-status-toggle .icon-perf-warn { display: block; }
+ .quasar-navbar.perf-degraded .perf-status-toggle .icon-perf-warn { 
+   display: block !important; 
+   animation: pulseWarnDark 2s cubic-bezier(0.5, 0, 0.2, 1) infinite !important;
+   filter: drop-shadow(0 0 6px rgba(255, 62, 24, 0.6)); /* 静态辉光，不参与帧重绘 */
+ }
+
+ /* 浅色低性能模式：黑/红 GPU 加速平滑呼吸 */
+ :global(html.perf-degraded.light-mode) .quasar-navbar .perf-status-toggle .icon-perf-warn,
+ :global(html.light-mode.perf-degraded) .quasar-navbar .perf-status-toggle .icon-perf-warn,
+ :global(.light-mode) .quasar-navbar.perf-degraded .perf-status-toggle .icon-perf-warn {
+   display: block !important;
+   animation: pulseWarnLight 2s cubic-bezier(0.5, 0, 0.2, 1) infinite !important;
+   filter: drop-shadow(0 0 5px rgba(255, 62, 24, 0.45));
+ }
 
  .theme-toggle .icon-sun, .theme-toggle .icon-moon { position: absolute; }
  .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
  .nav-progress-bar { position: absolute; bottom: -1px; left: 0; height: 2px; width: 0%; background: var(--themeColor); opacity: 0; }
 
- /* ── 明亮模式優化區塊 ── */
+ /* 明亮模式通用样式 */
  :global(.light-mode) body { background-color: #f5f5f7 !important; color: #1d1d1f !important; }
- :global(.light-mode) .liquid-glass-bg { background: rgba(255, 255, 255, 0.75); border-bottom: 1px solid rgba(0, 0, 0, 0.08); mix-blend-mode: normal; backdrop-filter: blur(32px) saturate(210%); }
+ :global(.light-mode) .liquid-glass-bg { 
+   background: rgba(255, 255, 255, 0.78); 
+   border-bottom: 1px solid rgba(0, 0, 0, 0.08); 
+   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+   backdrop-filter: blur(24px) saturate(190%); 
+   -webkit-backdrop-filter: blur(24px) saturate(190%);
+ }
  :global(.light-mode) .brand-link { color: #1d1d1f; }
  :global(.light-mode) .nav-link { color: #555555; }
  :global(.light-mode) .nav-link:hover { color: #000000; }
@@ -506,9 +570,25 @@ import PerformanceGuard from './PerformanceGuard.astro';
  
  :global(.light-mode) .icon-btn { color: #1d1d1f !important; opacity: 1 !important; }
  :global(.light-mode) .icon-btn:hover { background: rgba(0, 0, 0, 0.06); color: #000000 !important; }
- :global(.light-mode) .action-icon { color: #1d1d1f !important; opacity: 1 !important; }
+ 
+ :global(.light-mode) .action-icon:not(.icon-perf-warn) { 
+   color: #1d1d1f !important; 
+   opacity: 1 !important; 
+ }
  
  :global(.light-mode) .theme-toggle .icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
  :global(.light-mode) .theme-toggle .icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
  :global(.light-mode) .status-divider { color: rgba(0, 0, 0, 0.1); }
+
+ /* 低性能模式 (perf-degraded) 降级退场 */
+ :global(.perf-degraded) .liquid-glass-bg {
+   backdrop-filter: none !important;
+   -webkit-backdrop-filter: none !important;
+   background: #0a0a0e !important;
+   box-shadow: none !important;
+ }
+ :global(.perf-degraded.light-mode) .liquid-glass-bg {
+   background: #ffffff !important;
+   box-shadow: none !important;
+ }
 </style>

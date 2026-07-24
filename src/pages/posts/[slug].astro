@@ -46,7 +46,6 @@ const themeColorRgb = hexToRgb(themeColor);
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- 全面锁定 Noto Sans SC 字库 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
     <ClientRouter />
@@ -70,7 +69,7 @@ const themeColorRgb = hexToRgb(themeColor);
     <main class="post-detail-viewport">
       <div class="post-detail-container">
 
-        <!-- 左侧栏 -->
+        <!-- 左侧栏：去框化极简融入 -->
         <aside class="left-sidebar" transition:animate="fade">
           <div class="sticky-sidebar-wrapper">
             
@@ -164,7 +163,7 @@ const themeColorRgb = hexToRgb(themeColor);
             {data.subtitle && <p class="article-subtitle">{data.subtitle}</p>}
           </header>
 
-          <!-- Markdown 正文 (Noto 字体 + 略微加粗字重 500) -->
+          <!-- Markdown 正文 -->
           <div class="markdown-body">
             <Content />
           </div>
@@ -172,6 +171,63 @@ const themeColorRgb = hexToRgb(themeColor);
 
       </div>
     </main>
+
+    <!-- TOC 交互脚本：平滑滚动 + 动态跟随高亮 -->
+    <script is:inline>
+      document.addEventListener('astro:page-load', () => {
+        const tocLinks = document.querySelectorAll('.toc-item');
+        const headings = document.querySelectorAll('.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4');
+
+        if (!tocLinks.length || !headings.length) return;
+
+        tocLinks.forEach((link) => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href')?.substring(1);
+            if (!targetId) return;
+
+            const targetElement = document.getElementById(targetId);
+            if (targetElement) {
+              const isPerfDegraded = document.documentElement.classList.contains('perf-degraded');
+              targetElement.scrollIntoView({ behavior: isPerfDegraded ? 'auto' : 'smooth' });
+              history.pushState(null, '', `#${targetId}`);
+            }
+          });
+        });
+
+        const idToLinkMap = {};
+        tocLinks.forEach((link) => {
+          const href = link.getAttribute('href');
+          if (href && href.startsWith('#')) {
+            idToLinkMap[href.substring(1)] = link;
+          }
+        });
+
+        const observerOptions = {
+          root: null,
+          rootMargin: '-100px 0px -65% 0px',
+          threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const id = entry.target.getAttribute('id');
+              if (id && idToLinkMap[id]) {
+                tocLinks.forEach((l) => l.classList.remove('active'));
+                idToLinkMap[id].classList.add('active');
+              }
+            }
+          });
+        }, observerOptions);
+
+        headings.forEach((heading) => {
+          if (heading.id) {
+            observer.observe(heading);
+          }
+        });
+      });
+    </script>
 
   </body>
 </html>
@@ -183,6 +239,14 @@ const themeColorRgb = hexToRgb(themeColor);
     padding: 0; 
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
+  :global(html.perf-degraded) {
+    scroll-behavior: auto !important;
+  }
+
   html, body {
     background-color: #030303;
     color: #ffffff;
@@ -190,10 +254,11 @@ const themeColorRgb = hexToRgb(themeColor);
     min-height: 100vh;
   }
 
-  /* iOS 丝滑过渡引擎 */
+  /* 🔑 修复 View Transition 溢出与黑底问题 */
   ::view-transition-group(*) {
-    animation-duration: 0.42s;
+    animation-duration: 0.68s;
     animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+    overflow: hidden !important;
   }
   
   ::view-transition-old(*),
@@ -204,10 +269,23 @@ const themeColorRgb = hexToRgb(themeColor);
     backface-visibility: hidden;
   }
 
+  ::view-transition-group(card-cover-*) {
+    overflow: hidden !important;
+    border-radius: 12px;
+  }
+
   ::view-transition-old(card-cover-*),
   ::view-transition-new(card-cover-*) {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
+    object-position: center;
     border-radius: 12px;
+  }
+
+  ::view-transition-group(card-bg-*) {
+    overflow: hidden !important;
+    border-radius: 16px;
   }
 
   .post-detail-viewport {
@@ -223,7 +301,7 @@ const themeColorRgb = hexToRgb(themeColor);
     max-width: 102rem;
     display: grid;
     grid-template-columns: 18.5rem 1fr;
-    gap: 3rem;
+    gap: 3.5rem;
     align-items: start;
   }
 
@@ -237,6 +315,12 @@ const themeColorRgb = hexToRgb(themeColor);
     max-height: calc(100vh - 6.5rem); 
     overflow-y: auto;
     padding-right: 0.25rem;
+    opacity: 0.82;
+    transition: opacity 0.3s ease;
+  }
+
+  .left-sidebar:hover {
+    opacity: 1;
   }
 
   .left-sidebar::-webkit-scrollbar { display: none; }
@@ -245,116 +329,120 @@ const themeColorRgb = hexToRgb(themeColor);
   .sticky-sidebar-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 2.2rem;
+    padding-left: 0.25rem;
   }
 
   .back-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.625rem;
-    color: #888888;
+    gap: 0.5rem;
+    color: #727277;
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 500;
-    padding: 0.5rem 0.25rem;
+    padding: 0.25rem 0;
     transition: all 0.25s ease;
   }
   .back-link:hover { 
     color: #ffffff; 
     transform: translateX(-0.25rem);
   }
-  .back-link svg { width: 1.1rem; height: 1.1rem; }
+  .back-link svg { width: 1.05rem; height: 1.05rem; }
 
   .sidebar-box {
-    background: rgba(255, 255, 255, 0.018);
-    border: 0.0625rem solid rgba(255, 255, 255, 0.07);
-    border-radius: 1rem;
-    padding: 1.25rem;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
     width: 100%;
     overflow: hidden;
-    backdrop-filter: blur(1rem);
+    backdrop-filter: none !important;
+    box-shadow: none !important;
   }
 
   .category-pill {
     display: inline-block;
-    background: rgba(255, 255, 255, 0.08);
-    border: 0.0625rem solid rgba(255, 255, 255, 0.12);
-    color: #ffffff;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.25rem 0.75rem;
-    border-radius: 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.08);
+    color: #a1a1aa;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 0.2rem 0.65rem;
+    border-radius: 1rem;
     letter-spacing: 0.03em;
-    margin-bottom: 1rem;
+    margin-bottom: 0.85rem;
   }
 
   .meta-details {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
-    margin-bottom: 0.875rem;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
   }
 
   .meta-row {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    color: #86868b;
-    font-size: 0.8rem;
+    gap: 0.5rem;
+    color: #6e6e73;
+    font-size: 0.78rem;
   }
-  .meta-row svg { width: 0.95rem; height: 0.95rem; opacity: 0.7; }
+  .meta-row svg { width: 0.88rem; height: 0.88rem; opacity: 0.6; }
 
   .tags-wrapper {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.375rem;
-    padding-top: 0.75rem;
-    border-top: 0.0625rem solid rgba(255, 255, 255, 0.05);
+    gap: 0.35rem;
+    padding-top: 0.65rem;
   }
 
   .tag-item {
-    font-size: 0.72rem;
-    color: var(--themeColor);
-    background: rgba(var(--themeColorRgb), 0.08);
-    padding: 0.1875rem 0.5rem;
-    border-radius: 0.375rem;
+    font-size: 0.7rem;
+    color: #8e8e93;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.15rem 0.45rem;
+    border-radius: 0.3rem;
   }
 
   .box-title {
-    font-size: 0.82rem;
-    color: #888888;
-    letter-spacing: 0.06em;
-    margin-bottom: 0.875rem;
+    font-size: 0.78rem;
+    color: #6e6e73;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.85rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.45rem;
     font-weight: 700;
   }
 
   .blue-dot {
-    width: 0.375rem;
-    height: 0.375rem;
+    width: 0.32rem;
+    height: 0.32rem;
     background-color: var(--themeColor);
     border-radius: 50%;
-    box-shadow: 0 0 0.5rem rgba(var(--themeColorRgb), 0.8);
+    display: inline-block;
+    opacity: 0.8;
   }
 
   .toc-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.55rem;
     width: 100%;
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    padding-left: 0.2rem;
   }
 
   .toc-item {
-    color: #86868b;
+    color: #6e6e73;
     text-decoration: none;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     line-height: 1.5;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: 0.35rem;
     width: 100%;
     box-sizing: border-box;
     white-space: nowrap;
@@ -363,12 +451,12 @@ const themeColorRgb = hexToRgb(themeColor);
   }
 
   .toc-dot {
-    width: 0.25rem;
-    height: 0.25rem;
+    width: 0.22rem;
+    height: 0.22rem;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     flex-shrink: 0;
-    transition: background 0.2s ease;
+    transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   }
 
   .toc-text {
@@ -378,34 +466,46 @@ const themeColorRgb = hexToRgb(themeColor);
   }
 
   .toc-item:hover {
-    color: #ffffff;
-    transform: translateX(0.1875rem);
+    color: #d1d1d6;
+    transform: translateX(0.15rem);
   }
 
   .toc-item:hover .toc-dot {
     background: var(--themeColor);
   }
 
-  .toc-empty { font-size: 0.8rem; color: #555555; }
+  .toc-item.active {
+    color: var(--themeColor) !important;
+    font-weight: 700;
+    transform: translateX(0.2rem);
+  }
+
+  .toc-item.active .toc-dot {
+    background: var(--themeColor) !important;
+    transform: scale(1.4);
+    box-shadow: 0 0 0.4rem rgba(var(--themeColorRgb), 0.9);
+  }
+
+  .toc-empty { font-size: 0.78rem; color: #555555; }
 
   .recent-list {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.65rem;
   }
 
   .recent-item-link {
-    color: #aaaaaa;
+    color: #6e6e73;
     text-decoration: none;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     transition: color 0.2s ease;
   }
-  .recent-item-link:hover { color: #ffffff; }
+  .recent-item-link:hover { color: #d1d1d6; }
 
   /* 右侧文章主体卡片 */
   .main-article-content {
@@ -459,9 +559,10 @@ const themeColorRgb = hexToRgb(themeColor);
     line-height: 1.6;
     word-break: break-word;
     opacity: 0;
-    animation: textElementFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.14s forwards;
+    animation: textElementFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.22s forwards;
   }
 
+  /* 🔑 彻底干掉硬编码的黑底 */
   .article-cover {
     width: 100%;
     aspect-ratio: 21 / 9;
@@ -469,6 +570,7 @@ const themeColorRgb = hexToRgb(themeColor);
     overflow: hidden;
     margin-bottom: 3rem;
     border: 0.0625rem solid rgba(255, 255, 255, 0.08);
+    background: transparent !important;
   }
   .article-cover img {
     width: 100%;
@@ -476,14 +578,12 @@ const themeColorRgb = hexToRgb(themeColor);
     object-fit: cover;
   }
 
-  /* =========================================
-     ✨ 精细化 Markdown 正文版式 (Noto 字体 + 字重略微加粗 500)
-     ========================================= */
+  /* Markdown 正文 */
   .markdown-body {
     font-size: 1.08rem;
     line-height: 1.95;
-    color: #e5e5ea; /* 微提亮度，更清晰护眼 */
-    font-weight: 500; /* 略微加粗一点点，避免发虚头晕 */
+    color: #e5e5ea;
+    font-weight: 500;
     letter-spacing: 0.01em;
     word-break: break-word;
   }
@@ -645,31 +745,53 @@ const themeColorRgb = hexToRgb(themeColor);
     background: rgba(255, 255, 255, 0.015);
   }
 
-  /* 动画延迟配置 */
+  /* 正文元素交错渐显 */
   .markdown-body > * {
     opacity: 0;
-    animation: textElementFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: textElementFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  .markdown-body > *:nth-child(1)  { animation-delay: 0.18s; }
-  .markdown-body > *:nth-child(2)  { animation-delay: 0.22s; }
-  .markdown-body > *:nth-child(3)  { animation-delay: 0.26s; }
-  .markdown-body > *:nth-child(4)  { animation-delay: 0.30s; }
-  .markdown-body > *:nth-child(5)  { animation-delay: 0.34s; }
-  .markdown-body > *:nth-child(6)  { animation-delay: 0.38s; }
-  .markdown-body > *:nth-child(7)  { animation-delay: 0.42s; }
-  .markdown-body > *:nth-child(8)  { animation-delay: 0.46s; }
-  .markdown-body > *:nth-child(9)  { animation-delay: 0.50s; }
-  .markdown-body > *:nth-child(10) { animation-delay: 0.54s; }
-  .markdown-body > *:nth-child(n+11) { animation-delay: 0.58s; }
+  .markdown-body > *:nth-child(1)  { animation-delay: 0.28s; }
+  .markdown-body > *:nth-child(2)  { animation-delay: 0.34s; }
+  .markdown-body > *:nth-child(3)  { animation-delay: 0.40s; }
+  .markdown-body > *:nth-child(4)  { animation-delay: 0.46s; }
+  .markdown-body > *:nth-child(5)  { animation-delay: 0.52s; }
+  .markdown-body > *:nth-child(6)  { animation-delay: 0.58s; }
+  .markdown-body > *:nth-child(7)  { animation-delay: 0.64s; }
+  .markdown-body > *:nth-child(8)  { animation-delay: 0.70s; }
+  .markdown-body > *:nth-child(9)  { animation-delay: 0.76s; }
+  .markdown-body > *:nth-child(10) { animation-delay: 0.82s; }
+  .markdown-body > *:nth-child(n+11) { animation-delay: 0.88s; }
 
-  /* 性能降级防护 */
+  /* 低性能模式 (perf-degraded) 全面干掉 iOS 展开动效、模糊、过渡与升入 */
+  :global(html.perf-degraded) ::view-transition-group(*),
+  :global(html.perf-degraded) ::view-transition-old(*),
+  :global(html.perf-degraded) ::view-transition-new(*) {
+    animation-duration: 0s !important;
+    animation: none !important;
+  }
+
+  :global(html.perf-degraded) .main-article-content {
+    background: #0d0d0f !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  :global(html.perf-degraded) .left-sidebar {
+    opacity: 1 !important;
+    transition: none !important;
+  }
+
   :global(html.perf-degraded) .markdown-body > *,
-  :global(html.perf-degraded) .article-subtitle {
+  :global(html.perf-degraded) .article-subtitle,
+  :global(html.perf-degraded) .toc-item,
+  :global(html.perf-degraded) .toc-dot,
+  :global(html.perf-degraded) .back-link {
     animation: none !important;
     opacity: 1 !important;
     filter: none !important;
     transform: none !important;
+    transition: none !important;
   }
 
   /* 明亮模式适配 */
@@ -679,14 +801,24 @@ const themeColorRgb = hexToRgb(themeColor);
     color: #1d1d1f !important; 
   }
 
-  :global(html.light-mode) .back-link { color: #6e6e73; }
+  :global(html.light-mode) .back-link { color: #86868b; }
   :global(html.light-mode) .back-link:hover { color: #000000; }
 
-  :global(html.light-mode) .sidebar-box, 
+  :global(html.light-mode) .sidebar-box {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
   :global(html.light-mode) .main-article-content {
     background: #ffffff;
     border-color: rgba(0, 0, 0, 0.06);
     box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.03);
+  }
+
+  :global(html.perf-degraded.light-mode) .main-article-content {
+    background: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
   }
 
   :global(html.light-mode) .article-title {
@@ -695,20 +827,25 @@ const themeColorRgb = hexToRgb(themeColor);
   }
 
   :global(html.light-mode) .category-pill {
-    background: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.06);
+    color: #6e6e73;
+  }
+
+  :global(html.light-mode) .meta-row,
+  :global(html.light-mode) .box-title,
+  :global(html.light-mode) .toc-item, 
+  :global(html.light-mode) .recent-item-link {
+    color: #86868b;
+  }
+
+  :global(html.light-mode) .toc-item:hover,
+  :global(html.light-mode) .recent-item-link:hover {
     color: #1d1d1f;
   }
 
-  :global(html.light-mode) .meta-row { color: #6e6e73; }
-
-  :global(html.light-mode) .toc-item, 
-  :global(html.light-mode) .recent-item-link {
-    color: #555555;
-  }
-  :global(html.light-mode) .toc-item:hover,
-  :global(html.light-mode) .recent-item-link:hover {
-    color: #000000;
+  :global(html.light-mode) .toc-list {
+    border-left-color: rgba(0, 0, 0, 0.08);
   }
 
   :global(html.light-mode) .markdown-body { color: #2c2c2e; font-weight: 500; }
@@ -731,6 +868,7 @@ const themeColorRgb = hexToRgb(themeColor);
     .left-sidebar {
       position: static;
       max-height: none;
+      opacity: 1;
     }
     .main-article-content {
       padding: 2rem;
