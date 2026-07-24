@@ -5,8 +5,8 @@ import PerformanceGuard from './PerformanceGuard.astro';
 ---
 
 <header 
-  class="sinyan-navbar" 
-  id="sinyan-navbar-element" 
+  class="quasar-navbar" 
+  id="quasar-navbar-element" 
   define:vars={{ themeColor: SITE_CONFIG.themeColor }}
   data-restored={NAVBAR_CONFIG.perfRestored}
   data-manual-degraded={NAVBAR_CONFIG.perfManualDegraded}
@@ -112,7 +112,7 @@ import PerformanceGuard from './PerformanceGuard.astro';
     const navCenter = document.getElementById('nav-center');
     const themeBtn = document.getElementById('theme-toggle-btn');
     
-    const navbarMain = document.getElementById('sinyan-navbar-element');
+    const navbarMain = document.getElementById('quasar-navbar-element');
     const perfBtn = document.getElementById('perf-toggle-btn');
     const perfAlert = document.getElementById('nav-perf-alert');
     const perfAlertText = document.getElementById('perf-alert-text');
@@ -170,9 +170,9 @@ import PerformanceGuard from './PerformanceGuard.astro';
       }
     });
 
-    window.addEventListener('sinyan-perf-status', (e) => {
+    window.addEventListener('quasar-perf-status', (e) => {
       const { status, text } = e.detail;
-      sessionStorage.setItem('sinyan-perf', status);
+      sessionStorage.setItem('quasar-perf', status);
       
       if (status === 'degraded') {
         if (navbarMain) navbarMain.classList.add('perf-degraded');
@@ -191,9 +191,9 @@ import PerformanceGuard from './PerformanceGuard.astro';
       perfBtn.addEventListener('click', () => {
         const isCurrentlyDegraded = document.documentElement.classList.contains('perf-degraded');
         if (isCurrentlyDegraded) {
-          window.dispatchEvent(new CustomEvent('sinyan-perf-force'));
+          window.dispatchEvent(new CustomEvent('quasar-perf-force'));
         } else {
-          window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
+          window.dispatchEvent(new CustomEvent('quasar-perf-status', {
             detail: { status: 'degraded', text: navbarMain ? navbarMain.dataset.manualDegraded : '' }
           }));
         }
@@ -216,7 +216,7 @@ import PerformanceGuard from './PerformanceGuard.astro';
 </script>
 
 <style>
- .sinyan-navbar { position: fixed; top: 0; left: 0; width: 100vw; height: 72px; z-index: 100; font-family: 'Noto Sans SC', sans-serif; }
+ .quasar-navbar { position: fixed; top: 0; left: 0; width: 100vw; height: 72px; z-index: 100; font-family: 'Noto Sans SC', sans-serif; }
  .liquid-glass-bg { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(32px) saturate(210%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); pointer-events: none; z-index: 1; mix-blend-mode: color-dodge; transition: background 0.4s ease, mix-blend-mode 0.4s ease; }
  .nav-container { position: relative; z-index: 2; max-width: 90%; margin: 0 auto; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
  
@@ -258,10 +258,10 @@ import PerformanceGuard from './PerformanceGuard.astro';
  
  .perf-status-toggle .icon-perf-check { display: block; color: var(--themeColor); }
  .perf-status-toggle .icon-perf-warn { display: none; color: #ff3e18; }
- :global(.perf-degraded) .sinyan-navbar .perf-status-toggle .icon-perf-check,
- .sinyan-navbar.perf-degraded .perf-status-toggle .icon-perf-check { display: none; }
- :global(.perf-degraded) .sinyan-navbar .perf-status-toggle .icon-perf-warn,
- .sinyan-navbar.perf-degraded .perf-status-toggle .icon-perf-warn { display: block; }
+ :global(.perf-degraded) .quasar-navbar .perf-status-toggle .icon-perf-check,
+ .quasar-navbar.perf-degraded .perf-status-toggle .icon-perf-check { display: none; }
+ :global(.perf-degraded) .quasar-navbar .perf-status-toggle .icon-perf-warn,
+ .quasar-navbar.perf-degraded .perf-status-toggle .icon-perf-warn { display: block; }
 
  .theme-toggle .icon-sun, .theme-toggle .icon-moon { position: absolute; }
  .theme-toggle .icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }

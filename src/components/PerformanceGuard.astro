@@ -8,14 +8,14 @@ import { NAVBAR_CONFIG } from '../config';
 <script is:inline>
   // 🟢 全局状态同步：确保路由切换与初始加载时瞬间恢复 CSS 样式
   const syncPerfState = () => {
-    const perfState = sessionStorage.getItem('sinyan-perf');
+    const perfState = sessionStorage.getItem('quasar-perf');
     if (perfState === 'degraded') {
       document.documentElement.classList.add('perf-degraded');
-      const nav = document.getElementById('sinyan-navbar-element');
+      const nav = document.getElementById('quasar-navbar-element');
       if (nav) nav.classList.add('perf-degraded');
     } else if (perfState === 'high') {
       document.documentElement.classList.remove('perf-degraded');
-      const nav = document.getElementById('sinyan-navbar-element');
+      const nav = document.getElementById('quasar-navbar-element');
       if (nav) nav.classList.remove('perf-degraded');
     }
   };
@@ -29,13 +29,13 @@ import { NAVBAR_CONFIG } from '../config';
     window._perfGuardInitialized = true;
 
     // 🟢 将切回高性能模式的监听器提到最外层：保证无论当前是否处于降级状态，随时都能接收切换指令
-    window.addEventListener('sinyan-perf-force', () => {
-      sessionStorage.setItem('sinyan-perf', 'high');
+    window.addEventListener('quasar-perf-force', () => {
+      sessionStorage.setItem('quasar-perf', 'high');
       document.documentElement.classList.remove('perf-degraded');
-      const nav = document.getElementById('sinyan-navbar-element');
+      const nav = document.getElementById('quasar-navbar-element');
       if (nav) nav.classList.remove('perf-degraded');
       
-      window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
+      window.dispatchEvent(new CustomEvent('quasar-perf-status', {
         detail: { status: 'high' }
       }));
     });
@@ -53,7 +53,7 @@ import { NAVBAR_CONFIG } from '../config';
       let checkTimeout;
 
       // 若已经处于自动/手动设置的状态，通知渲染引擎即可，不再启动后台 FPS 监测
-      const currentPerf = sessionStorage.getItem('sinyan-perf');
+      const currentPerf = sessionStorage.getItem('quasar-perf');
       if (currentPerf === 'degraded') {
         window.dispatchEvent(new CustomEvent('earth-quality-engine', { detail: { mode: 'low' } }));
         return;
@@ -96,12 +96,12 @@ import { NAVBAR_CONFIG } from '../config';
 
       function triggerDegrade() {
         isMonitoring = false;
-        sessionStorage.setItem('sinyan-perf', 'degraded');
+        sessionStorage.setItem('quasar-perf', 'degraded');
         document.documentElement.classList.add('perf-degraded');
-        const nav = document.getElementById('sinyan-navbar-element');
+        const nav = document.getElementById('quasar-navbar-element');
         if (nav) nav.classList.add('perf-degraded');
 
-        window.dispatchEvent(new CustomEvent('sinyan-perf-status', {
+        window.dispatchEvent(new CustomEvent('quasar-perf-status', {
           detail: { status: 'degraded', text: warningText }
         }));
       }
