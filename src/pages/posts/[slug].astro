@@ -1,0 +1,742 @@
+---
+// src/pages/posts/[...slug].astro
+import { getCollection, render } from 'astro:content';
+import { SITE_CONFIG } from '../../config.ts';
+import Navbar from '../../components/Navbar.astro';
+import { ClientRouter } from 'astro:transitions';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post, allPosts: posts },
+  }));
+}
+
+const { post, allPosts } = Astro.props;
+const { Content, headings } = await render(post);
+
+const data = post.data || {};
+const pubDate = data.pubDate ? new Date(data.pubDate).toISOString().split('T')[0] : '2026-01-01';
+
+const recentPosts = allPosts
+  .filter((p) => p.id !== post.id)
+  .slice(0, 5);
+
+const hexToRgb = (hex: string) => {
+  const cleanHex = (hex || '#015EFB').replace('#', '');
+  const num = parseInt(cleanHex, 16);
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return `${r}, ${g}, ${b}`;
+};
+
+const themeColor = SITE_CONFIG.themeColor || '#015EFB';
+const themeColorRgb = hexToRgb(themeColor);
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{data.title} | {SITE_CONFIG.title}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 全面锁定 Noto Sans SC 字库 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <ClientRouter />
+
+    <script is:inline>
+      const syncSystemTheme = () => {
+        if (localStorage.getItem('theme') === 'light') {
+          document.documentElement.classList.add('light-mode');
+        } else {
+          document.documentElement.classList.remove('light-mode');
+        }
+      };
+      syncSystemTheme();
+      document.addEventListener('astro:after-swap', syncSystemTheme);
+    </script>
+  </head>
+  <body>
+
+    <Navbar />
+
+    <main class="post-detail-viewport">
+      <div class="post-detail-container">
+
+        <!-- 左侧栏 -->
+        <aside class="left-sidebar" transition:animate="fade">
+          <div class="sticky-sidebar-wrapper">
+            
+            <a href="/posts" class="back-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+              <span>返回文章列表</span>
+            </a>
+
+            <div class="sidebar-box meta-info-card">
+              <div class="meta-header">
+                <span class="category-pill">{data.category || 'Article'}</span>
+              </div>
+              <div class="meta-details">
+                <div class="meta-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+                  <span>{pubDate}</span>
+                </div>
+                <div class="meta-row">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>{data.readTime || '5 min read'}</span>
+                </div>
+              </div>
+              {data.tags && data.tags.length > 0 && (
+                <div class="tags-wrapper">
+                  {data.tags.map((tag: string) => (
+                    <span class="tag-item">#{tag}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div class="sidebar-box toc-box">
+              <h3 class="box-title">
+                <span class="blue-dot"></span> 文章目录
+              </h3>
+              {headings.length > 0 ? (
+                <nav class="toc-list">
+                  {headings.map((h) => (
+                    <a
+                      href={`#${h.slug}`}
+                      class={`toc-item depth-${h.depth}`}
+                      style={`padding-left: ${(h.depth - 2) * 0.625}rem`}
+                    >
+                      <span class="toc-dot"></span>
+                      <span class="toc-text">{h.text}</span>
+                    </a>
+                  ))}
+                </nav>
+              ) : (
+                <p class="toc-empty">本文暂无目录标题</p>
+              )}
+            </div>
+
+            {recentPosts.length > 0 && (
+              <div class="sidebar-box recent-box">
+                <h3 class="box-title">最近发布</h3>
+                <ul class="recent-list">
+                  {recentPosts.map((item) => (
+                    <li>
+                      <a href={`/posts/${item.id}`} class="recent-item-link">
+                        {item.data.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+          </div>
+        </aside>
+
+        <!-- 右侧文章主体卡片 -->
+        <article 
+          class="main-article-content"
+          transition:name={`card-bg-${post.id}`}
+        >
+          {data.cover && (
+            <div class="article-cover">
+              <img 
+                src={data.cover} 
+                alt={data.title} 
+                transition:name={`card-cover-${post.id}`}
+              />
+            </div>
+          )}
+
+          <header class="article-header">
+            <h1 class="article-title" transition:name={`card-title-${post.id}`}>{data.title}</h1>
+            {data.subtitle && <p class="article-subtitle">{data.subtitle}</p>}
+          </header>
+
+          <!-- Markdown 正文 (Noto 字体 + 略微加粗字重 500) -->
+          <div class="markdown-body">
+            <Content />
+          </div>
+        </article>
+
+      </div>
+    </main>
+
+  </body>
+</html>
+
+<style define:vars={{ themeColor, themeColorRgb }}>
+  * { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+  }
+
+  html, body {
+    background-color: #030303;
+    color: #ffffff;
+    font-family: 'Noto Sans SC', sans-serif !important;
+    min-height: 100vh;
+  }
+
+  /* iOS 丝滑过渡引擎 */
+  ::view-transition-group(*) {
+    animation-duration: 0.42s;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    mix-blend-mode: normal;
+    height: 100%;
+    overflow: hidden;
+    backface-visibility: hidden;
+  }
+
+  ::view-transition-old(card-cover-*),
+  ::view-transition-new(card-cover-*) {
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .post-detail-viewport {
+    width: 100vw;
+    margin-top: 4.5rem;
+    padding: 3rem 0 6.25rem 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .post-detail-container {
+    width: 92%;
+    max-width: 102rem;
+    display: grid;
+    grid-template-columns: 18.5rem 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* 左侧栏 */
+  .left-sidebar {
+    width: 100%;
+    min-width: 0;
+    position: sticky;
+    top: 5.5rem;
+    align-self: start;
+    max-height: calc(100vh - 6.5rem); 
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+
+  .left-sidebar::-webkit-scrollbar { display: none; }
+  .left-sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .sticky-sidebar-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: #888888;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.5rem 0.25rem;
+    transition: all 0.25s ease;
+  }
+  .back-link:hover { 
+    color: #ffffff; 
+    transform: translateX(-0.25rem);
+  }
+  .back-link svg { width: 1.1rem; height: 1.1rem; }
+
+  .sidebar-box {
+    background: rgba(255, 255, 255, 0.018);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.07);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    width: 100%;
+    overflow: hidden;
+    backdrop-filter: blur(1rem);
+  }
+
+  .category-pill {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.08);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1.25rem;
+    letter-spacing: 0.03em;
+    margin-bottom: 1rem;
+  }
+
+  .meta-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: #86868b;
+    font-size: 0.8rem;
+  }
+  .meta-row svg { width: 0.95rem; height: 0.95rem; opacity: 0.7; }
+
+  .tags-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    padding-top: 0.75rem;
+    border-top: 0.0625rem solid rgba(255, 255, 255, 0.05);
+  }
+
+  .tag-item {
+    font-size: 0.72rem;
+    color: var(--themeColor);
+    background: rgba(var(--themeColorRgb), 0.08);
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.375rem;
+  }
+
+  .box-title {
+    font-size: 0.82rem;
+    color: #888888;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+  }
+
+  .blue-dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    background-color: var(--themeColor);
+    border-radius: 50%;
+    box-shadow: 0 0 0.5rem rgba(var(--themeColorRgb), 0.8);
+  }
+
+  .toc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .toc-item {
+    color: #86868b;
+    text-decoration: none;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .toc-dot {
+    width: 0.25rem;
+    height: 0.25rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+  }
+
+  .toc-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .toc-item:hover {
+    color: #ffffff;
+    transform: translateX(0.1875rem);
+  }
+
+  .toc-item:hover .toc-dot {
+    background: var(--themeColor);
+  }
+
+  .toc-empty { font-size: 0.8rem; color: #555555; }
+
+  .recent-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .recent-item-link {
+    color: #aaaaaa;
+    text-decoration: none;
+    font-size: 0.82rem;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+  }
+  .recent-item-link:hover { color: #ffffff; }
+
+  /* 右侧文章主体卡片 */
+  .main-article-content {
+    background: rgba(255, 255, 255, 0.015);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.07);
+    border-radius: 1.25rem;
+    padding: 3.8rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    backdrop-filter: blur(1.25rem);
+    box-shadow: 0 1.25rem 3.75rem rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+  }
+
+  .article-header {
+    margin-bottom: 2.8rem;
+    border-bottom: 0.0625rem solid rgba(255, 255, 255, 0.07);
+    padding-bottom: 2rem;
+  }
+
+  .article-title {
+    font-size: 2.85rem;
+    font-weight: 900;
+    line-height: 1.22;
+    letter-spacing: -0.03em;
+    background: linear-gradient(180deg, #ffffff 40%, #999999 100%);
+    -webkit-background-clip: text;
+    margin-bottom: 1rem;
+    word-break: break-word;
+    display: inline-block;
+  }
+
+  @keyframes textElementFadeUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+      filter: blur(5px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0px);
+    }
+  }
+
+  .article-subtitle {
+    font-size: 1.15rem;
+    color: #98989d;
+    font-weight: 400;
+    line-height: 1.6;
+    word-break: break-word;
+    opacity: 0;
+    animation: textElementFadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.14s forwards;
+  }
+
+  .article-cover {
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    border-radius: 0.875rem;
+    overflow: hidden;
+    margin-bottom: 3rem;
+    border: 0.0625rem solid rgba(255, 255, 255, 0.08);
+  }
+  .article-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* =========================================
+     ✨ 精细化 Markdown 正文版式 (Noto 字体 + 字重略微加粗 500)
+     ========================================= */
+  .markdown-body {
+    font-size: 1.08rem;
+    line-height: 1.95;
+    color: #e5e5ea; /* 微提亮度，更清晰护眼 */
+    font-weight: 500; /* 略微加粗一点点，避免发虚头晕 */
+    letter-spacing: 0.01em;
+    word-break: break-word;
+  }
+
+  .markdown-body :global(p) {
+    margin-bottom: 1.75rem;
+  }
+
+  .markdown-body :global(h1),
+  .markdown-body :global(h2),
+  .markdown-body :global(h3),
+  .markdown-body :global(h4) {
+    color: #ffffff;
+    font-weight: 700;
+    margin-top: 3.2rem;
+    margin-bottom: 1.25rem;
+    scroll-margin-top: 6.5rem;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+
+  .markdown-body :global(h2) {
+    font-size: 1.7rem;
+    border-bottom: 0.0625rem solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 0.75rem;
+    position: relative;
+    padding-left: 0.85rem;
+  }
+
+  .markdown-body :global(h2::before) {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 15%;
+    height: 70%;
+    width: 0.25rem;
+    background: var(--themeColor);
+    border-radius: 0.125rem;
+    box-shadow: 0 0 0.5rem rgba(var(--themeColorRgb), 0.6);
+  }
+
+  .markdown-body :global(h3) {
+    font-size: 1.35rem;
+    color: #f2f2f7;
+  }
+
+  .markdown-body :global(strong) {
+    color: #ffffff;
+    font-weight: 700;
+    background: linear-gradient(180deg, transparent 65%, rgba(var(--themeColorRgb), 0.25) 65%);
+    padding: 0 0.15rem;
+    border-radius: 0.125rem;
+  }
+
+  .markdown-body :global(blockquote) {
+    background: rgba(255, 255, 255, 0.025);
+    border-left: 0.25rem solid var(--themeColor);
+    border-radius: 0 0.75rem 0.75rem 0;
+    padding: 1.125rem 1.5rem;
+    color: #aeaeb2;
+    margin: 2rem 0;
+    font-style: normal;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .markdown-body :global(blockquote p) {
+    margin-bottom: 0;
+    line-height: 1.8;
+  }
+
+  .markdown-body :global(ul), 
+  .markdown-body :global(ol) {
+    padding-left: 1.5rem;
+    margin-bottom: 1.85rem;
+  }
+
+  .markdown-body :global(li) {
+    margin-bottom: 0.625rem;
+    padding-left: 0.25rem;
+  }
+
+  .markdown-body :global(li::marker) {
+    color: var(--themeColor);
+    font-weight: 700;
+  }
+
+  .markdown-body :global(:not(pre) > code) {
+    background: rgba(var(--themeColorRgb), 0.12);
+    color: #60a5fa;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875em;
+    border: 0.0625rem solid rgba(var(--themeColorRgb), 0.2);
+  }
+
+  .markdown-body :global(pre) {
+    background: #090d13 !important;
+    border: 0.0625rem solid rgba(255, 255, 255, 0.1) !important;
+    padding: 1.5rem;
+    border-radius: 0.875rem;
+    overflow-x: auto;
+    margin: 2rem 0;
+    box-shadow: inset 0 0 1rem rgba(0, 0, 0, 0.5);
+  }
+
+  .markdown-body :global(pre code) {
+    background: transparent !important;
+    color: #e6edf3 !important;
+    padding: 0;
+    border: none;
+    font-size: 0.92em;
+    line-height: 1.65;
+  }
+
+  .markdown-body :global(a) {
+    color: var(--themeColor);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--themeColor);
+    padding-bottom: 0.05rem;
+    transition: all 0.2s ease;
+  }
+  .markdown-body :global(a:hover) {
+    border-bottom-style: solid;
+    opacity: 0.85;
+  }
+
+  .markdown-body :global(hr) {
+    border: none;
+    height: 0.0625rem;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    margin: 3.5rem 0;
+  }
+
+  .markdown-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .markdown-body :global(th),
+  .markdown-body :global(td) {
+    padding: 0.85rem 1.125rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .markdown-body :global(th) {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .markdown-body :global(tr:nth-child(even)) {
+    background: rgba(255, 255, 255, 0.015);
+  }
+
+  /* 动画延迟配置 */
+  .markdown-body > * {
+    opacity: 0;
+    animation: textElementFadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .markdown-body > *:nth-child(1)  { animation-delay: 0.18s; }
+  .markdown-body > *:nth-child(2)  { animation-delay: 0.22s; }
+  .markdown-body > *:nth-child(3)  { animation-delay: 0.26s; }
+  .markdown-body > *:nth-child(4)  { animation-delay: 0.30s; }
+  .markdown-body > *:nth-child(5)  { animation-delay: 0.34s; }
+  .markdown-body > *:nth-child(6)  { animation-delay: 0.38s; }
+  .markdown-body > *:nth-child(7)  { animation-delay: 0.42s; }
+  .markdown-body > *:nth-child(8)  { animation-delay: 0.46s; }
+  .markdown-body > *:nth-child(9)  { animation-delay: 0.50s; }
+  .markdown-body > *:nth-child(10) { animation-delay: 0.54s; }
+  .markdown-body > *:nth-child(n+11) { animation-delay: 0.58s; }
+
+  /* 性能降级防护 */
+  :global(html.perf-degraded) .markdown-body > *,
+  :global(html.perf-degraded) .article-subtitle {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  /* 明亮模式适配 */
+  :global(html.light-mode),
+  :global(html.light-mode) body { 
+    background-color: #f5f5f7 !important; 
+    color: #1d1d1f !important; 
+  }
+
+  :global(html.light-mode) .back-link { color: #6e6e73; }
+  :global(html.light-mode) .back-link:hover { color: #000000; }
+
+  :global(html.light-mode) .sidebar-box, 
+  :global(html.light-mode) .main-article-content {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.03);
+  }
+
+  :global(html.light-mode) .article-title {
+    background: linear-gradient(180deg, #1d1d1f 30%, #6e6e73 100%) !important;
+    -webkit-background-clip: text !important;
+  }
+
+  :global(html.light-mode) .category-pill {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #1d1d1f;
+  }
+
+  :global(html.light-mode) .meta-row { color: #6e6e73; }
+
+  :global(html.light-mode) .toc-item, 
+  :global(html.light-mode) .recent-item-link {
+    color: #555555;
+  }
+  :global(html.light-mode) .toc-item:hover,
+  :global(html.light-mode) .recent-item-link:hover {
+    color: #000000;
+  }
+
+  :global(html.light-mode) .markdown-body { color: #2c2c2e; font-weight: 500; }
+  :global(html.light-mode) .markdown-body :global(h1),
+  :global(html.light-mode) .markdown-body :global(h2),
+  :global(html.light-mode) .markdown-body :global(h3),
+  :global(html.light-mode) .markdown-body :global(strong) { color: #1d1d1f; }
+
+  :global(html.light-mode) .markdown-body :global(blockquote) {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: var(--themeColor);
+    color: #555555;
+  }
+
+  @media (max-width: 64rem) {
+    .post-detail-container {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .left-sidebar {
+      position: static;
+      max-height: none;
+    }
+    .main-article-content {
+      padding: 2rem;
+    }
+    .article-title {
+      font-size: 2.2rem;
+    }
+  }
+</style>

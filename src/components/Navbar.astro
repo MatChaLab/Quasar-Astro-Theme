@@ -17,12 +17,36 @@ import PerformanceGuard from './PerformanceGuard.astro';
  <div class="liquid-glass-bg"></div>
 
  <div class="nav-container">
-   <!-- 左側區塊 -->
+   <!-- 左側區塊：Logo + 进度圆圈 + 动态章节名称 -->
    <div class="nav-left">
      <a href="/" class="brand-link" id="nav-logo" title={SITE_CONFIG.title}>
        <Fragment set:html={SITE_CONFIG.logoIconPath} />
        <span class="brand-text">{SITE_CONFIG.title}</span>
      </a>
+
+     <!-- 文章阅读进度 + 当前动态章节名 -->
+     <div class="article-reading-info" id="article-reading-info">
+       <span class="info-divider">|</span>
+       <div class="reading-progress-circle" title="阅读进度">
+         <svg viewBox="0 0 36 36" class="progress-svg">
+           <path
+             class="circle-bg"
+             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+           ></path>
+           <path
+             class="circle-bar"
+             id="reading-progress-bar"
+             stroke-dasharray="100, 100"
+             stroke-dashoffset="100"
+             d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+           ></path>
+         </svg>
+       </div>
+       <div class="chapter-text-wrapper">
+         <span class="current-chapter-text" id="current-chapter-text"></span>
+       </div>
+     </div>
+
      <div class="loading-spinner" id="nav-spinner">
        <svg viewBox="0 0 50 50" class="spinner-svg">
          <circle cx="25" cy="25" r="20" fill="none" stroke-width="5" class="spinner-path"></circle>
@@ -34,7 +58,7 @@ import PerformanceGuard from './PerformanceGuard.astro';
      </div>
    </div>
 
-   <!-- 中間內容包裝層 -->
+   <!-- 中間內容包裝層 (🔑 绝对居中解耦) -->
    <div class="nav-content-wrapper">
      <!-- 標籤頁導航 -->
      <nav class="nav-center" id="nav-center">
@@ -63,8 +87,15 @@ import PerformanceGuard from './PerformanceGuard.astro';
      </div>
    </div>
 
-   <!-- 右側區塊（按鈕排序：搜尋 -> 主題 -> 性能） -->
+   <!-- 右側區塊（按鈕排序：返回顶部 -> 搜尋 -> 主題 -> 性能） -->
    <div class="nav-right">
+     <!-- 返回顶部按钮 -->
+     <button class="icon-btn back-to-top-btn" id="back-to-top-btn" aria-label="Back to Top" title="返回顶部">
+       <svg viewBox="0 0 24 24" fill="none" class="action-icon" xmlns="http://www.w3.org/2000/svg">
+         <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+       </svg>
+     </button>
+
      <!-- 1. 搜尋按鈕 -->
      <button class="icon-btn search-trigger" id="search-trigger-btn" aria-label="Toggle Search">
        <svg viewBox="0 0 24 24" fill="none" class="action-icon" xmlns="http://www.w3.org/2000/svg">
@@ -75,7 +106,7 @@ import PerformanceGuard from './PerformanceGuard.astro';
      <!-- 2. 日夜模式按鈕 -->
      <button class="icon-btn theme-toggle" id="theme-toggle-btn" aria-label="Toggle Theme">
        <svg viewBox="0 0 24 24" fill="none" class="action-icon icon-sun" xmlns="http://www.w3.org/2000/svg">
-         <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2,35"/>
+         <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2.35"/>
          <path d="M12 2V4M12 20V22M4 12H2M22 12H20M19.0711 19.0711L17.6569 17.6569M6.34315 6.34315L4.92893 4.92893M19.0711 4.92893L17.6569 6.34315M6.34315 17.6569L4.92893 19.0711" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
        </svg>
        <svg viewBox="0 0 24 24" fill="none" class="action-icon icon-moon" xmlns="http://www.w3.org/2000/svg">
@@ -85,11 +116,9 @@ import PerformanceGuard from './PerformanceGuard.astro';
 
      <!-- 3. 性能切換按鈕 -->
      <button class="icon-btn perf-status-toggle" id="perf-toggle-btn" aria-label="Toggle Animation Quality">
-       <!-- 正常打勾圓圈 -->
        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon icon-perf-check" stroke-linecap="round" stroke-linejoin="round">
          <circle cx="12" cy="12" r="10"/><path d="M22 4L12 14.01l-3-3"/>
        </svg>
-       <!-- 降級三角形警告 -->
        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="action-icon icon-perf-warn" stroke-linecap="round" stroke-linejoin="round">
          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
        </svg>
@@ -117,9 +146,15 @@ import PerformanceGuard from './PerformanceGuard.astro';
     const perfAlert = document.getElementById('nav-perf-alert');
     const perfAlertText = document.getElementById('perf-alert-text');
     const countdownBar = document.getElementById('countdown-circle-bar');
+
+    const backToTopBtn = document.getElementById('back-to-top-btn');
+    const articleReadingInfo = document.getElementById('article-reading-info');
+    const progressBar = document.getElementById('reading-progress-bar');
+    const chapterText = document.getElementById('current-chapter-text');
     
     let isSearchOpen = false;
     let alertTimer = null;
+    let lastActiveChapter = ''; 
 
     function triggerNavbarNotice(msg, duration = 4000, isRedAlert = false) {
       if (perfAlertText) perfAlertText.innerText = msg;
@@ -149,6 +184,103 @@ import PerformanceGuard from './PerformanceGuard.astro';
         gsap.to(navCenter, { opacity: 1, scale: 1, pointerEvents: 'auto', duration: 0.35, ease: "power2.out" });
       }, duration);
     }
+
+    // 1. 返回顶部按钮逻辑
+    if (backToTopBtn) {
+      backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    // 2. 阅读进度与章节名平滑过度
+    const updateArticleScrollState = () => {
+      const scrollY = window.scrollY;
+
+      if (backToTopBtn) {
+        if (scrollY > 120) {
+          backToTopBtn.classList.add('visible');
+        } else {
+          backToTopBtn.classList.remove('visible');
+        }
+      }
+
+      const markdownContainer = document.querySelector('.markdown-body') || document.querySelector('.main-article-content');
+
+      if (!markdownContainer) {
+        if (articleReadingInfo) articleReadingInfo.classList.remove('active');
+        return;
+      }
+
+      if (articleReadingInfo) articleReadingInfo.classList.add('active');
+
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progressPercent = totalHeight > 0 ? Math.min(100, Math.max(0, (scrollY / totalHeight) * 100)) : 0;
+
+      if (progressBar) {
+        const offset = 100 - progressPercent;
+        progressBar.style.strokeDashoffset = offset.toString();
+      }
+
+      const headings = Array.from(markdownContainer.querySelectorAll('h1, h2, h3, h4'));
+      if (headings.length > 0 && chapterText) {
+        let currentSection = '';
+        const offsetThreshold = 140;
+
+        for (const heading of headings) {
+          const rect = heading.getBoundingClientRect();
+          if (rect.top <= offsetThreshold) {
+            currentSection = heading.innerText || heading.textContent || '';
+          } else {
+            break;
+          }
+        }
+
+        if (!currentSection && headings[0]) {
+          const firstRect = headings[0].getBoundingClientRect();
+          if (firstRect.top > offsetThreshold) {
+            currentSection = '正文概述';
+          }
+        }
+
+        // 🔑 动画过度：位移 + 透明度 + 模糊高定效果
+        if (currentSection && currentSection !== lastActiveChapter) {
+          lastActiveChapter = currentSection;
+
+          if (window.gsap) {
+            gsap.killTweensOf(chapterText);
+            
+            if (!chapterText.innerText.trim()) {
+              chapterText.innerText = currentSection;
+              gsap.fromTo(chapterText, 
+                { opacity: 0, y: 8, filter: 'blur(3px)' }, 
+                { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.35, ease: "power2.out" }
+              );
+            } else {
+              // 旧文字向上退场，新文字从下方升入
+              gsap.to(chapterText, {
+                opacity: 0,
+                y: -6,
+                filter: 'blur(3px)',
+                duration: 0.18,
+                ease: "power2.in",
+                onComplete: () => {
+                  chapterText.innerText = currentSection;
+                  gsap.fromTo(chapterText, 
+                    { opacity: 0, y: 6, filter: 'blur(3px)' }, 
+                    { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.28, ease: "power2.out" }
+                  );
+                }
+              });
+            }
+          } else {
+            chapterText.innerText = currentSection;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', updateArticleScrollState, { passive: true });
+    updateArticleScrollState();
 
     if (searchTrigger) {
       searchTrigger.addEventListener('mouseenter', () => {
@@ -220,18 +352,95 @@ import PerformanceGuard from './PerformanceGuard.astro';
  .liquid-glass-bg { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(32px) saturate(210%); border-bottom: 1px solid rgba(255, 255, 255, 0.06); pointer-events: none; z-index: 1; mix-blend-mode: color-dodge; transition: background 0.4s ease, mix-blend-mode 0.4s ease; }
  .nav-container { position: relative; z-index: 2; max-width: 90%; margin: 0 auto; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
  
- .nav-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+ /* 左侧盒子限制最大宽度，防止与绝对居中的菜单重叠 */
+ .nav-left { display: flex; align-items: center; gap: 12px; flex-shrink: 0; max-width: 35vw; }
  .brand-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #ffffff; transition: opacity 0.2s ease; flex-shrink: 0; }
  .brand-link svg, :global(.brand-link svg) { width: 22px; height: 22px; flex-shrink: 0; display: block; }
  .brand-text { font-weight: 900; font-size: 1.15rem; letter-spacing: 0.02em; white-space: nowrap; flex-shrink: 0; }
+
+ /* ── 阅读进度与章节样式 ── */
+ .article-reading-info {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   opacity: 0;
+   visibility: hidden;
+   transform: translateX(-8px);
+   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+ }
+ .article-reading-info.active {
+   opacity: 1;
+   visibility: visible;
+   transform: translateX(0);
+ }
+ .info-divider {
+   color: rgba(255, 255, 255, 0.15);
+   font-weight: 300;
+ }
+ .reading-progress-circle {
+   width: 18px;
+   height: 18px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   flex-shrink: 0;
+ }
+ .progress-svg {
+   width: 100%;
+   height: 100%;
+   transform: rotate(-90deg);
+ }
+ .circle-bg {
+   fill: none;
+   stroke: rgba(255, 255, 255, 0.12);
+   stroke-width: 4;
+ }
+ .circle-bar {
+   fill: none;
+   stroke: var(--themeColor);
+   stroke-width: 4;
+   stroke-linecap: round;
+   transition: stroke-dashoffset 0.1s linear;
+ }
+ .chapter-text-wrapper {
+   display: inline-flex;
+   align-items: center;
+   overflow: hidden;
+   height: 22px;
+   max-width: 180px;
+ }
+ .current-chapter-text {
+   font-size: 0.82rem;
+   font-weight: 500;
+   color: #cccccc;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   letter-spacing: 0.01em;
+   font-family: 'Plus Jakarta Sans', 'Noto Sans SC', sans-serif;
+   display: inline-block;
+   will-change: transform, opacity, filter;
+ }
  
  .loading-spinner { width: 16px; height: 16px; opacity: 0; transform: scale(0.5); transition: all 0.3s ease; }
  .album-cache-status { display: flex; align-items: center; gap: 12px; opacity: 0; transform: translateX(-10px); }
  .status-divider { color: rgba(255, 255, 255, 0.15); font-weight: 300; }
  .status-text { font-family: 'Plus Jakarta Sans', monospace; font-size: 0.65rem; font-weight: 700; color: var(--themeColor); }
  
- .nav-content-wrapper { display: flex; align-items: center; justify-content: center; position: relative; flex: 1; height: 100%; }
- .nav-center { display: flex; align-items: center; gap: 32px; transition: all 0.35s ease; will-change: transform, opacity; }
+ /* 🔑 核心修正：绝对定位固定在视口正中心 */
+ .nav-content-wrapper { 
+   position: absolute; 
+   left: 50%; 
+   top: 50%; 
+   transform: translate(-50%, -50%); 
+   display: flex; 
+   align-items: center; 
+   justify-content: center; 
+   height: 100%; 
+   pointer-events: none; 
+   z-index: 3;
+ }
+ .nav-center { display: flex; align-items: center; gap: 32px; transition: all 0.35s ease; will-change: transform, opacity; pointer-events: auto; }
  
  .perf-warning-notice { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.98); width: max-content; pointer-events: none; opacity: 0; font-size: 0.85rem; font-weight: 500; color: #ffffff; letter-spacing: 0.02em; text-shadow: 0 0 12px rgba(255, 255, 255, 0.1); will-change: transform, opacity; display: flex; align-items: center; gap: 8px; }
  .perf-warning-notice.is-red-warning { color: #ff3e18 !important; text-shadow: 0 0 12px rgba(255, 62, 24, 0.2) !important; }
@@ -255,8 +464,22 @@ import PerformanceGuard from './PerformanceGuard.astro';
  .icon-btn { background: transparent; border: none; color: #cccccc; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; transition: all 0.2s ease; position: relative; }
  .icon-btn:hover { color: #ffffff; background: rgba(255, 255, 255, 0.1); }
  .action-icon { width: 18px; height: 18px; }
+
+ .back-to-top-btn {
+   opacity: 0;
+   visibility: hidden;
+   transform: scale(0.8);
+   pointer-events: none;
+   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+ }
+ .back-to-top-btn.visible {
+   opacity: 1;
+   visibility: visible;
+   transform: scale(1);
+   pointer-events: auto;
+ }
  
- .perf-status-toggle .icon-perf-check { display: block; color: var(--themeColor); }
+ .perf-status-toggle .icon-perf-check { display: block; }
  .perf-status-toggle .icon-perf-warn { display: none; color: #ff3e18; }
  :global(.perf-degraded) .quasar-navbar .perf-status-toggle .icon-perf-check,
  .quasar-navbar.perf-degraded .perf-status-toggle .icon-perf-check { display: none; }
@@ -275,6 +498,10 @@ import PerformanceGuard from './PerformanceGuard.astro';
  :global(.light-mode) .nav-link:hover { color: #000000; }
  :global(.light-mode) .nav-link::after { background-color: #000000; }
  
+ :global(.light-mode) .info-divider { color: rgba(0, 0, 0, 0.12); }
+ :global(.light-mode) .circle-bg { stroke: rgba(0, 0, 0, 0.08); }
+ :global(.light-mode) .current-chapter-text { color: #444444; }
+
  :global(.light-mode) .perf-warning-notice { color: #1d1d1f; text-shadow: none; }
  
  :global(.light-mode) .icon-btn { color: #1d1d1f !important; opacity: 1 !important; }

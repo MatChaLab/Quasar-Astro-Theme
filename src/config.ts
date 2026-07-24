@@ -32,6 +32,7 @@ export const NAVBAR_CONFIG = {
   // 顶部的搜索框提示和 4 个自定义标签页
   searchBox: "🔍 探索 Quasar Blog...",
   navItems: [
+    { label: "文章", url: "/posts" },
     { label: "Projects", url: "/projects" },
     { label: "相册", url: "/albums" },
     { label: "时刻", url: "/moments" },
@@ -70,6 +71,12 @@ searchData: [
     { type: 'Journal', title: '技术学习笔记', url: '/journal/study-notes' }
   ]
 
+export const POSTS_CONFIG = {
+  nav: "Posts",
+  tagline: " ARTICLES & INSIGHTS",
+  title: "📃  Quasar Posts",
+  subtitle: "捕捉思考的顆粒度，記錄生活與自我的博弈。",
+};
 
 export const ALBUMS_CONFIG = {
   nav: "Albums",

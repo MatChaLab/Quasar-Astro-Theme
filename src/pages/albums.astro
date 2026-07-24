@@ -1,16 +1,169 @@
 ---
 // src/pages/albums.astro
-import { SITE_CONFIG, ALBUMS_CONFIG } from '../config';
+import { SITE_CONFIG, ALBUMS_CONFIG  } from '../config';
 import Navbar from '../components/Navbar.astro';
-// 引入刚刚剥离的纯净后端抓取引擎
-import { fetchAllPhotos } from '../components/services/GooglePhotosFetcher';
 
 // ========================================================
-// 服务端数据同步 (SSR / SSG)
+// 服务端数据同步引擎 (Astro Frontmatter)
 // ========================================================
-const { photos: photosData, errorMsg } = await fetchAllPhotos();
+const shareUrl = `https://photos.app.goo.gl/${ALBUMS_CONFIG.googleSharedId}`;
 
-const albumTitle = ALBUMS_CONFIG.title;
+let photosData: any[] = [];
+let albumTitle = "{ALBUMS_CONFIG.title}";
+let errorMsg = null;
+
+try {
+  const response = await fetch(shareUrl, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    },
+    redirect: 'follow'
+  });
+
+  if (!response.ok) {
+    throw new Error(` 服务端寻找 Google Photos 相册失败，请检查分享外链是否有效。: ${response.statusText}`);
+  }
+
+  const html = await response.text();
+
+  // ========================================================
+// Google Photos 标题同步
+// ========================================================
+  // const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/);
+  // if (titleMatch && titleMatch[1]) {
+  //   albumTitle = titleMatch[1];
+  // }
+
+  const matches = html.match(/AF_initDataCallback\(\s*\{\s*key:\s*'ds:\d+'[\s\S]*?data:\s*([\s\S]*?)\}\s*\);/g);
+  
+  if (matches) {
+    for (const match of matches) {
+      if (match.includes('https://lh3.googleusercontent.com/')) {
+        const dataBlockMatch = match.match(/data:\s*([\s\S]*?)(?=\s*,\s*sideChannel|$)/);
+        if (dataBlockMatch) {
+          try {
+            let dataStr = dataBlockMatch[1].trim();
+            if (dataStr.endsWith(',')) {
+              dataStr = dataStr.slice(0, -1);
+            }
+
+            const getJson = new Function(`return ${dataStr};`);
+            const parsedData = getJson();
+
+            if (Array.isArray(parsedData)) {
+              const extracted = extractPhotosFromArray(parsedData);
+              if (extracted && extracted.length > 0) {
+                photosData = extracted;
+                break;
+              }
+            }
+          } catch (e) {
+            // 容错
+          }
+        }
+      }
+    }
+  }
+
+  if (photosData.length === 0) {
+    photosData = fallbackRegexExtract(html);
+  }
+
+} catch (err: any) {
+  errorMsg = "服务端抓取失败，当前网络环境可能无法访问 Google Photos 资源。";
+  console.error("相册抓取调试日志:", err.message);
+}
+
+function extractPhotosFromArray(arr: any[]): any[] {
+  let result: any[] = [];
+
+  function traverse(item: any) {
+    if (!item) return;
+    if (Array.isArray(item)) {
+      const isPhotoList = item.length > 0 && item.every(el => 
+        Array.isArray(el) && 
+        typeof el[0] === 'string' && 
+        el[0].length > 10 && 
+        Array.isArray(el[1]) && 
+        typeof el[1][0] === 'string' && 
+        el[1][0].startsWith('https://lh3.googleusercontent.com/')
+      );
+
+      if (isPhotoList) {
+        result = item.map((photo, index) => {
+          const id = photo[0];
+          const baseUrl = photo[1][0];
+          const width = photo[1][1] || null;
+          const height = photo[1][2] || null;
+          
+          let mediaType: 'photo' | 'video' = 'photo';
+          let videoUrl: string | null = null;
+
+          const isVideoElement = photo.some((field: any) => 
+            Array.isArray(field) && field.some(sub => typeof sub === 'string' && sub.includes('video'))
+          );
+
+          if (isVideoElement) {
+            mediaType = 'video';
+            videoUrl = `${baseUrl}=m18`;
+          }
+
+          let takenAt = null;
+          if (typeof photo[2] === 'number' && photo[2] > 1000000000000) {
+            takenAt = new Date(photo[2]).toISOString();
+          } else if (typeof photo[5] === 'number' && photo[5] > 1000000000000) {
+            takenAt = new Date(photo[5]).toISOString();
+          }
+
+          return {
+            index, id, mediaType, width, height, takenAt,
+            thumbUrl: `${baseUrl}=w800`,
+            fallbackThumbUrl: `${baseUrl}=w500`,
+            displayUrl: `${baseUrl}=w1600`,
+            fallbackDisplayUrl: `${baseUrl}=w1200`,
+            previewUrl: `${baseUrl}=w1024`,
+            fallbackPreviewUrl: `${baseUrl}=w800`,
+            originalLikeUrl: `${baseUrl}=w2400`,
+            fallbackOriginalLikeUrl: `${baseUrl}=w1600`,
+            videoUrl,
+            fallbackVideoUrl: videoUrl ? `${baseUrl}=m22` : null
+          };
+        });
+        return;
+      }
+
+      for (const sub of item) {
+        traverse(sub);
+        if (result.length > 0) return;
+      }
+    }
+  }
+
+  traverse(arr);
+  return result;
+}
+
+function fallbackRegexExtract(html: string): any[] {
+  const regex = /"(https:\/\/lh3\.googleusercontent\.com\/[A-Za-z0-9_\-]+)"/g;
+  const urls = new Set<string>();
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    const url = match[1];
+    if (!url.includes('=s') && !url.includes('=w') && url.length > 50) {
+      urls.add(url);
+    }
+  }
+
+  return Array.from(urls).map((url, index) => ({
+    index, id: `fallback-${index}`, mediaType: 'photo',
+    width: null, height: null, takenAt: null,
+    thumbUrl: `${url}=w800`, fallbackThumbUrl: `${url}=w500`,
+    displayUrl: `${url}=w1600`, fallbackDisplayUrl: `${url}=w1200`,
+    previewUrl: `${url}=w1024`, fallbackPreviewUrl: `${url}=w800`,
+    originalLikeUrl: `${url}=w2400`, fallbackOriginalLikeUrl: `${url}=w1600`,
+    videoUrl: null, fallbackVideoUrl: null
+  }));
+}
 ---
 
 <!DOCTYPE html>
@@ -19,7 +172,7 @@ const albumTitle = ALBUMS_CONFIG.title;
   <meta charset="utf-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>{ALBUMS_CONFIG.nav} | {SITE_CONFIG.title}</title>
+  <title>{ALBUMS_CONFIG .nav} | {SITE_CONFIG.title}</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,8 +185,8 @@ const albumTitle = ALBUMS_CONFIG.title;
   <main class="gallery-viewport" define:vars={{ themeColor: SITE_CONFIG.themeColor }}>
     
     <div class="header-section">
-      <h1 class="page-title">{albumTitle}</h1>
-      <p class="page-subtitle">{ALBUMS_CONFIG.subtitle}</p>
+      <h1 class="page-title">{ALBUMS_CONFIG .title}</h1>
+      <p class="page-subtitle">{ALBUMS_CONFIG .subtitle}</p>
     </div>
 
     <div 
@@ -43,7 +196,7 @@ const albumTitle = ALBUMS_CONFIG.title;
       style="display: none;"
     ></div>
 
-    {errorMsg && (
+{errorMsg && (
       <div class="error-card">
         <div class="error-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 18c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -141,10 +294,10 @@ const albumTitle = ALBUMS_CONFIG.title;
 
   function initGallery() {
     if (cachePool.length === 0) return;
-    window.dispatchEvent(new CustomEvent('quasar-album-sync', { detail: { showing: 0, cached: cachePool.length, isBuffering: true } }));
+    window.dispatchEvent(new CustomEvent('sinyan-album-sync', { detail: { showing: 0, cached: cachePool.length, isBuffering: true } }));
     setTimeout(() => {
       revealNextBatch(); 
-      window.dispatchEvent(new CustomEvent('quasar-album-sync', { detail: { showing: renderedCount, cached: cachePool.length, isBuffering: false } }));
+      window.dispatchEvent(new CustomEvent('sinyan-album-sync', { detail: { showing: renderedCount, cached: cachePool.length, isBuffering: false } }));
     }, 200); 
   }
 
@@ -236,7 +389,7 @@ const albumTitle = ALBUMS_CONFIG.title;
   };
 
   function notifyNavbar() {
-    window.dispatchEvent(new CustomEvent('quasar-album-sync', { detail: { showing: renderedCount, cached: cachePool.length, isBuffering: false } }));
+    window.dispatchEvent(new CustomEvent('sinyan-album-sync', { detail: { showing: renderedCount, cached: cachePool.length, isBuffering: false } }));
   }
 
   let resizeTimeout;
@@ -424,7 +577,6 @@ const albumTitle = ALBUMS_CONFIG.title;
     border: 1px solid rgba(255, 59, 48, 0.15);
     color: #d63031;
   }
-  
   /* =========================================
      🔴 终极战车：Flex 物理列隔离瀑布流 (绝对不可能溢出/重叠)
   ========================================= */
